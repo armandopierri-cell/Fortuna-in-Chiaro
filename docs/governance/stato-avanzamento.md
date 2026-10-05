@@ -2,7 +2,7 @@
 
 > File di passaggio tra sessioni: chi riprende il lavoro legge prima questo. Aggiornarlo a ogni decisione o milestone.
 
-**Freeze: 15:00 del 05/10/2026.** Ultimo aggiornamento: 12:45.
+**Freeze: 15:00 del 05/10/2026.** Ultimo aggiornamento: 12:55.
 
 ## Decisioni prese
 | Ora | Decisione | Chi |
@@ -11,11 +11,15 @@
 | 12:05 | App in HTML/JS statico (sulla macchina mancano Node e Python), test in Edge headless | orchestratore |
 | 12:05 | Git installato con winget. Repository GitHub pubblico fornito dai docenti (URL da ricevere) | utente |
 | 12:45 | **Idea: "Fortuna in Chiaro"** (Tema 02): simulatore educativo sul gioco d'azzardo con probabilità ufficiali. Scartate dopo valutazione: 3A Palestra Digitale, N1 Prova Generale (NEET), 2B/Rata Vera+, X2 Truffa o No | utente |
+| 12:55 | BR, analisi funzionale e analisi tecnica scritte in parallelo con ID BR-01..BR-12 fissati dall'orchestratore | orchestratore |
+| 12:55 | Stanze agile: Motore (sviluppo + business: data/giochi.js, motore.js, test unitari) e Esperienza (index.html, style.css, ui.js, quiz, cruscotto) in parallelo, contratto API in ARCHITETTURA.md, test per stanza senza aspettare la fine | orchestratore |
+| 12:55 | Checkpoint idea e valore alle 14:05 con utente: demo end-to-end, stima del valore (docs/idea/valore-checkpoint.md), decisione sui tagli di perimetro | orchestratore |
 
 ## Verifiche umane
 | Ora | Punto | Esito |
 |---|---|---|
 | 12:45 | Scelta dell'idea | **APPROVATA dall'utente**: "Fortuna in Chiaro" (nome scelto dall'utente tra 4 proposte). Scheda: docs/idea/idea-selezionata.md. Prima della scelta l'utente ha chiesto una verifica di fattibilità e di efficacia della demo |
+| 14:05 | Checkpoint idea e valore | da fare |
 | — | Consegna e push | da fare |
 
 ## Fatto
@@ -30,12 +34,16 @@
 2. agents/ non allineata a .claude/ al momento del push: eseguire agents/sync.ps1 (H-04)
 3. Push dopo le 15:00, oppure deliverable del tema come documenti separati invece che dentro presentazione e demo (R-11/R-09)
 
-## Prossimi passi
-1. Conferma dell'idea → BR (business) e pitch-narrative (innovazione) in parallelo
-2. Sviluppo in app/ (12:30–14:00)
-3. Test di accettazione (14:00–14:20) e presentazione (13:45–14:30)
-4. Review QA, README, sync di agents/ (14:30–14:45)
-5. Conferma dell'utente, poi push (14:45–14:55)
+## Prossimi passi (piano dettagliato)
+- **12:55–13:15**: BR, analisi funzionale, analisi tecnica, partenza Motore. Parallelo: innovazione scrive valore-checkpoint (docs/idea/valore-checkpoint.md)
+- **13:15–14:00**: Stanze Motore e Esperienza in parallelo, test di accettazione per stanza. Business testa appena consegna
+- **13:45**: Bozza presentazione (innovazione)
+- **14:05 CHECKPOINT**: Demo end-to-end con utente, stima valore, decisione tagli di perimetro (verifica umana)
+- **14:05–14:25**: Correzioni finali, UAT finale
+- **14:25–14:40**: Presentazione definitiva, README, sync agents/
+- **14:40**: Review QA (PASS/FAIL)
+- **14:50**: Conferma utente, push
+- **14:55**: Margine
 
 ## Questioni aperte
 - URL del repository GitHub (dai docenti)
