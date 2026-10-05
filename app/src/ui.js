@@ -381,17 +381,18 @@
     var numero = nv.numero || "800 55 88 22";
     var tel = numero.replace(/\D/g, "");
     var orari = nv.orari || "lunedì-venerdì 10:00-16:00";
-    var msg = "Ciao, ho fatto due conti su quanto spendo nel gioco e mi farebbe piacere parlarne con te. Quando hai un momento?";
+    var msg = "Ciao, volevo condividere con te due numeri sulla mia spesa di gioco di questo mese: " + eur2(r.spesaMese) +
+      " su una soglia personale di " + eur(state.soglia) + " che mi ero dato. Se hai cinque minuti mi farebbe piacere parlarne con te.";
     box.innerHTML =
       "<h2>Vuoi parlarne con qualcuno?</h2>" +
-      "<p>La spesa mensile della tua abitudine (<strong>" + eur2(r.spesaMese) + "</strong>) supera di <strong>" + eur2(r.eccedenza) +
-      "</strong> la soglia che hai scelto tu (" + eur(state.soglia) + " al mese).</p>" +
+      "<p>La tua spesa mensile stimata (<strong>" + eur2(r.spesaMese) + "</strong>) supera la soglia che hai scelto (" + eur(state.soglia) +
+      "). Qui trovi il Telefono Verde Nazionale ISS, gratuito e anonimo, e un messaggio pronto per una persona di fiducia, se vuoi inviarlo tu.</p>" +
       '<p><a class="btn btn-primary" id="link-tel" href="tel:' + tel + '">Chiama il Telefono Verde ISS ' + numero + "</a></p>" +
       '<p class="note">Gratuito e anonimo, ' + orari + ".</p>" +
-      "<p>Oppure scrivi a una persona di fiducia. Il messaggio è già scritto: puoi cambiarlo e lo invii solo tu, se vuoi.</p>" +
+      "<p>Messaggio pronto per una persona di fiducia (si apre nell'app che scegli; lo invii solo tu, se vuoi):</p>" +
       '<blockquote class="msg">' + msg + "</blockquote>" +
       '<p class="azioni"><a class="btn" id="link-wa" target="_blank" rel="noopener" href="https://wa.me/?text=' + encodeURIComponent(msg) + '">Scrivi su WhatsApp</a> ' +
-      '<a class="btn" id="link-mail" href="mailto:?subject=' + encodeURIComponent("Due parole") + "&body=" + encodeURIComponent(msg) + '">Scrivi una email</a></p>' +
+      '<a class="btn" id="link-mail" href="mailto:?subject=' + encodeURIComponent("Una cosa di cui parlare") + "&body=" + encodeURIComponent(msg) + '">Scrivi una email</a></p>' +
       '<p class="note">Questa pagina non salva e non invia nulla: né la soglia, né il messaggio, né i contatti.</p>';
     box.hidden = false;
   }
@@ -464,8 +465,8 @@
     var t = $("toast");
     var cl = classeEvento(e), c = costoEvento(e);
     var seconda;
-    if (cl === "rimborso") seconda = "hai recuperato la giocata: guadagno 0 €";
-    else if (c !== null) seconda = "tolta la giocata da " + eur(c) + ": guadagno " + eur(e.premio - c);
+    if (cl === "rimborso") seconda = "Hai recuperato la giocata: guadagno netto 0 €.";
+    else if (c !== null) seconda = "Tolta la giocata da " + eur(c) + ": guadagno netto " + eur(e.premio - c) + ".";
     else seconda = "vincita di " + eur(e.premio);
     t.className = "toast t-vinto";
     t.innerHTML = "<strong>HAI VINTO " + eur(e.premio) + "</strong>";
@@ -618,7 +619,7 @@
       var id = voci[0].gioco, g = M.trovaGioco(id);
       if (g.tipo !== "lotto") {
         var rv = M.riepilogoVincite(id, postaDi(id));
-        html += '<p class="note">Dalla tabella premi ufficiale (' + g.nome + "): vince " + perc(rv.quotaBigliettiVincenti) + " dei biglietti (" +
+        html += '<p class="note">Dalla tabella premi ufficiale (' + g.nome + "): vince il " + perc(rv.quotaBigliettiVincenti) + " dei biglietti (" +
           unoSu(1 / rv.quotaBigliettiVincenti) + "); il " + perc(rv.quotaRimborso) + " delle vincite è il rimborso della giocata e il " +
           perc(rv.quotaPiccole) + " è al massimo il doppio della giocata. " + citaFonte(g.fonte) + "</p>";
       }

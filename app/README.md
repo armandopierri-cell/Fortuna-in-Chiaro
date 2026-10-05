@@ -7,7 +7,8 @@ Simulatore educativo sul gioco d'azzardo: in 7 schermate mostra quanto costa un'
 
 ## Come si apre
 1. Doppio click su `app/index.html`.
-2. Modalità demo (seme fisso, animazione di circa 3 secondi): aprire `app/index.html?demo=1`, oppure attivare il toggle "Modalità demo" nella schermata di benvenuto.
+2. Modalità demo (seme fisso, animazione di circa 3 secondi, soglia mensile precompilata a 100 €): aprire `app/index.html?demo=1`, oppure attivare il toggle "Modalità demo" nella schermata di benvenuto.
+3. "Pausa e Conto" (BR-17, nascosta di default): aggiungere `pausa=1`, ad esempio `app/index.html?demo=1&pausa=1`.
 
 Da PowerShell, nella cartella del repository:
 ```powershell
@@ -16,6 +17,13 @@ Start-Process msedge ("file:///" + ((Resolve-Path app\index.html).Path -replace 
 
 ## Percorso
 1. Benvenuto → 2. Quiz prima (3 domande) → 3. La mia abitudine (default: Salvatore, 2 biglietti da 5 € al giorno = 10 €/giorno) → 4. Un anno in 10 secondi → 5. Capire i numeri (3 schede con mini-esperimento) → 6. Quiz dopo + domanda di trasferimento → 7. Cruscotto prima/dopo.
+
+Novità della seconda versione:
+- **Le vincite che non sono vincite** (schermata 4): ogni vincita compare come "HAI VINTO 5 €" e diventa il saldo reale ("Hai recuperato la giocata: guadagno netto 0 €."); a fine anno il riepilogo per classe (rimborso, piccole, più grandi del doppio).
+- **Probabilità in cose fisiche** (schermata 4 e scheda A): "208 stadi da 60.000 posti pieni — e in tutti vincerebbe una sola persona", con la griglia degli stadi.
+- **Dalla parte del banco** (pulsante in schermata 4): 10.000 persone con la stessa abitudine per un anno, quante in attivo, incasso del banco, perdita media e mediana; scala Italia 2024 (21,5 miliardi €, fonte ADM).
+- **Vuoi parlarne con qualcuno?** (schermata 3): campo facoltativo per una soglia mensile scelta dall'utente; se la spesa la supera compaiono il Telefono Verde (`tel:800558822`) e un messaggio già scritto per una persona di fiducia (WhatsApp o email), che l'utente invia solo se vuole. Nulla viene salvato.
+- **Pausa e Conto** (solo con `?pausa=1`): pulsante "Sto per comprare un biglietto" in testata; per 30 secondi (10 in demo) i numeri del biglietto scelto, poi "La scelta è tua."
 
 Disclaimer e Telefono Verde Nazionale ISS (800 55 88 22) sono sempre visibili in testata e a piè di pagina.
 

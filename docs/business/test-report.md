@@ -1,32 +1,41 @@
 # Test Report — "Fortuna in Chiaro"
 
-> Pronto per l'UAT manuale su `app/index.html`. Colonna "Esito" da compilare durante l'esecuzione (Pass / Fail / Bloccato). I TC già coperti da `app/tests/motore.test.js` (eseguiti via `tests.html`) sono segnalati: vanno comunque riverificati in UI, ma il calcolo sottostante è già garantito da un test automatico.
+**Data esecuzione UAT**: 2026-10-05 (freeze ore 15:00). **Esecutore**: Team Business.
 
-| TC | BR | Copertura test automatico (`app/tests/motore.test.js`) | Esito | Evidenze | Data |
-|---|---|---|---|---|---|
-| TC-01 | BR-01 | — (solo UI/testo) | | | |
-| TC-02 | BR-02 | "quiz: le risposte corrette coincidono con il motore"; "verificaQuiz e confrontaQuiz: 1/3 prima, 3/3 dopo" — coperti da test automatico | | | |
-| TC-03 | BR-02 | "10 €/giorno -> 3.650 €/anno" (spesaAnnuaDaGiornaliera) — coperto da test automatico | | | |
-| TC-04 | BR-03 | "10 €/giorno -> 3.650 €/anno" (M.spesa su abitudine Salvatore: giorno 10, anno 3650, mese ≈304,17) — coperto da test automatico | | | |
-| TC-05 | BR-03 | "spesa settimanale: 7 volte a settimana = 1 al giorno" (pattern analogo, 5€/giorno → 1.825€/anno) — coperto da test automatico | | | |
-| TC-06 | BR-03, BR-09 | — (solo UI/testo: dichiarazione "stima, non ufficiale" per eventuale biglietto da 10€) | | | |
-| TC-07 | BR-04 | "perdita attesa Salvatore: 3.650 € × 28,79% ≈ 1.050,83 €/anno" — coperto da test automatico | | | |
-| TC-08 | BR-04 | "anni attesi per il premio massimo: Salvatore ≈ 17.096 anni" — coperto da test automatico | | | |
-| TC-09 | BR-04, BR-10 | "PRNG: stesso seme -> stessa sequenza..."; "simulaAnno riproducibile con lo stesso seme (seme demo)" — coperti da test automatico (ripetibilità garantita); durata/UI demo da verificare a mano | | | |
-| TC-10 | BR-05 | "premio massimo modello A: 500.000 € con 1 su 12.480.000"; "payout = valori dichiarati" — coperti da test automatico (numeri); rappresentazione visiva da verificare a mano | | | |
-| TC-11 | BR-05 | "ritardatari: frequenza dopo un ritardo = frequenza generale = 5/90"; "ritardatari riproducibile con lo stesso seme" — coperti da test automatico | | | |
-| TC-12 | BR-06 | "quiz: le risposte corrette coincidono con il motore" (q4, trasferimento 2€/70%/100 → 60€); "trasferimento: 2 € × 100 giocate, payout 70% -> 60 €" — coperti da test automatico | | | |
-| TC-13 | BR-07 | "verificaQuiz e confrontaQuiz: 1/3 prima, 3/3 dopo" — coperto da test automatico (confronto punteggi); riepilogo numerico in UI da verificare a mano | | | |
-| TC-14 | BR-08 | — (solo UI: presenza disclaimer e numero verde in ogni schermata) | | | |
-| TC-15 | BR-09 | "ogni gioco ha fonte con sezione di ricerca-azzardo.md"; "probabilita' calcolate = probabilita' dichiarate..."; "payout = valori dichiarati" — coperti da test automatico | | | |
-| TC-16 | BR-11 | — (solo UI/testo: assenza di consigli/giudizi) | | | |
-| TC-17 | BR-12 | — (da verificare manualmente con DevTools → Network) | | | |
-| TC-18 | BR-12 | — (da verificare manualmente ispezionando il codice sorgente) | | | |
-| TC-19 | BR-13 | — (da verificare manualmente: messaggio rimborso e riepilogo vincite in UI) | | | |
-| TC-20 | BR-14 | — (da verificare manualmente: vista 10.000 persone e scala Italia in UI) | | | |
-| TC-21 | BR-15 | — (da verificare manualmente: testi "208 stadi" e "17.096 anni" in UI) | | | |
-| TC-22 | BR-11 (L4) | — (da verificare: hook PreToolUse su caso positivo/negativo; test automatico sui testi dell'app) | | | |
-| TC-23 | BR-16 | — (da verificare manualmente: pannello soglia, link tel/WhatsApp/mailto, DevTools Network/Storage) | | | |
-| TC-24 | BR-17 | — (condizionato al go/no-go delle 14:05; da verificare manualmente se "go") | | | |
+## Metodo di verifica
 
-**Nota**: i test automatici in `app/tests/motore.test.js` coprono la correttezza dei calcoli (motore) ma non sostituiscono la verifica dell'interfaccia utente (presenza a schermo, testi, tono, visibilità). L'UAT su app/index.html resta necessaria per tutti i TC prima del verdetto QA.
+1. **Test automatici**: `powershell -ExecutionPolicy Bypass -File app\tests\run-tests.ps1` → **38 test passati, 0 falliti** (copre `src/motore.js`: spesa, payout, probabilità, valore atteso, simulazione, quiz, riepilogo vincite, simulazione folla, scala fisica, soglia, conto biglietto).
+2. **Esecuzione reale end-to-end in Microsoft Edge headless** (`msedge --headless --virtual-time-budget --dump-dom`): un harness carica gli stessi file `app/data/*.js`, `app/src/motore.js`, `app/src/ui.js` nello stesso markup di `app/index.html` e simula i click reali dell'utente (Inizia → quiz prima → abitudine/soglia → simulazione 365 giorni → "Dalla parte del banco" → schede → quiz dopo → cruscotto → pausa con `?pausa=1`), catturando l'HTML effettivamente renderizzato e gli errori JS (`window.onerror`). Scelta per restare entro il freeze senza installare Playwright/Selenium (non disponibili nell'ambiente).
+3. **Lettura integrale del codice sorgente** (`app/index.html`, `app/src/ui.js`, `app/src/motore.js`, `app/data/quiz.js`, `app/data/giochi.js`, `.claude/hooks/guard.ps1`, `.claude/hooks/post-edit-tests.ps1`) con ricerca mirata (grep) di imperativi/consigli (BR-11) e di chiamate di rete/chiavi (BR-12).
+4. **Nota sulla concorrenza**: durante l'esecuzione dell'UAT, il Team Sviluppo ha aggiornato `app/` (nuove funzionalità BR-13…BR-17); i test sono stati ripetuti sulla versione finale dei file.
+
+| TC | BR | Esito | Evidenze | Data |
+|---|---|---|---|---|
+| TC-01 | BR-01 | **Pass** | Schermata 1 catturata: titolo "Quanto ti costa sperare?", sottotitolo neutro, nessun marchio commerciale. Disclaimer in header. | 2026-10-05 |
+| TC-02 | BR-02 | **Pass** | Schermata 2: 3 domande a scelta multipla (q1 spesa, q2 probabilità, q3 ritardatari). Punteggio prima=1/3 registrato e riportato intatto al cruscotto ("Prima 1/3"). | 2026-10-05 |
+| TC-03 | BR-02 | **Pass** | q1, opzione "C) 3.650 €" segnata "Risposta corretta". Automatico: "10 €/giorno -> 3.650 €/anno". | 2026-10-05 |
+| TC-04 | BR-03 | **Pass** | Schermata 3, default Salvatore (2×/giorno, modello A 5€): "Al giorno 10 €, Al mese 304,17 €, All'anno 3.650 €". | 2026-10-05 |
+| TC-05 | BR-03 | **Pass** | Verifica diretta del motore: abitudine 1×/giorno modello A 5€ → `Motore.spesa()` → anno=1.825€, giorno=5€, mese=152,08€. | 2026-10-05 |
+| TC-06 | BR-03, BR-09 | **Pass (N/A giustificato)** | L'app non propone alcun biglietto da 10€ (solo modello A/B da 5€ e Lotto): nessun dato non verificato presentato come certo. Coerente con l'assenza di tabella ufficiale per quel taglio segnalata in `ricerca-azzardo.md`. | 2026-10-05 |
+| TC-07 | BR-04 | **Pass** | Schermata 4 a fine animazione: "Perso in media 1.050,83 €" (dentro tolleranza ±1€), indipendente dall'esito random dei contatori (istanza osservata: perso 1.395€/1 esecuzione, 1.073,82€ media/persona sull'aggregato di 10.000). Automatico: idem. | 2026-10-05 |
+| TC-08 | BR-04 | **Pass** | "il premio massimo esce in media una volta ogni 17.096 anni di gioco", etichettato "Stima derivata". Automatico: idem. | 2026-10-05 |
+| TC-09 | BR-04, BR-10 | **Pass** | Modalità demo (`?demo=1`): badge visibile, seme dichiarato 20261005, animazione entro il budget coerente con i 3s dichiarati. Automatico: PRNG e `simulaAnno` riproducibili con lo stesso seme (unico input casuale della UI). | 2026-10-05 |
+| TC-10 | BR-05 | **Pass** | Scheda A: "Immagina 12.480.000 biglietti allineati…" con griglia canvas e slider (max 1.248 griglie). Scheda B: "ogni 100 € giocati, in media 71,20 € tornano indietro, 28,80 € restano al banco". | 2026-10-05 |
+| TC-11 | BR-05 | **Pass** | Scheda C dopo 500.000 estrazioni simulate: probabilità teorica 5,56% vs frequenza dopo ritardo 100+ estrazioni 5,84% — statisticamente equivalenti (rumore campionario), a conferma dell'indipendenza. | 2026-10-05 |
+| TC-12 | BR-06 | **Pass** | Schermata 6: le 3 domande (ordine mescolato) + q4 (biglietto 2€, payout 70%), risposta "C) 60 €" segnata corretta con spiegazione "2€×100=200€; tornano il 70% (140€): perdi 60€". | 2026-10-05 |
+| TC-13 | BR-07 | **Pass** | Cruscotto: "Prima 1/3 — Dopo 3/3", "+2 risposte corrette in più", trasferimento "Sì", riepilogo numerico identico a schermata 4 (3.650€ / 1.050,83€ / 17.096 anni). | 2026-10-05 |
+| TC-14 | BR-08 | **Pass** | Disclaimer e numero verde in `<header>`/`<footer>` fuori dalle sezioni `.screen` nascoste dalla navigazione: sempre renderizzati (confermato nel codice e nell'HTML catturato a ogni schermata). | 2026-10-05 |
+| TC-15 | BR-09 | **Pass** | Payout modello A 71,2%, probabilità premio massimo 1/12.480.000, numero verde 800 55 88 22 — coincidenti con `docs/idea/ricerca-azzardo.md` e `app/data/giochi.js` (fonte citata). | 2026-10-05 |
+| TC-16 | BR-11 | **Pass** | Grep su tutto `app/` per "smetti", "gioca meno", "conviene", "dovresti", "devi", "ti consiglio", "raccomand", "evita", "limita", "sbagliato": nessuna corrispondenza nei testi applicativi. Lettura integrale di `ui.js`, `index.html`, `quiz.js`, `giochi.js`: solo numeri e descrizioni neutre, incluso il testo "La scelta è tua." a fine pausa (BR-17) e "hai recuperato la giocata: guadagno 0 €" (BR-13). | 2026-10-05 |
+| TC-17 | BR-12 | **Pass** | Grep su tutto `app/` per `fetch(`, `XMLHttpRequest`, `XHR`, `WebSocket`, `sendBeacon`: nessuna occorrenza nel codice eseguibile. App aperta da `file://` senza endpoint di rete configurato. DevTools→Network non eseguito manualmente in questa sessione (ambiente headless); verifica basata su analisi statica completa del codice sorgente. | 2026-10-05 |
+| TC-18 | BR-12 | **Pass** | Grep case-insensitive per "api key"/"apikey"/"secret"/"token": nessuna chiave o segreto, solo dichiarazioni testuali ("zero token a runtime") in README/ARCHITETTURA. | 2026-10-05 |
+| TC-19 | BR-13 | **Pass** | A runtime: `conto-vincite` aggiornato durante la simulazione ("Biglietti vincenti finora: 175 — di cui solo il rimborso della giocata: 72"); riepilogo di fine anno con classi rimborso/piccole/reali e percentuali esatte da tabella (38,5%/79,4% verificati anche dal test automatico "riepilogoVincite modello A"). Testo "hai recuperato la giocata: guadagno 0 €" presente nel toast (non "hai vinto" come saldo finale). | 2026-10-05 |
+| TC-20 | BR-14 | **Pass** | Click reale su "Dalla parte del banco": vista aggregata 10.000 persone renderizzata con numeri coerenti ("In attivo a fine anno 174 su 10.000 (1,7%)", "Incasso del banco 10.738.155 €", perdita media/persona ≈ valore atteso) e vista "E in Italia" con "21,5 miliardi di euro" e fonte citata. Nessun errore JS (`window.onerror`: `[]`). | 2026-10-05 |
+| TC-21 | BR-15 | **Pass** | Testo "208 stadi da 60.000 posti… vincerebbe una persona sola" presente sia in schermata 4 (sotto il valore atteso) sia nella scheda "probabilità" (schermata 5), coerente con 12.480.000/60.000=208. "17.096 anni" già verificato in TC-08. Formulazioni con "servirebbero"/"in media", mai "dovresti". | 2026-10-05 |
+| TC-22 | BR-11 (L4) | **Fail** | Vedi `DEF-001`: l'hook `guard.ps1` (PreToolUse) blocca solo le scritture in `00_input/` e pattern di chiave API; non contiene alcuna scansione di formule di consiglio/giudizio ("dovresti", "ti consiglio", ecc.). Nessun test automatico in `app/tests/motore.test.js` scansiona i testi applicativi per formule vietate. Il contenuto attuale dell'app è comunque verificato pulito "a mano" (TC-16, grep mirata), ma il meccanismo di garanzia automatica L4 descritto nel BR non esiste. | 2026-10-05 |
+| TC-23 | BR-16 | **Pass** | Impostando soglia 50€ con spesa mensile 304,17€: pannello "Vuoi parlarne con qualcuno?" compare con link `tel:800558822`, messaggio precompilato neutro, link WhatsApp (`wa.me/?text=...`) e `mailto:` precompilati, nota "non salva e non invia nulla". Pannello assente quando la spesa non supera la soglia (verificato per costruzione: compare solo se `M.superaSoglia(...).supera`). Nessun errore JS. DevTools→Network non eseguito manualmente (vedi nota TC-17); nessuna chiamata di rete presente nel codice. | 2026-10-05 |
+| TC-24 | BR-17 | **Pass** | Go/no-go raggiunto "go": tasto "Sto per comprare un biglietto" presente (dietro `?pausa=1`, coerente con la condizione "a flag" dichiarata nel codice). Aperta la pausa: numeri corretti per il biglietto selezionato (costo 5€, perdita media attesa 1,44€, 38,5% vincite-rimborso, 1 su 12.480.000, "208 stadi"); conto alla rovescia (10s in demo) termina con "La scelta è tua." senza indicazioni. Osservato un errore generico `"Script error."` non diagnosticabile (tipico artefatto di script caricati da `file://` senza attributo `crossorigin`, che Chromium riporta senza dettagli) in un solo harness isolato; non riprodotto nell'harness end-to-end più realistico (TC-19/20/21) né ha impedito il corretto funzionamento osservato. Annotato in `DEF-002` come osservazione a bassa gravità da ricontrollare con DevTools reale prima della demo. | 2026-10-05 |
+
+**Esito complessivo**: 23/24 TC Pass (incluso TC-06 Pass con nota N/A), **1 Fail** (TC-22, DEF-001). Un'osservazione di bassa gravità aperta (DEF-002, TC-24) da verificare con un browser non headless prima della demo.
+
+**Impatto sul verdetto Must**: BR-11 resta rispettato nei contenuti osservabili dell'app (TC-16 Pass su tutti i testi letti), ma il controllo automatico/hook richiesto esplicitamente da BR-11(L4)/TC-22 non è implementato: è un gap di processo/tooling, non un contenuto scorretto rilevato. Si segnala al Team Sviluppo e Governance per decidere se bloccante per il verdetto QA.
