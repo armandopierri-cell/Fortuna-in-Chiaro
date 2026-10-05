@@ -67,6 +67,8 @@
   function perc(f, d) { return num(f * 100, d === undefined ? 1 : d) + "%"; }
   function unoSu(n) { return "1 su " + num(n, n % 1 === 0 ? 0 : 1); }
   function seme() { return state.demo ? G.seme.demo : SEME_NORMALE; }
+  // Seme dell'anno simulato: il primo anno usa il seme base (demo o normale), "Simula un altro anno" lo sposta di +1.
+  function semeAnno() { return seme() + (state.altroAnno || 0); }
 
   function payoutDichiarato(g) {
     return g.dichiarati && typeof g.dichiarati.payout === "number" ? g.dichiarati.payout : M.payout(g.id);
@@ -87,15 +89,15 @@
   // ------------------------------------------------------------------ stato
   function statoIniziale() {
     var sel = {};
-    G.giochi.forEach(function (g) { sel[g.id] = { on: false, volte: 0, periodo: "giorno" }; });
+    G.giochi.forEach(function (g) { sel[g.id] = { on: false, volte: 0, importo: 0, periodo: "giorno" }; });
     var voci = (G.abitudineDemo && G.abitudineDemo.voci) || [];
     var applicate = 0;
     voci.forEach(function (v) {
       if (!sel[v.gioco]) return;
-      sel[v.gioco] = { on: true, volte: v.volte, periodo: v.periodo || "giorno" };
+      sel[v.gioco] = { on: true, volte: v.volte, importo: v.volte * M.trovaGioco(v.gioco).prezzo, periodo: v.periodo || "giorno" };
       applicate++;
     });
-    if (!applicate && G.giochi.length) sel[G.giochi[0].id] = { on: true, volte: 1, periodo: "giorno" };
+    if (!applicate && G.giochi.length) sel[G.giochi[0].id] = { on: true, volte: 1, importo: G.giochi[0].prezzo, periodo: "giorno" };
     var demo = demoDaUrl || ($("demo-toggle") && $("demo-toggle").checked) || false;
     return {
       schermata: 1,
@@ -174,7 +176,7 @@
     }
     $("demo-badge").hidden = !state.demo;
     $("demo-info").textContent = state.demo
-      ? "Modalità demo attiva: seme fisso " + G.seme.demo + ", animazione di circa 3 secondi, risultato identico a ogni esecuzione."
+      ? "Modalità demo attiva: simulazione riproducibile, animazione di circa 3 secondi, risultato identico a ogni esecuzione."
       : "";
   }
 
@@ -263,6 +265,15 @@
   function renderAbitudine() {
     var box = $("lista-giochi");
     box.innerHTML = "";
+    var gA = G.giochi.filter(function (g) { return g.id === "istantanea-5-a"; })[0];
+    var gB = G.giochi.filter(function (g) { return g.id === "istantanea-5-b"; })[0];
+    if (gA && gB) {
+      var cent = function (g) { return num(Math.round(100 * payoutDichiarato(g))) + " centesimi"; };
+      var stessoPrezzo = gA.prezzo === gB.prezzo;
+      box.appendChild(el("p", { class: "diff-ab", text: "Due biglietti reali" + (stessoPrezzo ? " da " + eur(gA.prezzo) : "") +
+        " con tabelle premi diverse: " + (stessoPrezzo ? "allo stesso prezzo, " : "") + "A restituisce in media " + cent(gA) +
+        " per ogni euro giocato, B " + cent(gB) + "." }));
+    }
     G.giochi.forEach(function (g) {
       var s = state.sel[g.id];
       var card = el("div", { class: "gioco" + (s.on ? " sel" : "") });
@@ -275,14 +286,16 @@
 
       var pm = M.probabilitaPremioMax(g.id);
       var dati = el("ul", { class: "gioco-dati" });
-      [["Costo", eur(g.prezzo)], ["Payout", perc(payoutDichiarato(g))], ["Premio massimo", eur(pm.premio)], ["Probabilità premio massimo", unoSu(pm.unoSu)]]
+      [["Costo", eur(g.prezzo)], ["Restituisce in media", num(100 * payoutDichiarato(g), 1) + " € ogni 100 € giocati"], ["Premio massimo", eur(pm.premio)], ["Probabilità premio massimo", unoSu(pm.unoSu)]]
         .forEach(function (r) { dati.appendChild(el("li", null, r[0] + ": <strong>" + r[1] + "</strong>")); });
       card.appendChild(dati);
 
       var inp = el("div", { class: "gioco-input" });
-      var lv = el("label", null, "Quante volte ");
-      var volte = el("input", { type: "number", min: "0", max: "20", step: "1", inputmode: "numeric", value: String(s.volte) });
+      if (!(s.importo > 0) && s.volte > 0) s.importo = s.volte * g.prezzo;
+      var lv = el("label", null, "Quanto spendi ");
+      var volte = el("input", { type: "number", min: "0", max: "1000", step: "1", inputmode: "numeric", value: String(s.importo || 0), "aria-label": "Importo in euro" });
       lv.appendChild(volte);
+      lv.appendChild(document.createTextNode(" € "));
       var per = el("select", { "aria-label": "Periodo" });
       [["giorno", "al giorno"], ["settimana", "a settimana"]].forEach(function (p) {
         var o = el("option", { value: p[0], text: p[1] });
@@ -291,6 +304,18 @@
       });
       inp.appendChild(lv);
       inp.appendChild(per);
+      var conv = el("p", { class: "conversione" });
+      inp.appendChild(conv);
+      // Importo -> numero di biglietti (per difetto). Il motore riceve sempre {gioco, volte, periodo}.
+      function aggConv() {
+        var n = Math.floor((s.importo || 0) / g.prezzo);
+        s.volte = n;
+        var unita = n === 1 ? " biglietto" : " biglietti";
+        conv.textContent = n * g.prezzo === s.importo
+          ? "= " + num(n) + unita + " da " + eur(g.prezzo)
+          : "arrotondato a " + num(n) + unita + " (" + eur(n * g.prezzo) + "): un biglietto costa " + eur(g.prezzo);
+      }
+      aggConv();
       inp.hidden = !s.on;
       card.appendChild(inp);
       card.appendChild(el("p", { class: "fonte", text: citaFonte(g.fonte) }));
@@ -303,13 +328,13 @@
       }
       chk.addEventListener("change", function () {
         s.on = chk.checked;
-        if (s.on && !(s.volte > 0)) { s.volte = 1; volte.value = "1"; }
+        if (s.on && !(s.volte > 0)) { s.importo = g.prezzo; volte.value = String(g.prezzo); aggConv(); }
         card.className = "gioco" + (s.on ? " sel" : "");
         inp.hidden = !s.on;
         aggiornaSpesa();
       });
-      volte.addEventListener("input", function () { s.volte = intero(volte, 0, 20); aggiornaSpesa(); });
-      volte.addEventListener("change", function () { volte.value = String(s.volte); });
+      volte.addEventListener("input", function () { s.importo = intero(volte, 0, 1000); aggConv(); aggiornaSpesa(); });
+      volte.addEventListener("change", function () { volte.value = String(s.importo); });
       per.addEventListener("change", function () { s.periodo = per.value; aggiornaSpesa(); });
       box.appendChild(card);
     });
@@ -408,9 +433,9 @@
     var pa = M.perditaAttesa(ab);
     var anni = M.anniAttesiPremioMax(ab);
     var top = anni.reduce(function (a, b) { return !a || b.premio > a.premio ? b : a; }, null);
-    var sim = M.simulaAnno(ab, seme());
+    var sim = M.simulaAnno(ab, semeAnno());
     return {
-      seme: seme(),
+      seme: semeAnno(),
       spesaAnno: pa.spesaAnno,
       ritornoAnno: pa.ritornoAnno,
       perditaAnno: pa.anno,
@@ -473,9 +498,9 @@
   }
 
   function avviaSimulazione() {
-    if (!state.risultati || state.risultati.seme !== seme()) state.risultati = calcolaRisultati();
+    if (!state.risultati || state.risultati.seme !== semeAnno()) state.risultati = calcolaRisultati();
     var r = state.risultati;
-    $("seme-info").textContent = "Simulazione con seme fisso (" + r.seme + "), riproducibile: rivedendola, i numeri restano gli stessi." +
+    $("seme-info").textContent = "Simulazione riproducibile: rivedendola, i numeri restano gli stessi." + (state.altroAnno ? " Anno simulato n. " + (state.altroAnno + 1) + "." : "") +
       (state.demo ? " Modalità demo: animazione accelerata." : "");
 
     $("atteso-dl").innerHTML =
@@ -494,6 +519,7 @@
     $("vincite").innerHTML = "";
     $("sim-finale").innerHTML = "";
     $("btn-rivedi").disabled = true;
+    $("btn-altro-anno").disabled = true;
     $("btn-banco").disabled = true;
     mostraVista(false);
     fermaToast();
@@ -546,11 +572,22 @@
     $("sim-progress").style.width = (tot ? 100 * fino / tot : 0) + "%";
   }
 
+  // Confronto esplicito tra l'anno simulato (un caso) e la media su tantissimi anni.
+  function confrontoAnnoHtml(persoAnno, persoMedio) {
+    var d = Math.round((persoAnno - persoMedio) * 100) / 100;
+    var parte = Math.abs(d) < 0.005
+      ? "Quest'anno hai perso esattamente quanto la media"
+      : "Quest'anno hai perso <strong>" + eur2(Math.abs(d)) + (d > 0 ? " in più" : " in meno") + "</strong> della media";
+    return '<p class="confronto-anno">' + parte + ": è il caso. Su tanti anni la perdita si avvicina a <strong>" +
+      eur2(persoMedio) + "</strong> all'anno.</p>";
+  }
+
   function fineSimulazione(r) {
     var t = r.sim.totale;
     var html =
       "<p>In questo anno simulato: speso <strong>" + eur(t.speso) + "</strong>, vinto <strong>" + eur(t.vinto) +
       "</strong>, perso <strong>" + eur(t.perso) + "</strong>.</p>" +
+      confrontoAnnoHtml(t.perso, r.perditaAnno) +
       "<p>In media, su 100 € giocati, te ne tornano <strong>" + num(r.payoutMedio * 100, 2) + " €</strong>.</p>";
     if (r.anniPremioMax !== null) {
       html += "<p>Con questa abitudine, il premio massimo esce in media una volta ogni <strong>" +
@@ -563,6 +600,7 @@
     html += riepilogoClassiHtml(r);
     $("sim-finale").innerHTML = html;
     $("btn-rivedi").disabled = false;
+    $("btn-altro-anno").disabled = false;
     $("btn-banco").disabled = !has("simulaFolla");
   }
 
@@ -648,7 +686,7 @@
       "<dt>Perdita media per persona</dt><dd>" + eur2(f.perditaMedia) + "</dd>" +
       "<dt>Perdita mediana per persona</dt><dd>" + eur2(f.perditaMediana) + "</dd>" +
       "</dl></div>" +
-      '<p class="note">Stesso motore e stesse probabilità ufficiali della tua simulazione; seme fisso ' + r.seme + ".</p>" +
+      '<p class="note">Stesso motore e stesse probabilità ufficiali della tua simulazione. Simulazione riproducibile: rivedendola, i numeri restano gli stessi.</p>' +
       '<div class="italia"><h3>E in Italia</h3><p>Nel ' + ITALIA.anno + " la spesa netta nel gioco (giocato meno vinto) è stata di <strong>" +
       num(ITALIA.spesaNettaMld, 1) + " miliardi di euro</strong>: oltre " + eur(ITALIA.perResidente) + " l'anno per ogni residente, neonati inclusi.</p>" +
       '<p class="fonte">Fonte: ' + ITALIA.fonte + "; docs/idea/ricerca-azzardo.md.</p></div>";
@@ -688,8 +726,8 @@
     $("sa-fonte").textContent = citaFonte(g.fonte);
 
     // Scheda B
-    $("sb-testo").textContent = "Il valore atteso è la media di ciò che torna indietro se giochi tante volte. Su un biglietto con payout " +
-      perc(pay) + ": ogni 100 € giocati, in media " + eur2(100 * pay) + " tornano indietro, " + eur2(100 * (1 - pay)) + " restano al banco.";
+    $("sb-testo").textContent = "In media, su tantissime giocate, una parte di ciò che giochi torna indietro. Questo biglietto restituisce in media " + num(100 * pay, 1) + " € ogni 100 € giocati (" +
+      perc(pay) + "): " + eur2(100 * (1 - pay)) + " ogni 100 € restano al banco.";
     var box = $("sb-scelte");
     [10, 100, 1000, 10000].forEach(function (n, i) {
       var lab = el("label");
@@ -708,12 +746,12 @@
       var spesaTot = n * va.costo;
       $("sb-dl").innerHTML =
         "<dt>Spesa totale</dt><dd>" + eur(spesaTot) + "</dd>" +
-        "<dt>Vincita attesa (esatta)</dt><dd>" + eur2(spesaTot - M.perditaAttesaSu(va.costo, va.perEuro, n)) + " (" + perc(va.perEuro) + ")</dd>" +
-        "<dt>Perdita attesa (esatta)</dt><dd>" + eur2(M.perditaAttesaSu(va.costo, va.perEuro, n)) + "</dd>" +
+        "<dt>Vincita media (su tantissime giocate)</dt><dd>" + eur2(spesaTot - M.perditaAttesaSu(va.costo, va.perEuro, n)) + " (" + perc(va.perEuro) + ")</dd>" +
+        "<dt>Perdita media (su tantissime giocate)</dt><dd>" + eur2(M.perditaAttesaSu(va.costo, va.perEuro, n)) + "</dd>" +
         "<dt>Vincita in una prova simulata</dt><dd>" + eur(vinto) + " (" + perc(vinto / spesaTot) + ")</dd>";
     }
     aggB(100);
-    $("sb-fonte").textContent = citaFonte(g.fonte) + " Prova simulata con seme fisso " + seme() + ": con più giocate la percentuale tende al valore atteso.";
+    $("sb-fonte").textContent = citaFonte(g.fonte) + " Simulazione riproducibile: rivedendola, i numeri restano gli stessi. Con più giocate la percentuale si avvicina alla media.";
 
     // Scheda C
     $("sc-testo").textContent = "Un'estrazione di 5 numeri su 90, come nel Lotto: ogni estrazione è indipendente dalle precedenti, quindi un numero fermo da 100 estrazioni ha la stessa probabilità di uscire di uno uscito ieri.";
@@ -731,12 +769,12 @@
           (r.frequenzaDopoRitardo === null ? "nessun caso" : perc(r.frequenzaDopoRitardo, 2)) + "</dd>" +
           "<dt>Ritardo più lungo osservato</dt><dd>" + num(r.ritardoMassimo) + " estrazioni</dd>";
         b.disabled = false;
-        b.textContent = "Lancia di nuovo (stesso seme)";
+        b.textContent = "Lancia di nuovo (stessi numeri)";
       }, 30);
     });
     var L = G.estrazioni || {};
     $("sc-fonte").textContent = "Fonte: principio matematico standard di indipendenza delle estrazioni (calcolo, non dato ADM); " +
-      (L.estratti || 5) + " numeri estratti su " + (L.numeri || 90) + " (" + (L.sezione || "ricerca-azzardo.md §2") + "). Simulazione con seme fisso " + seme() + ".";
+      (L.estratti || 5) + " numeri estratti su " + (L.numeri || 90) + " (" + (L.sezione || "ricerca-azzardo.md §2") + "). Simulazione riproducibile: rivedendola, i numeri restano gli stessi.";
   }
 
   function disegnaGriglia(vincente) {
@@ -782,7 +820,7 @@
     if (r) {
       html += '<div class="cr-num">' +
         '<div class="cr-box"><span class="cr-l">Spesa annua</span><span class="cr-v">' + eur(r.spesaAnno) + "</span></div>" +
-        '<div class="cr-box cr-perso"><span class="cr-l">Valore atteso perso</span><span class="cr-v">' + eur2(r.perditaAnno) + "</span></div>" +
+        '<div class="cr-box cr-perso"><span class="cr-l">Perdita media in un anno</span><span class="cr-v">' + eur2(r.perditaAnno) + "</span></div>" +
         '<div class="cr-box"><span class="cr-l">Anni attesi per il premio massimo</span><span class="cr-v">' +
         (r.anniPremioMax !== null ? num(Math.round(r.anniPremioMax)) : "—") + "</span></div></div>";
     }
@@ -864,6 +902,7 @@
     $("avanti-3").addEventListener("click", function () { if (!$("avanti-3").disabled) vai(4); });
     $("avanti-6").addEventListener("click", function () { if (!$("avanti-6").disabled) vai(7); });
     $("btn-rivedi").addEventListener("click", avviaSimulazione);
+    $("btn-altro-anno").addEventListener("click", function () { state.altroAnno = (state.altroAnno || 0) + 1; state.risultati = null; avviaSimulazione(); });
     $("btn-ricomincia").addEventListener("click", ricomincia);
     $("btn-ricomincia-top").addEventListener("click", ricomincia);
     document.querySelectorAll("[data-nav]").forEach(function (b) {

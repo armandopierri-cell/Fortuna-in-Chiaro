@@ -77,6 +77,7 @@
     <div id="vista-mia">
     <div class="layout-2 sim">
       <div class="sim-anim">
+        <h2 class="sim-titolo">Quest'anno simulato (un caso)</h2>
         <div class="progress" aria-hidden="true"><div class="progress-fill" id="sim-progress"></div></div>
         <p class="giorno" id="sim-giorno">Giorno 0 di 365</p>
         <div class="contatori" aria-live="off">
@@ -91,8 +92,8 @@
         <ul class="vincite" id="vincite" aria-label="Vincite da 100 euro in su"></ul>
       </div>
       <aside class="atteso" aria-labelledby="t4b">
-        <h2 id="t4b">Valore atteso esatto</h2>
-        <p class="note">Calcolato dalla tabella premi, non dal caso.</p>
+        <h2 id="t4b">In media, su tantissimi anni</h2>
+        <p class="note">Calcolato dalla tabella premi ufficiale, non dal caso: è la media che si ottiene su tantissimi anni.</p>
         <dl id="atteso-dl"></dl>
         <p id="atteso-media"></p>
         <div class="stadi-box" id="stadi-anno"></div>
@@ -104,6 +105,7 @@
     <div class="nav">
       <button type="button" class="btn" data-nav="back">Indietro</button>
       <button type="button" class="btn" id="btn-rivedi">Rivedi</button>
+      <button type="button" class="btn" id="btn-altro-anno" disabled>Simula un altro anno</button>
       <button type="button" class="btn" id="btn-banco" disabled>Dalla parte del banco</button>
       <button type="button" class="btn btn-primary" data-nav="next">Avanti</button>
     </div>
