@@ -10,7 +10,7 @@ atteso esatto e quiz prima/dopo. Non dà consigli né giudizi: solo numeri e sig
 
 - Standard: apri `app/index.html` nel browser.
 - Demo con seme fisso e animazione rapida: `app/index.html?demo=1`.
-- Con BR-17 "Pausa e Conto" (bottone educativo): `app/index.html?demo=1&pausa=1`.
+- "Pausa e Conto" (BR-17) è attiva di default; per nasconderla: `app/index.html?demo=1&pausa=0`.
 
 ## 3. Presentazione
 

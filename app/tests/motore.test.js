@@ -17,9 +17,9 @@
     var s = M.spesa({ voci: [{ gioco: "istantanea-5-b", volte: 7, periodo: "settimana" }] });
     vicino(s.giorno, 5, 1e-9); vicino(s.anno, 1825, 1e-9);
   });
-  test("spesa lotto con posta scelta + abitudine mista", function () {
-    var s = M.spesa({ voci: [salvatore.voci[0], { gioco: "lotto-ambo", volte: 1, periodo: "giorno", posta: 2 }] });
-    assertEqual(s.giorno, 12);
+  test("spesa abitudine mista: 2 biglietti A + 1 biglietto B al giorno = 15 €", function () {
+    var s = M.spesa({ voci: [salvatore.voci[0], { gioco: "istantanea-5-b", volte: 1, periodo: "giorno" }] });
+    assertEqual(s.giorno, 15);
   });
   test("abitudine vuota -> spesa 0", function () { assertEqual(M.spesa({ voci: [] }).anno, 0); });
   test("gioco sconosciuto -> eccezione", function () {
@@ -51,7 +51,7 @@
   test("montepremi modello A = 177.740.800 € (§1.1)", function () {
     vicino(M.valoreAtteso("istantanea-5-a").ritorno * 49920000, 177740800, 1e-3);
   });
-  test("payout = valori dichiarati (A 71,2%, B 60,1%, ambo 62,4%, terno 38,3%)", function () {
+  test("payout = valori dichiarati (A 71,2%, B 60,1%)", function () {
     G.giochi.forEach(function (g) { vicino(M.payout(g.id), g.dichiarati.payout, 0.0006, g.id); });
   });
   test("quota biglietti vincenti = dichiarata (A 23,8%, B 13,9% = 1 su 7,20)", function () {
@@ -64,8 +64,10 @@
       assert(M.payout(g.id) <= G.tettoPayoutLotterie.valore, g.id);
     });
   });
-  test("lotto: 1 su 400,5 = C(90,2)/C(5,2) con 5 estratti su 90", function () {
-    vicino((90 * 89 / 2) / (5 * 4 / 2), M.trovaGioco("lotto-ambo").probabilitaUnoSu, 1e-9);
+  test("giochi selezionabili: solo lotterie istantanee con tabella ADM (nessun Lotto)", function () {
+    assertEqual(G.giochi.map(function (g) { return g.id; }), ["istantanea-5-a", "istantanea-5-b"]);
+    G.giochi.forEach(function (g) { assertEqual(g.tipo, "istantanea"); assertEqual(g.fonte.affidabilita, "UFF"); });
+    assertEqual([G.estrazioni.numeri, G.estrazioni.estratti], [90, 5]);
   });
 
   // ---- Valore atteso e perdita attesa (BR-04) ----
@@ -104,8 +106,8 @@
     s.vincite.forEach(function (v) { assert(v.premio >= 100); });
   });
   test("simulaAnno settimanale: 3 volte a settimana -> 156 giocate in 365 giorni", function () {
-    var s = M.simulaAnno({ voci: [{ gioco: "lotto-ambo", volte: 3, periodo: "settimana", posta: 1 }] }, 1);
-    assertEqual(s.totale.speso, Math.floor(365 * 3 / 7));
+    var s = M.simulaAnno({ voci: [{ gioco: "istantanea-5-b", volte: 3, periodo: "settimana" }] }, 1);
+    assertEqual(s.totale.speso, 5 * Math.floor(365 * 3 / 7));
   });
   test("convergenza lotteria A: quota vincenti e ritorno medio (premi <= 1.000 €) su 400.000 giocate", function () {
     var g = M.trovaGioco("istantanea-5-a"), rnd = M.creaPRNG(12345), n = 400000;
@@ -119,11 +121,6 @@
       .reduce(function (s, x) { return s + x.premio * x.vincenti / g.emissione; }, 0);
     vicino(vincenti / n, M.probabilitaVincita(g.id), 0.003, "quota vincenti");
     vicino(somma / n, attesoCap, 0.1, "ritorno medio per giocata");
-  });
-  test("convergenza lotto ambo: payout simulato ~ 62,4% su 400.000 giocate", function () {
-    var rnd = M.creaPRNG(99), n = 400000, somma = 0;
-    for (var i = 0; i < n; i++) somma += M.estraiPremio("lotto-ambo", rnd, 1);
-    vicino(somma / n, M.payout("lotto-ambo"), 0.06);
   });
 
   // ---- Ritardatari (BR-05) ----
@@ -169,12 +166,10 @@
     vicino(r.quotaPiccole, 0.794, 0.0005);
     vicino(r.quotaSoloPiccole + r.quotaRimborso + r.quotaReali, 1, 1e-12);
   });
-  test("riepilogoVincite modello B (nessun rimborso) e lotto", function () {
+  test("riepilogoVincite modello B (nessun rimborso)", function () {
     var b = M.riepilogoVincite("istantanea-5-b");
     assertEqual(b.quotaRimborso, 0);
     vicino(b.quotaPiccole, 2816000 / 5332875, 1e-12);
-    var l = M.riepilogoVincite("lotto-ambo");
-    vicino(l.quotaBigliettiVincenti, 1 / 400.5, 1e-12); assertEqual(l.quotaRimborso, 0);
   });
   test("classeVincita: rimborso, piccole, reali", function () {
     assertEqual(M.classeVincita(5, 5), "rimborso"); assertEqual(M.classeVincita(10, 5), "piccole");

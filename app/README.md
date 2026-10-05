@@ -8,7 +8,9 @@ Simulatore educativo sul gioco d'azzardo: in 7 schermate mostra quanto costa un'
 ## Come si apre
 1. Doppio click su `app/index.html`.
 2. Modalità demo (seme fisso, animazione di circa 3 secondi, soglia mensile precompilata a 100 €): aprire `app/index.html?demo=1`, oppure attivare il toggle "Modalità demo" nella schermata di benvenuto.
-3. "Pausa e Conto" (BR-17, nascosta di default): aggiungere `pausa=1`, ad esempio `app/index.html?demo=1&pausa=1`.
+3. "Pausa e Conto" (BR-17) è attiva di default. Per nasconderla, ad esempio per tarare i tempi della demo, aggiungere `pausa=0`: `app/index.html?demo=1&pausa=0`.
+
+Giochi selezionabili: due lotterie istantanee da 5 € (modello A e B), con tabella premi ufficiale ADM. Il Lotto non è un gioco selezionabile. Compare solo come esempio nella scheda dei ritardatari ("un'estrazione di 5 numeri su 90, come nel Lotto").
 
 Da PowerShell, nella cartella del repository:
 ```powershell
@@ -23,7 +25,7 @@ Novità della seconda versione:
 - **Probabilità in cose fisiche** (schermata 4 e scheda A): "208 stadi da 60.000 posti pieni — e in tutti vincerebbe una sola persona", con la griglia degli stadi.
 - **Dalla parte del banco** (pulsante in schermata 4): 10.000 persone con la stessa abitudine per un anno, quante in attivo, incasso del banco, perdita media e mediana; scala Italia 2024 (21,5 miliardi €, fonte ADM).
 - **Vuoi parlarne con qualcuno?** (schermata 3): campo facoltativo per una soglia mensile scelta dall'utente; se la spesa la supera compaiono il Telefono Verde (`tel:800558822`) e un messaggio già scritto per una persona di fiducia (WhatsApp o email), che l'utente invia solo se vuole. Nulla viene salvato.
-- **Pausa e Conto** (solo con `?pausa=1`): pulsante "Sto per comprare un biglietto" in testata; per 30 secondi (10 in demo) i numeri del biglietto scelto, poi "La scelta è tua."
+- **Pausa e Conto** (attiva di default, `?pausa=0` la nasconde): pulsante "Sto per comprare un biglietto" in testata; per 30 secondi (10 in demo) i numeri del biglietto scelto, poi "La scelta è tua."
 
 Disclaimer e Telefono Verde Nazionale ISS (800 55 88 22) sono sempre visibili in testata e a piè di pagina.
 
@@ -31,7 +33,7 @@ Disclaimer e Telefono Verde Nazionale ISS (800 55 88 22) sono sempre visibili in
 ```powershell
 powershell -ExecutionPolicy Bypass -File app\tests\run-tests.ps1
 ```
-Esegue `app/tests/tests.html` (test della logica di `src/motore.js`) in Edge headless; exit code diverso da 0 se un test fallisce. In alternativa si apre `app/tests/tests.html` nel browser.
+Esegue `app/tests/tests.html` (test della logica di `src/motore.js`) in Edge headless; exit code diverso da 0 se un test fallisce (oggi 40 test, tutti verdi). In alternativa si apre `app/tests/tests.html` nel browser.
 
 ## Configurazione e segreti
 Nessuna API key, nessuna variabile d'ambiente, nessun servizio esterno: tutti i calcoli sono deterministici e locali (zero token a runtime). I dati inseriti restano in memoria nella pagina e si perdono alla chiusura.
