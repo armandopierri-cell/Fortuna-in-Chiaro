@@ -102,9 +102,8 @@ Flusso e stanze (Motore, Esperienza) dettagliati in `agents/WORKFLOW.md`.
 
 - Ultimo verdetto QA: **PASS** (`docs/qa/verdetto-qa.md`, riesame 15:11 su `786ad9a`; review approfondita 15:18 senza rilievi bloccanti in `docs/qa/review-approfondita.md`): UAT 24/24, 40 test automatici verdi, `agents/` allineata a `.claude/`.
 - Checkpoint idea e valore: **svolto con l'utente alle 14:30** (decisioni in `docs/governance/stato-avanzamento.md`).
-- Restano prima del push: remote GitHub (URL dall'utente) e
-  **conferma umana di consegna**.
-- **Push non ancora eseguito.**
+- **Consegna confermata dall'utente** alle 15:27. Repository: https://github.com/armandopierri-cell/Fortuna-in-Chiaro
+- Push eseguito al freeze (commit finale di consegna).
 
 ---
 **Aggiornato:** 05/10/2026, 14:45 — orchestratore. **Freeze:** 15:30 (deroga; regolamento riporta 15:00).

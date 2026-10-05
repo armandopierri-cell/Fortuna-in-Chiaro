@@ -30,7 +30,7 @@ Ora corrente 14:23. Tempo residuo al freeze: **1 h 07 min**. `git status`: solo 
 | ~13:00–13:10 | Leve di innovazione (L1–L4) e CR (CR1, CR2) | **APPROVATE dall'utente**: dettaglio in docs/idea/idea-selezionata.md (BR-13..BR-17) |
 | 14:30 | Checkpoint idea e valore | **SVOLTO con l'utente**. Decisioni: BR-17 Pausa e Conto resta (attivo di default); stima ~150 mln € resta (stima nostra); Lotto (ambo/terno) TOLTO dall'app; biglietto didattico 2 € con payout 70% resta. Vincolo ribadito dall'utente: esposizione totale 5'00" demo compresa, taratura della demo a prodotto finito |
 | 15:10 | Conferma utente e go al push | **In attesa** |
-| — | Consegna e push | **In attesa** |
+| 15:27 | Consegna e push | **CONFERMATA dall'utente** ("confermo la consegna"). Repository: https://github.com/armandopierri-cell/Fortuna-in-Chiaro |
 
 ## Fatto
 
