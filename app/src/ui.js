@@ -89,15 +89,15 @@
   // ------------------------------------------------------------------ stato
   function statoIniziale() {
     var sel = {};
-    G.giochi.forEach(function (g) { sel[g.id] = { on: false, volte: 0, importo: 0, periodo: "giorno" }; });
+    G.giochi.forEach(function (g) { sel[g.id] = { on: false, volte: 0, importo: g.prezzo, quante: 1, periodo: "giorno" }; });
     var voci = (G.abitudineDemo && G.abitudineDemo.voci) || [];
     var applicate = 0;
     voci.forEach(function (v) {
       if (!sel[v.gioco]) return;
-      sel[v.gioco] = { on: true, volte: v.volte, importo: v.volte * M.trovaGioco(v.gioco).prezzo, periodo: v.periodo || "giorno" };
+      sel[v.gioco] = { on: true, volte: v.volte, importo: M.trovaGioco(v.gioco).prezzo, quante: v.volte, periodo: v.periodo || "giorno" };
       applicate++;
     });
-    if (!applicate && G.giochi.length) sel[G.giochi[0].id] = { on: true, volte: 1, importo: G.giochi[0].prezzo, periodo: "giorno" };
+    if (!applicate && G.giochi.length) sel[G.giochi[0].id] = { on: true, volte: 1, importo: G.giochi[0].prezzo, quante: 1, periodo: "giorno" };
     var demo = demoDaUrl || ($("demo-toggle") && $("demo-toggle").checked) || false;
     return {
       schermata: 1,
@@ -291,29 +291,42 @@
       card.appendChild(dati);
 
       var inp = el("div", { class: "gioco-input" });
-      if (!(s.importo > 0) && s.volte > 0) s.importo = s.volte * g.prezzo;
-      var lv = el("label", null, "Quanto spendi ");
-      var volte = el("input", { type: "number", min: "0", max: "1000", step: "1", inputmode: "numeric", value: String(s.importo || 0), "aria-label": "Importo in euro" });
-      lv.appendChild(volte);
-      lv.appendChild(document.createTextNode(" € "));
+      if (!(s.importo > 0)) s.importo = g.prezzo;
+      if (!(s.quante > 0)) s.quante = 1;
+      var li = el("label", null, "Importo per giocata ");
+      var imp = el("input", { type: "number", min: "0", max: "1000", step: "1", inputmode: "numeric", value: String(s.importo), "aria-label": "Importo per giocata in euro" });
+      li.appendChild(imp);
+      li.appendChild(document.createTextNode(" €"));
+      var lq = el("label", null, "Quante volte ");
+      var qv = el("input", { type: "number", min: "0", max: "100", step: "1", inputmode: "numeric", value: String(s.quante), "aria-label": "Quante volte" });
+      lq.appendChild(qv);
       var per = el("select", { "aria-label": "Periodo" });
       [["giorno", "al giorno"], ["settimana", "a settimana"]].forEach(function (p) {
         var o = el("option", { value: p[0], text: p[1] });
         if (s.periodo === p[0]) o.selected = true;
         per.appendChild(o);
       });
-      inp.appendChild(lv);
+      inp.appendChild(li);
+      inp.appendChild(lq);
       inp.appendChild(per);
       var conv = el("p", { class: "conversione" });
       inp.appendChild(conv);
-      // Importo -> numero di biglietti (per difetto). Il motore riceve sempre {gioco, volte, periodo}.
+      // Schedina: biglietti per giocata = floor(importo / prezzo); il motore riceve {gioco, volte, periodo}
+      // con volte = quante volte x biglietti per giocata.
       function aggConv() {
-        var n = Math.floor((s.importo || 0) / g.prezzo);
-        s.volte = n;
-        var unita = n === 1 ? " biglietto" : " biglietti";
-        conv.textContent = n * g.prezzo === s.importo
-          ? "= " + num(n) + unita + " da " + eur(g.prezzo)
-          : "arrotondato a " + num(n) + unita + " (" + eur(n * g.prezzo) + "): un biglietto costa " + eur(g.prezzo);
+        var b = Math.floor((s.importo || 0) / g.prezzo);
+        s.volte = (s.quante || 0) * b;
+        var perTxt = s.periodo === "settimana" ? " a settimana" : " al giorno";
+        if (b < 1) {
+          conv.textContent = "L'importo minimo per giocata è " + eur(g.prezzo);
+          return;
+        }
+        var q = s.quante || 0;
+        var unita = s.volte === 1 ? " biglietto" : " biglietti";
+        var t = "= " + num(q) + (q === 1 ? " giocata" : " giocate") + " da " + eur(b * g.prezzo) + perTxt +
+          " → " + eur(q * b * g.prezzo) + perTxt + " (" + num(s.volte) + unita + " da " + eur(g.prezzo) + ")";
+        if (b * g.prezzo !== s.importo) t += "; arrotondato a " + num(b) + (b === 1 ? " biglietto" : " biglietti") + " da " + eur(g.prezzo) + " per giocata";
+        conv.textContent = t;
       }
       aggConv();
       inp.hidden = !s.on;
@@ -328,14 +341,20 @@
       }
       chk.addEventListener("change", function () {
         s.on = chk.checked;
-        if (s.on && !(s.volte > 0)) { s.importo = g.prezzo; volte.value = String(g.prezzo); aggConv(); }
+        if (s.on && !(s.volte > 0)) {
+          if (s.importo < g.prezzo) { s.importo = g.prezzo; imp.value = String(g.prezzo); }
+          if (!(s.quante > 0)) { s.quante = 1; qv.value = "1"; }
+          aggConv();
+        }
         card.className = "gioco" + (s.on ? " sel" : "");
         inp.hidden = !s.on;
         aggiornaSpesa();
       });
-      volte.addEventListener("input", function () { s.importo = intero(volte, 0, 1000); aggConv(); aggiornaSpesa(); });
-      volte.addEventListener("change", function () { volte.value = String(s.importo); });
-      per.addEventListener("change", function () { s.periodo = per.value; aggiornaSpesa(); });
+      imp.addEventListener("input", function () { s.importo = intero(imp, 0, 1000); aggConv(); aggiornaSpesa(); });
+      imp.addEventListener("change", function () { imp.value = String(s.importo); });
+      qv.addEventListener("input", function () { s.quante = intero(qv, 0, 100); aggConv(); aggiornaSpesa(); });
+      qv.addEventListener("change", function () { qv.value = String(s.quante); });
+      per.addEventListener("change", function () { s.periodo = per.value; aggConv(); aggiornaSpesa(); });
       box.appendChild(card);
     });
     aggiornaSpesa();
