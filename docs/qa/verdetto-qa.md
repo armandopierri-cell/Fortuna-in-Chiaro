@@ -233,3 +233,23 @@ Non restano violazioni del regolamento in carico ai team. App, BR, test, README 
 **Riserve, consigliate prima del push (circa 5 minuti in tutto)**: QA-017 e QA-020 (innovazione), QA-018 e QA-021 (business, governance).
 
 Se dopo questo riesame si modificano solo README, `stato-avanzamento.md`, `test-report.md`, `analisi-funzionale.md` o le note e i badge della presentazione, non serve un nuovo giro QA. Se si modifica `app/`, bisogna rieseguire `run-tests.ps1`. Se si modifica `.claude/` o `CLAUDE.md`, bisogna rieseguire `agents/sync.ps1`.
+
+## 7. Riesame 15:00 (c69aa32)
+
+| Campo | Valore |
+|---|---|
+| Versione revisionata | commit `c69aa32` rispetto a `e92fb39`; `git diff e92fb39 c69aa32 --stat`: `app/index.html` (+6/-2), `app/src/ui.js` (+85/-25 circa), `app/style.css` (+6), `app/tracciabilita.md` (+2) |
+| Ambito | Solo le modifiche UI richieste dall'utente: scelta dell'importo (al posto di "quante volte"), frase di confronto esplicito A/B nella schermata abitudine, linguaggio semplice al posto di "payout/valore atteso/seme", box "Quest'anno simulato (un caso)" vs "In media, su tantissimi anni", pulsante "Simula un altro anno" |
+
+### 7.1 Verifiche eseguite
+
+| Verifica | Esito | Evidenza |
+|---|---|---|
+| Test automatici | **OK** | `run-tests.ps1`: `RISULTATO: 40 passati, 0 falliti`, incluso il guardrail statico T2-V3 ("nessuna formula vietata... 5 file") |
+| T2-V3 nessun consiglio/giudizio nei testi nuovi | **OK** | Lettura diretta del diff: i nuovi testi ("Due biglietti reali... restituisce in media X centesimi", "Quest'anno hai perso X in più/meno della media: è il caso", "Restituisce in media... € ogni 100 € giocati") sono descrittivi, non prescrittivi. Nessuna formula tipo "conviene/dovresti/meglio". La scansione statica della suite (che copre `index.html`, `src/*.js`, `data/*.js`) resta verde dopo le modifiche |
+| T2-E4 i numeri vengono da GIOCHI/Motore, non scritti a mano | **OK** | Il confronto A/B usa `payoutDichiarato(g)` sui due oggetti gioco reali (`istantanea-5-a`/`-b`) letti da `G.giochi`, non costanti hardcoded. Il box "In media" e "Quest'anno simulato" derivano da `M.simulaAnno`, `M.perditaAttesa`, `r.perditaAnno` già calcolati dal motore. La nuova funzione `confrontoAnnoHtml` fa solo la differenza tra `t.perso` (esito della simulazione) e `r.perditaAnno` (esito del motore): nessun valore scritto a mano. "Simula un altro anno" introduce `semeAnno()` che somma un contatore (`state.altroAnno`) al seme esistente (demo o normale): il seme resta governato dalla logica esistente, non da un valore arbitrario nuovo |
+| Nessun file di prova nel repository | **OK** | `git status --porcelain` vuoto: working tree pulito, nessun file non tracciato o residuo di debug |
+
+### 7.2 Verdetto del riesame 15:00: **PASS**
+
+Le modifiche sono circoscritte alla UI richiesta, non toccano il motore né le tabelle dati, non introducono testi di consiglio/giudizio e non introducono numeri scritti a mano: tutti i valori mostrati restano derivati da `G.giochi` e da `M.*` (Motore). I 40 test automatici restano verdi (40/40) e il repository è pulito. Nessun nuovo rilievo bloccante o maggiore. Restano valide, invariate, le condizioni per il push già registrate nella sezione 6 (remote pubblico, conferma umana di consegna, README §9).
