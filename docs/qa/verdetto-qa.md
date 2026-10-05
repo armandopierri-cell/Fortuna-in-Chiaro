@@ -1,5 +1,7 @@
 # Verdetto QA pre-rilascio: "Fortuna in Chiaro" (Tema 02)
 
+> **Verdetto corrente (Riesame 14:20, commit `c485ab5`): PASS con riserva, condizionato ai soli punti in attesa dell'utente.** Vedi la sezione 5 "Riesame 14:20" in fondo. Le sezioni 1-4 restano come registro della review delle 14:15.
+
 | Campo | Valore |
 |---|---|
 | Data e ora review | 2026-10-05, 14:10-14:15 |
@@ -110,3 +112,66 @@ Legenda: Sì = conforme · No = non conforme · Rif. = con riserva · N.V. = non
 3. Nuovo giro QA, breve, su: README, `git status` pulito, `git remote -v`, test-report e defect-log aggiornati, durata della presentazione (R-10).
 
 Con queste condizioni il verdetto atteso è **PASS con riserva**; la riserva cade se in quel giro vengono chiusi anche QA-005, QA-007 e QA-008.
+
+---
+
+## 5. Riesame 14:20 (solo differenze)
+
+| Campo | Valore |
+|---|---|
+| Data e ora | 2026-10-05, 14:20 |
+| Versione revisionata | commit `c485ab5` (HEAD di `main`), `git status` pulito. Commit esaminati dopo la review delle 14:15: `e22b6ff`, `4a385b7`, `99454b4`, `c485ab5` (`git diff --stat 3be27c3 HEAD`: 12 file) |
+| Ambito | Solo QA-001, QA-003, QA-004, la presentazione v4 (R-09, R-10) e i punti in attesa dell'utente. `app/` non è cambiata da `3be27c3` |
+| Ripetizione dei test | `run-tests.ps1` → **41 passati, 0 falliti, exit 0** (14:20) |
+
+### 5.1 Esito dei rilievi rivisti
+
+| ID | Esito | Evidenza |
+|---|---|---|
+| QA-001 README (R-02, R-06, V-10) | **Chiuso, con un residuo minore (QA-016)** | `README.md` tracciato (`git ls-files`). Ho confrontato ogni percorso citato con `git ls-files`: `app/` (index.html, style.css, ARCHITETTURA.md, README.md, tracciabilita.md, data/giochi.js, data/quiz.js, src/motore.js, src/ui.js, tests/tests.html, motore.test.js, testi.test.js, run-tests.ps1), `agents/` (agents/*.md ×5, hooks ×3, skills/presentazioni-accenture/SKILL.md, reference.md, assets/template.html, settings.json, CLAUDE.md, sync.ps1, WORKFLOW.md), `docs/` (tutti i file elencati in idea, business, qa, governance), `.claude/`, `CLAUDE.md`, `.gitignore`: **esistono tutti**. La descrizione di `.gitignore` coincide con il file reale. Le spunte non supportate sono state tolte (§9 "Stato della consegna" è onesto). La mappa criterio → evidenza c'è (§6). **Unica eccezione**: `presentation/sezioni/` e `presentation/sezioni/business-case.html`, citati alle r.17 e r.49, **non esistono**: il file è stato cancellato nel commit `4a385b7`. Vedi QA-016 |
+| QA-003 `agents/` (H-04, R-04) | **Chiuso** | Confronto per hash di tutti i file di `.claude/` con `agents/`: identici. L'unico file assente in `agents/` è `.claude/settings.local.json`, escluso a ragione (gitignored, locale). Ci sono solo in `agents/`, come previsto: `CLAUDE.md` (hash identico al `CLAUDE.md` di radice), `sync.ps1`, `WORKFLOW.md`. Tutto committato, `git status` pulito. **Nota**: se si modifica `.claude/` o `CLAUDE.md` prima del push, va rieseguito `agents/sync.ps1` |
+| QA-007 workflow in `agents/` | **Chiuso** | `agents/WORKFLOW.md` presente e committato (`99454b4`), citato dal README §7 |
+| QA-004 TC-22 / DEF-001 (BR-11 Must) | **Chiuso** | `test-report.md`: TC-22 (ritest) **Pass** con evidenze (hook exit 2/0, scansione statica, 41/0), esito complessivo **24/24**, "Impatto sul verdetto Must" aggiornato. `defect-log.md`: DEF-001 **"Chiuso (ritestato)"**. Residuo minore: QA-018 |
+| QA-008 DEF-002 | **Aperto** (Maggiore, non bloccante) | `defect-log.md`: DEF-002 "Aperto", ritest solo parziale in headless. La prova in un browser reale non è stata fatta |
+| QA-012 Risk & Clarity Note (T2-D3 c) | **Aperto** (Minore) | La slide 06 v4 ha 6 righe (Semplificato, Non alterato, Lotto, Quiz didattico, Nessun consiglio, Se serve aiuto). L'ambiguità evitata è coperta di fatto (fonte del Lotto dichiarata, quiz inventato dichiarato), ma non c'è una voce con quel titolo. Il badge "Opzionale 14:05" non c'è più |
+
+### 5.2 Presentazione v4 (`presentation/index.html`)
+
+| Controllo | Esito | Evidenza |
+|---|---|---|
+| Struttura | Sì | 9 `<section class="slide">` parlate (01-09) e un'appendice di 9 slide (divisore 10 + A1-A8), tutte con note "(non parlata)" |
+| R-09 / C-09: i 3 deliverable del Tema 02 nella parte parlata | **Sì** | D1 "User Difficulty Statement · Deliverable 01" = slide 02 (r.268); D2 "Before/After Simplicity Evidence · Deliverable 02" = slide 05 (r.344); D3 "Risk & Clarity Note · Deliverable 03" = slide 06 (r.379). Tutte e tre stanno prima della chiusura (slide 09) |
+| R-10 / V-03: 5 minuti, demo compresa | **Sì** | Note del relatore: 01 10" + 02 25" + 03 20" + 04 2'30" (150") + 05 20" + 06 15" + 07 35" + 08 15" + 09 10" = **300" = 5'00"**. Gli intervalli sono contigui (0:00→5:00) e coincidono con la scaletta di testa (r.15-25). I passi della demo (0:55-3:25) sono anch'essi contigui. Riserva minore: la nota della demo prevede, se BR-17 viene approvato, "Pausa e Conto" al posto del passo 4 **oppure** 10" prima della chiusura. La seconda opzione porterebbe il totale a 5'10": va usata solo la prima (QA-017) |
+| R-05 struttura agentica | Sì | Slide 07 "Struttura agentica di sviluppo" (5 agenti, 2 verifiche umane, rules, skill, hook L4). Il commento duplicato "07" del giro precedente non c'è più |
+
+### 5.3 Nuovi rilievi (non bloccanti)
+
+| ID | Gravità | Riferimento | Rilievo | Azione | Owner |
+|---|---|---|---|---|---|
+| QA-016 | Minore | R-06, V-11 (README: percorsi verificabili) | Il `README.md` cita `presentation/sezioni/` (r.17) e `presentation/sezioni/business-case.html` (r.49), che non esistono più (cancellati in `4a385b7`). Inoltre r.27 attribuisce la "scansione statica dei testi" a `testi.test.js`, mentre la scansione che verifica davvero è in `run-tests.ps1` | Togliere i due riferimenti a `sezioni/`. Scrivere: "scansione statica in `run-tests.ps1`, controlli sui dati in `testi.test.js`". Lavoro di un minuto | governance |
+| QA-017 | Minore | R-10 | Nota della slide 04: l'opzione "10" prima della chiusura" per BR-17 fa sforare i 5'00" | Se BR-17 è "go", tenere solo "al posto del passo 4" | innovazione |
+| QA-018 | Minore | Coerenza interna | `test-report.md` r.7 ("Metodo di verifica") dice ancora "**38 test passati**", ma r.43 dice 41 | Allineare a 41 | business |
+| QA-019 | Minore | R-06 (README onesto *alla consegna*) | README §9 descrive lo stato prima di questo riesame ("Ultimo verdetto QA: FAIL", remote assente, push non eseguito). Al push sarà superato | Subito prima del push finale aggiornare §9: verdetto QA corrente, URL del repository, conferma umana registrata | governance |
+
+Restano aperti senza modifiche: QA-005 (tracciabilità BR → TC), QA-009, QA-010, QA-011, QA-013, QA-014 (`deliverable-register.md` non esiste; il README non lo cita più), QA-015. Sono tutti non bloccanti.
+
+### 5.4 In attesa dell'utente (fuori dal controllo dei team)
+
+| Punto | Regola | Stato | Cosa serve |
+|---|---|---|---|
+| QA-002 Remote e URL GitHub pubblico | R-01, R-11 | **In attesa dell'utente**: `git remote -v` è ancora vuoto | Creare il repository **pubblico**, `git remote add origin`, push di prova, verificare l'URL da una sessione non autenticata, poi riportarlo nel README §9 |
+| Verifica umana di consegna (QA-006) | CLAUDE.md "Verifica umana obbligatoria"; V-07 | **In attesa dell'utente**: `stato-avanzamento.md` r.27-28 dice "In attesa" | Registrare ora, decisore e "go al push" |
+| Go/no-go BR-17 "Pausa e Conto" (CR2) | CLAUDE.md (verifica umana sullo scope); QA-006 | **In attesa dell'utente**: `stato-avanzamento.md` r.26 e r.76 dicono "In attesa/Provvisoria" | Decidere e registrare. Se "go": BR-17 nella demo al posto del passo 4 (QA-017). Se "no-go": togliere flag e bottone, oppure dichiararli fuori scope; aggiornare TC-24 e la tracciabilità |
+
+### 5.5 Verdetto del riesame 14:20: **PASS con riserva, condizionato ai soli punti in attesa dell'utente**
+
+I bloccanti in carico ai team (QA-001, QA-003, QA-004) sono chiusi e committati in `c485ab5`. La presentazione rispetta R-09 e R-10 (5'00" esatti). I test sono verdi (41/0). Non ci sono violazioni del regolamento rimaste in carico ai team.
+
+**Condizioni per il push**, nessuna eccezione:
+1. QA-002: remote GitHub **pubblico** creato e URL verificato.
+2. Go/no-go BR-17 registrato in `stato-avanzamento.md`.
+3. Conferma umana di consegna registrata in `stato-avanzamento.md`.
+
+**Riserve, consigliate prima del push (circa 5 minuti, non bloccanti)**: QA-016 (percorso inesistente `presentation/sezioni/` nel README), QA-019 (§9 del README aggiornato con verdetto e URL), QA-018, QA-017. Prima della demo dal vivo: QA-008, cioè la prova di DEF-002 in un browser reale.
+
+Se dopo questo riesame si modifica `.claude/`, `CLAUDE.md`, `app/` o `presentation/`, bisogna rieseguire `agents/sync.ps1` e `run-tests.ps1`. Se le modifiche toccano qualcosa oltre README, stato-avanzamento e defect-log, serve un nuovo giro QA rapido.

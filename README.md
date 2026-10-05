@@ -14,7 +14,7 @@ atteso esatto e quiz prima/dopo. Non dà consigli né giudizi: solo numeri e sig
 
 ## 3. Presentazione
 
-`presentation/index.html` (sezioni in `presentation/sezioni/`): brand Accenture, soluzione,
+`presentation/index.html`: brand Accenture, soluzione,
 struttura agentica, demo compresa.
 
 ## 4. Test
@@ -46,7 +46,6 @@ agents/                            Struttura agentica consegnata (copia di .clau
 
 presentation/
 ├── index.html                     Slide Accenture
-└── sezioni/business-case.html     Sezione business case
 
 docs/
 ├── governance/stato-avanzamento.md   Decisioni, verifiche umane, rischi, piano residuo

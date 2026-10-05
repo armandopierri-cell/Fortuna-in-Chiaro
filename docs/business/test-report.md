@@ -4,7 +4,7 @@
 
 ## Metodo di verifica
 
-1. **Test automatici**: `powershell -ExecutionPolicy Bypass -File app\tests\run-tests.ps1` → **38 test passati, 0 falliti** (copre `src/motore.js`: spesa, payout, probabilità, valore atteso, simulazione, quiz, riepilogo vincite, simulazione folla, scala fisica, soglia, conto biglietto).
+1. **Test automatici**: `powershell -ExecutionPolicy Bypass -File app\tests\run-tests.ps1` → **41 test passati, 0 falliti** (copre `src/motore.js` e la scansione dei testi T2-V3: spesa, payout, probabilità, valore atteso, simulazione, quiz, riepilogo vincite, simulazione folla, scala fisica, soglia, conto biglietto).
 2. **Esecuzione reale end-to-end in Microsoft Edge headless** (`msedge --headless --virtual-time-budget --dump-dom`): un harness carica gli stessi file `app/data/*.js`, `app/src/motore.js`, `app/src/ui.js` nello stesso markup di `app/index.html` e simula i click reali dell'utente (Inizia → quiz prima → abitudine/soglia → simulazione 365 giorni → "Dalla parte del banco" → schede → quiz dopo → cruscotto → pausa con `?pausa=1`), catturando l'HTML effettivamente renderizzato e gli errori JS (`window.onerror`). Scelta per restare entro il freeze senza installare Playwright/Selenium (non disponibili nell'ambiente).
 3. **Lettura integrale del codice sorgente** (`app/index.html`, `app/src/ui.js`, `app/src/motore.js`, `app/data/quiz.js`, `app/data/giochi.js`, `.claude/hooks/guard.ps1`, `.claude/hooks/post-edit-tests.ps1`) con ricerca mirata (grep) di imperativi/consigli (BR-11) e di chiamate di rete/chiavi (BR-12).
 4. **Nota sulla concorrenza**: durante l'esecuzione dell'UAT, il Team Sviluppo ha aggiornato `app/` (nuove funzionalità BR-13…BR-17); i test sono stati ripetuti sulla versione finale dei file.
