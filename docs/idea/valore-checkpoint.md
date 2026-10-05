@@ -37,7 +37,7 @@ Nota: §0 di `ricerca-azzardo.md` riporta "1.060–1.460 €"; il calcolo esatto
 3. **Valore su scala**: mostriamo nel pitch la stima dei 150 milioni € (dichiarata come stima nostra) o restiamo solo sui numeri di Salvatore?
 
 ## 5. Bozza del pitch (5 minuti, demo compresa)
-1. **0:00 Titolo** — "Quanto costa sperare?": Fortuna in Chiaro, Tema 02.
+1. **0:00 Titolo** — "Fortuna in Chiaro", Tema 02.
 2. **0:15 Salvatore (Deliverable 01)** — chi è, cosa crede, 3.650 € l'anno, il 23% del reddito.
 3. **0:45 Il problema** — 18 mln di giocatori, 21,5 mld € persi nel 2024 (ISS, ADM).
 4. **1:05 La soluzione** — simulatore + 3 concetti + quiz; solo numeri, nessun consiglio.

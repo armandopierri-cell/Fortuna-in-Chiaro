@@ -22,19 +22,19 @@ Navigazione: flusso lineare 1→7. "Avanti" valida lo stato corrente prima di pr
 
 ## 2. Giochi selezionabili (nomi generici, dati da `ricerca-azzardo.md`)
 
+**Aggiornamento (checkpoint 14:30, decisione utente)**: il Lotto (ex G3 ambo, G4 terno) è tolto dal perimetro dell'app. Restano solo le due lotterie istantanee da 5 €, modello A e modello B. Il simulatore dei "ritardatari" resta come concetto didattico autonomo nella scheda "estrazioni indipendenti" (schermata 5, Scheda C), non più agganciato a un gioco Lotto selezionabile.
+
 | ID | Nome in app | Costo | Payout | Prob. premio massimo | Premio massimo | Fonte |
 |---|---|---|---|---|---|---|
 | G1 | Lotteria istantanea da 5 € (modello A) | 5 € | 71,2% | 1 su 12.480.000 | 500.000 € | §1.1 |
 | G2 | Lotteria istantanea da 5 € (modello B) | 5 € | 60,1% | 1 su 7.680.000 | 500.000 € | §1.2 |
-| G3 | Lotto: ambo su una ruota | 1 € a puntata | 62,4% | 1 su 400,5 | 250 € (250× la posta) | §2 |
-| G4 | Lotto: terno su una ruota | 1 € a puntata | 38,3% | 1 su 11.748 | 4.500 € (4.500× la posta) | §2 |
 
-Ogni scheda gioco in app mostra costo, payout, probabilità del premio massimo e la citazione fonte ("ADM, struttura premi [modello], 2024" per G1/G2; "calcolo matematico standard sul regolamento Lotto" per G3/G4), coerente con BR-09.
+Ogni scheda gioco in app mostra costo, payout, probabilità del premio massimo e la citazione fonte ("ADM, struttura premi [modello], 2024"), coerente con BR-09.
 
 ## 3. Schermate — elementi, input, output, calcoli, stati vuoti/errori
 
 ### 1. Benvenuto
-- **Elementi**: titolo "Quanto ti costa sperare?"; sottotitolo "Un simulatore per capire, in 10 secondi, cosa succede in un anno di gioco quotidiano."; toggle "Modalità demo" (BR-10, default: spento); pulsante "Inizia".
+- **Elementi**: titolo **"Fortuna in Chiaro"** (correzione nome progetto, checkpoint 14:30); sottotitolo "Un anno di gioco in 10 secondi, con le probabilità ufficiali."; toggle "Modalità demo" (BR-10, default: spento); pulsante "Inizia".
 - **Input**: `modalitaDemo` (booleano, default `false`). Se `true`: seme RNG fisso dichiarato e animazione schermata 4 accelerata (≈3 secondi invece di ≈10).
 - **Output/calcolo**: nessuno.
 - **Stati**: nessuno stato vuoto; pulsante "Inizia" sempre attivo.
@@ -48,7 +48,7 @@ Ogni scheda gioco in app mostra costo, payout, probabilità del premio massimo e
   2. "Qual è la probabilità di vincere il premio massimo (500.000 €) con una lotteria istantanea da 5 € come il modello A?"
      A) 1 su 1.000  B) 1 su 100.000  C) 1 su 1.000.000  **D) 1 su 12.480.000**
      Spiegazione: "La tabella premi ufficiale ADM indica 4 biglietti vincenti su 49.920.000 emessi: 1 su 12.480.000."
-  3. "Un numero che non esce al Lotto da 100 estrazioni, alla prossima estrazione ha…"
+  3. "In un'estrazione numerica, un numero che non esce da 100 estrazioni, alla prossima estrazione ha…" (domanda generica su estrazioni indipendenti, non legata a un gioco specifico presente nell'app — vedi aggiornamento §2)
      A) più probabilità di uscire  B) meno probabilità di uscire  **C) la stessa probabilità di sempre**  D) dipende dalla ruota
      Spiegazione: "Ogni estrazione è indipendente dalle precedenti: la probabilità non cambia."
 - **Input**: 1 scelta per domanda, nessun default (obbligatorio rispondere).
@@ -56,7 +56,7 @@ Ogni scheda gioco in app mostra costo, payout, probabilità del premio massimo e
 - **Stati vuoti/errori**: "Avanti" disabilitato finché non sono state selezionate tutte e 3 le risposte; nessun messaggio di errore bloccante.
 
 ### 3. La mia abitudine
-- **Elementi**: elenco dei 4 giochi (G1-G4) con checkbox di selezione; per ogni gioco selezionato, campo numerico "quante volte al giorno"; riepilogo live spesa giornaliera/mensile/annua; fonte citata sotto ogni gioco (BR-09).
+- **Elementi**: elenco dei 2 giochi (G1, G2) con checkbox di selezione; per ogni gioco selezionato, campo numerico "quante volte al giorno"; riepilogo live spesa giornaliera/mensile/annua; fonte citata sotto ogni gioco (BR-09).
 - **Input**: `selezione[]` (multi-select, default: solo G1 selezionato); `frequenzaGiorno` per gioco selezionato (intero, 0-20, default G1 = 2/giorno → 10 €/giorno, persona Salvatore).
 - **Formula**:
   - `spesaGiornaliera = Σ (costo_i × frequenzaGiorno_i)`
@@ -79,7 +79,7 @@ Ogni scheda gioco in app mostra costo, payout, probabilità del premio massimo e
 - **Elementi**: 3 schede, ciascuna con titolo, testo breve e un mini-esperimento interattivo; fonte citata in calce a ogni scheda (BR-09).
 - **Scheda A — "La probabilità, vista"** (fonte §1.1): "Immagina 12.480.000 biglietti allineati: solo 4 vincono il premio massimo. È come scegliere a caso una sola persona tra tutti gli abitanti di una grande città europea." Mini-esperimento: griglia di punti (es. 10.000 puntini), un cursore "ingrandisci" che mostra quante griglie come questa servono per trovare un puntino vincente (1.248 griglie).
 - **Scheda B — "Perché 'in media' si perde"** (fonte §1.1/§1.2): "Il valore atteso è la media di ciò che torna indietro se giochi tante volte. Su un biglietto con payout 71,2%: ogni 100 € giocati, in media 71,20 € tornano indietro, 28,80 € restano al banco." Mini-esperimento: slider "numero di giocate" (10 / 100 / 1.000 / 10.000) che aggiorna spesa totale e vincita attesa totale, mostrando la convergenza verso il payout dichiarato.
-- **Scheda C — "I ritardatari non esistono"** (fonte §2): "Ogni estrazione del Lotto è indipendente dalle precedenti: un numero fermo da 100 estrazioni ha la stessa probabilità di uscire di uno uscito ieri." Mini-esperimento: simulatore con seme fisso che lancia estrazioni pseudo-casuali e mostra che la frequenza di uscita di un numero "ritardatario" resta costante nel tempo (non aumenta).
+- **Scheda C — "I ritardatari non esistono"** (fonte §2; concetto generale di estrazioni indipendenti, non legato a un gioco specifico presente nell'app — aggiornamento checkpoint 14:30): "Ogni estrazione numerica è indipendente dalle precedenti: un numero fermo da 100 estrazioni ha la stessa probabilità di uscire di uno uscito ieri." Mini-esperimento: simulatore con seme fisso che lancia estrazioni pseudo-casuali e mostra che la frequenza di uscita di un numero "ritardatario" resta costante nel tempo (non aumenta).
 - **Input**: interazione libera con gli slider dei mini-esperimenti (nessun valore obbligatorio per procedere).
 - **Output**: nessun dato salvato in stato.
 - **Stati vuoti/errori**: nessuno; "Avanti" sempre attivo.

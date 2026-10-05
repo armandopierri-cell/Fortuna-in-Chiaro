@@ -17,11 +17,8 @@
     return g;
   }
 
-  // Costo di una giocata: prezzo del biglietto o posta scelta (lotto).
-  function costoGiocata(gioco, posta) {
-    if (gioco.tipo === "lotto") return typeof posta === "number" && posta > 0 ? posta : 1;
-    return gioco.prezzo;
-  }
+  // Costo di una giocata: prezzo del biglietto.
+  function costoGiocata(gioco) { return gioco.prezzo; }
 
   function giocateAlGiorno(voce) {
     var v = Number(voce.volte) || 0;
@@ -34,32 +31,27 @@
   function spesa(abitudine) {
     var giorno = 0;
     (abitudine.voci || []).forEach(function (voce) {
-      giorno += giocateAlGiorno(voce) * costoGiocata(trovaGioco(voce.gioco), voce.posta);
+      giorno += giocateAlGiorno(voce) * costoGiocata(trovaGioco(voce.gioco));
     });
     var anno = spesaAnnuaDaGiornaliera(giorno);
     return { giorno: giorno, mese: anno / 12, anno: anno };
   }
 
   // ---- Valore atteso -----------------------------------------------------
-  function valoreAtteso(giocoId, posta) {
+  function valoreAtteso(giocoId) {
     var g = trovaGioco(giocoId);
-    var costo = costoGiocata(g, posta);
-    var ritorno;
-    if (g.tipo === "lotto") {
-      ritorno = (g.moltiplicatore * costo) / g.probabilitaUnoSu;
-    } else {
-      var montepremi = g.premi.reduce(function (s, p) { return s + p.premio * p.vincenti; }, 0);
-      ritorno = montepremi / g.emissione;
-    }
+    var costo = costoGiocata(g);
+    var montepremi = g.premi.reduce(function (s, p) { return s + p.premio * p.vincenti; }, 0);
+    var ritorno = montepremi / g.emissione;
     return { costo: costo, ritorno: ritorno, perEuro: ritorno / costo };
   }
 
-  function payout(giocoId) { return valoreAtteso(giocoId, 1).perEuro; }
+  function payout(giocoId) { return valoreAtteso(giocoId).perEuro; }
 
   function perditaAttesa(abitudine) {
     var spesaGiorno = 0, ritornoGiorno = 0;
     (abitudine.voci || []).forEach(function (voce) {
-      var va = valoreAtteso(voce.gioco, voce.posta);
+      var va = valoreAtteso(voce.gioco);
       var n = giocateAlGiorno(voce);
       spesaGiorno += n * va.costo;
       ritornoGiorno += n * va.ritorno;
@@ -80,25 +72,21 @@
   }
 
   // ---- Probabilita' ------------------------------------------------------
-  function probabilitaPremioMax(giocoId, posta) {
+  function probabilitaPremioMax(giocoId) {
     var g = trovaGioco(giocoId);
-    if (g.tipo === "lotto") {
-      return { premio: g.moltiplicatore * costoGiocata(g, posta), p: 1 / g.probabilitaUnoSu, unoSu: g.probabilitaUnoSu };
-    }
     var max = g.premi.reduce(function (a, b) { return b.premio > a.premio ? b : a; });
     return { premio: max.premio, p: max.vincenti / g.emissione, unoSu: g.emissione / max.vincenti };
   }
 
   function probabilitaVincita(giocoId) {
     var g = trovaGioco(giocoId);
-    if (g.tipo === "lotto") return 1 / g.probabilitaUnoSu;
     var tot = g.premi.reduce(function (s, p) { return s + p.vincenti; }, 0);
     return tot / g.emissione;
   }
 
   function anniAttesiPremioMax(abitudine) {
     return (abitudine.voci || []).map(function (voce) {
-      var pm = probabilitaPremioMax(voce.gioco, voce.posta);
+      var pm = probabilitaPremioMax(voce.gioco);
       var giocateAnno = giocateAlGiorno(voce) * GIORNI_ANNO;
       return {
         gioco: voce.gioco,
@@ -134,11 +122,7 @@
   // Campionatore veloce: u in [0,1) -> premio. Stessa mappatura di estraiPremio (stesse estrazioni
   // a parita' di seme), ma senza ricerca del gioco a ogni giocata e con uscita immediata per i
   // biglietti non vincenti (~76% dei casi) e ricerca binaria sulla cumulata.
-  function campionatore(g, posta) {
-    if (g.tipo === "lotto") {
-      var pL = 1 / g.probabilitaUnoSu, vL = g.moltiplicatore * costoGiocata(g, posta);
-      return function (u) { return u < pL ? vL : 0; };
-    }
+  function campionatore(g) {
     var c = cumulata(g), n = c.length;
     var soglie = c.map(function (x) { return x.soglia; }), premi = c.map(function (x) { return x.premio; });
     var pTot = soglie[n - 1];
@@ -150,10 +134,9 @@
     };
   }
 
-  function estraiPremio(giocoId, rnd, posta) {
+  function estraiPremio(giocoId, rnd) {
     var g = trovaGioco(giocoId);
     var u = rnd();
-    if (g.tipo === "lotto") return u < 1 / g.probabilitaUnoSu ? g.moltiplicatore * costoGiocata(g, posta) : 0;
     var c = cumulata(g);
     for (var i = 0; i < c.length; i++) if (u < c[i].soglia) return c[i].premio;
     return 0;
@@ -173,14 +156,9 @@
   // quotaRimborso = vincite pari al costo / vincite totali;
   // quotaPiccole  = vincite fino a 2 x costo (rimborso INCLUSO, cumulata) / vincite totali;
   // quotaSoloPiccole = vincite con costo < premio <= 2 x costo / vincite totali; quotaReali = il resto.
-  function riepilogoVincite(giocoId, posta) {
+  function riepilogoVincite(giocoId) {
     var g = trovaGioco(giocoId);
-    if (g.tipo === "lotto") {
-      // al lotto l'unica vincita paga moltiplicatore x posta: sempre "reale" secondo la definizione
-      return { quotaBigliettiVincenti: 1 / g.probabilitaUnoSu, quotaRimborso: 0, quotaPiccole: 0,
-        quotaSoloPiccole: 0, quotaReali: 1, vincenti: null, emissione: null };
-    }
-    var costo = costoGiocata(g, posta), conta = { rimborso: 0, piccole: 0, reali: 0 }, tot = 0;
+    var costo = costoGiocata(g), conta = { rimborso: 0, piccole: 0, reali: 0 }, tot = 0;
     g.premi.forEach(function (p) { conta[classeVincita(p.premio, costo)] += p.vincenti; tot += p.vincenti; });
     return {
       quotaBigliettiVincenti: tot / g.emissione,
@@ -209,12 +187,12 @@
   }
 
   // ---- Pausa e Conto (BR-17, CR2): i numeri di un singolo biglietto -----
-  function contoBiglietto(giocoId, posta) {
-    var va = valoreAtteso(giocoId, posta), pm = probabilitaPremioMax(giocoId, posta);
+  function contoBiglietto(giocoId) {
+    var va = valoreAtteso(giocoId), pm = probabilitaPremioMax(giocoId);
     return {
       costo: va.costo,
       perditaMediaPerBiglietto: va.costo - va.ritorno,
-      quotaRimborso: riepilogoVincite(giocoId, posta).quotaRimborso,
+      quotaRimborso: riepilogoVincite(giocoId).quotaRimborso,
       unoSu: pm.unoSu,
       stadi: scalaFisica(pm.unoSu).stadi
     };
@@ -267,7 +245,7 @@
   function preparaVoci(abitudine) {
     return (abitudine.voci || []).map(function (voce) {
       var g = trovaGioco(voce.gioco);
-      return { voce: voce, id: g.id, costo: costoGiocata(g, voce.posta), estrai: campionatore(g, voce.posta) };
+      return { voce: voce, id: g.id, costo: costoGiocata(g), estrai: campionatore(g) };
     });
   }
 
@@ -307,10 +285,11 @@
   }
 
   // ---- Simulatore dei "ritardatari" --------------------------------------
+  // Concetto, non gioco selezionabile: un'estrazione di 5 numeri su 90, come nel Lotto.
   // Estrae n volte 5 numeri distinti su 90; misura quante volte "numero" esce in generale
   // e quante volte esce quando e' in ritardo da almeno ritardoMinimo estrazioni.
   function simulaRitardatari(seme, n, numero, ritardoMinimo) {
-    var L = dati().lotto;
+    var L = dati().estrazioni;
     var bersaglio = numero || L.numeri;
     var soglia = ritardoMinimo === undefined ? 100 : ritardoMinimo;
     var rnd = creaPRNG(seme);

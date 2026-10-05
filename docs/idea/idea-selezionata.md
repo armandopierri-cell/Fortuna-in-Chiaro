@@ -15,7 +15,7 @@ Un simulatore educativo che mostra a chi gioca ogni giorno **quanto costa davver
 **Salvatore, 52 anni, autista, circa 1.300 € al mese.** Ogni giorno spende circa 10 € tra lotterie istantanee e lotto: "prima o poi tocca a me", "quel numero è in ritardo, deve uscire". Non ha mai fatto il conto di quanto spende in un anno, non sa che probabilità ha di vincere il premio massimo e crede che un numero "ritardatario" sia più probabile. **Difficoltà**: bassa alfabetizzazione finanziaria e statistica su una spesa quotidiana che pesa sul suo budget. **Perché è rilevante**: il gioco pesa di più su redditi e titoli di studio bassi (dati in `ricerca-azzardo.md`).
 
 ## Caso d'uso (cosa sviluppiamo)
-1. **Benvenuto** — "Quanto ti costa sperare?". Tono non giudicante.
+1. **Benvenuto** — "Fortuna in Chiaro" (nome del progetto, scelto dall'utente). Tono non giudicante.
 2. **Quiz prima** (3 domande a scelta multipla, punteggio registrato):
    - quanto spendi in un anno giocando 10 € al giorno;
    - che probabilità hai di vincere il premio massimo di un biglietto;

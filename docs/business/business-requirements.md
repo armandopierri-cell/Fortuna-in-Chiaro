@@ -7,13 +7,13 @@
 ---
 
 ## BR-01 — Benvenuto e tono
-**Descrizione**: la schermata iniziale presenta lo strumento ("Quanto ti costa sperare?") con tono educativo e non giudicante, senza riferimenti a marchi commerciali di gioco.
+**Descrizione**: la schermata iniziale presenta lo strumento con il titolo **"Fortuna in Chiaro"** (nome del progetto, correzione utente) e un sottotitolo educativo e non giudicante, senza riferimenti a marchi commerciali di gioco.
 **Motivazione di business**: prima impressione corretta sul tema delicato; evita che l'utente si senta giudicato e abbandoni.
 **Priorità**: Must.
 **Vincolo di tema**: T2-V3 (vietato dare consigli/giudizi), deliverable T2-E1 (User Difficulty Statement).
 
 **Criteri di accettazione**
-- Dato che l'utente apre `app/index.html`, quando la pagina si carica, allora è visibile un titolo/sottotitolo che richiama "quanto costa sperare" senza nominare marchi commerciali di gioco.
+- Dato che l'utente apre `app/index.html`, quando la pagina si carica, allora è visibile il titolo **"Fortuna in Chiaro"** con un sottotitolo che richiama lo scopo educativo dello strumento, senza nominare marchi commerciali di gioco.
 - Dato il testo di benvenuto, quando viene letto, allora non contiene imperativi di giudizio ("non dovresti", "è sbagliato") né consigli ("dovresti smettere").
 
 ---
@@ -32,7 +32,7 @@
 ---
 
 ## BR-03 — La mia abitudine (scelta giochi e frequenza → spesa giorno/mese/anno)
-**Descrizione**: l'utente sceglie uno o più giochi (lotteria istantanea da 5€, da 10€ "da fonte" — **segnalato**: nessuna tabella ufficiale reperita per il taglio da 10€, vedi `ricerca-azzardo.md` §1 nota finale e §7 — oppure lotto) e la frequenza (volte al giorno/settimana); l'app calcola spesa giornaliera, mensile, annuale.
+**Descrizione**: l'utente sceglie uno o più giochi tra le due lotterie istantanee da 5€ (modello A, modello B) e la frequenza (volte al giorno/settimana); l'app calcola spesa giornaliera, mensile, annuale. **Aggiornamento (checkpoint 14:30, decisione utente)**: il Lotto (G3 ambo, G4 terno) è tolto dal perimetro dell'app; restano solo le due lotterie istantanee da 5 €. Il riferimento al biglietto da 10€ "da fonte" non verificata resta solo come esempio di etichettatura di stima (BR-09), non come gioco effettivamente proposto.
 **Motivazione di business**: rende concreta e personale la spesa di Salvatore, base per la simulazione.
 **Priorità**: Must.
 **Vincolo di tema**: T2-V1 (simulazione di una scelta quotidiana), T2-E4 (nessun marchio commerciale, struttura premi ufficiale citata come fonte).
@@ -40,8 +40,8 @@
 **Criteri di accettazione**
 - Dato che l'utente seleziona "lotteria istantanea da 5€" con frequenza 2 volte al giorno, quando l'app calcola, allora mostra spesa giornaliera **10 €**, mensile **≈ 304,17 €** (10×365/12), annuale **3.650 €** (10×365).
 - Dato un'altra combinazione (es. 1 biglietto da 5€ al giorno), quando calcolata, allora la spesa annua è **1.825 €** (5×365), verificabile a mano.
-- Dato il biglietto da 10€ non ancora coperto da una tabella ufficiale completa, quando l'app lo propone, allora il testo dichiara esplicitamente "stima, non tabella ufficiale completa" (coerente con la nota in `ricerca-azzardo.md` §1).
 - Dato nessun gioco con marchio commerciale reale, quando l'utente vede le opzioni, allora i nomi sono generici ("lotteria istantanea modello A/B") con ADM citata come fonte della struttura premi.
+- Dato il perimetro aggiornato al checkpoint delle 14:30, quando l'utente apre la schermata "La mia abitudine", allora trova solo le due lotterie istantanee da 5€ (modello A, modello B) come giochi selezionabili: nessuna opzione Lotto (ambo/terno) è presente.
 
 ---
 
@@ -67,7 +67,7 @@
 
 **Criteri di accettazione**
 - Dato la scheda "probabilità", quando l'utente la apre, allora vede una rappresentazione visiva di "1 su 12.480.000" (es. proporzione, griglia) riferita al premio massimo del modello A (fonte §1.1).
-- Dato la scheda "estrazioni indipendenti", quando l'utente lancia il simulatore dei ritardatari per un numero "in ritardo da 100 estrazioni", allora la probabilità mostrata di uscita alla prossima estrazione resta uguale a quella di un numero appena uscito (principio di indipendenza, `ricerca-azzardo.md` §2 — dichiarato come principio matematico standard, non attribuito a uno studio specifico).
+- Dato la scheda "estrazioni indipendenti" (concetto generale di indipendenza statistica, non legato a un gioco specifico tolto dal perimetro — **aggiornamento checkpoint 14:30**: il Lotto non è più un gioco selezionabile nell'app, il simulatore dei ritardatari resta come mini-esperimento didattico autonomo), quando l'utente lancia il simulatore dei ritardatari per un numero "in ritardo da 100 estrazioni", allora la probabilità mostrata di uscita alla prossima estrazione resta uguale a quella di un numero appena uscito (principio di indipendenza, `ricerca-azzardo.md` §2 — dichiarato come principio matematico standard, non attribuito a uno studio specifico).
 - Dato la scheda "valore atteso", quando l'utente interagisce, allora viene mostrato un esempio numerico (es. "su 100 € giocati nel modello A, in media ne tornano 71,2 €, cioè ne restano persi 28,8 €", fonte §1.1).
 
 ---
@@ -220,14 +220,14 @@
 
 ---
 
-## BR-17 — CR2: "Pausa e Conto" (go/no-go al checkpoint delle 14:05)
+## BR-17 — CR2: "Pausa e Conto"
 **Descrizione**: un tasto "Sto per comprare un biglietto" avvia una pausa di 30 secondi durante la quale l'app mostra i numeri specifici del biglietto scelto: perdita media attesa su quella giocata, quota delle vincite di quel gioco che sono solo rimborso (BR-13), e la probabilità del premio massimo tradotta in scala fisica (BR-15). Al termine, il messaggio "La scelta è tua" chiude la pausa senza indicare una decisione.
 **Motivazione di business**: change request CR2, approvata dall'utente come versione educativa (non clinica) di un intervento nel momento della scelta; rinforza la decisione informata richiesta dal Tema 02 senza diventare un esercizio contro l'impulso o un'indicazione di cosa fare (T2-V3, BR-11).
-**Priorità**: Could — **condizionata a un go/no-go esplicito dell'utente al checkpoint delle 14:05**; se non approvata o se il tempo manca, la funzionalità resta fuori dal perimetro MVP senza impatto sui Must.
+**Priorità**: Should — **decisione dell'utente al checkpoint delle 14:30**: la funzionalità è attiva di default (non più dietro un flag opzionale `?pausa=1`); resta Should (non Must) perché non è il cuore della simulazione Before/After, ma deve essere presente e funzionante nel perimetro consegnato.
 **Vincolo di tema**: T2-V3 (nessuna indicazione su cosa fare, solo numeri), coerente con BR-11, BR-13, BR-15.
 
 **Criteri di accettazione**
-- Dato il go/no-go dell'utente al checkpoint delle 14:05, quando l'esito è "go", allora il tasto "Sto per comprare un biglietto" è presente nell'app e la funzionalità è testata; quando l'esito è "no-go" o il checkpoint non viene raggiunto in tempo, allora BR-17 resta non implementato e questo non blocca il verdetto sui Must.
-- Dato il tasto "Sto per comprare un biglietto" attivato (caso "go"), quando la pausa parte, allora dura 30 secondi e mostra: perdita media attesa per quella giocata, quota di vincite rimborso/piccole per quel gioco (coerente con BR-13), probabilità del premio massimo in scala fisica (coerente con BR-15).
+- Dato l'app aperta senza alcun parametro opzionale, quando l'utente arriva alla schermata della simulazione (schermata 4), allora il tasto "Sto per comprare un biglietto" è presente e attivo di default, senza necessità di flag o parametro d'attivazione.
+- Dato il tasto "Sto per comprare un biglietto" attivato, quando la pausa parte, allora dura 30 secondi e mostra: perdita media attesa per quella giocata, quota di vincite rimborso/piccole per quel gioco (coerente con BR-13), probabilità del premio massimo in scala fisica (coerente con BR-15).
 - Dato il termine della pausa di 30 secondi, quando l'app mostra il messaggio finale, allora il testo è "La scelta è tua" (o equivalente neutro), senza alcuna indicazione su cosa fare, coerente con BR-11/L4.
 - Dato il testo mostrato durante la pausa, quando scansionato dall'hook L4 e dal test automatico (BR-11), allora non contiene formule da consiglio o giudizio.

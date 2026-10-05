@@ -67,45 +67,11 @@ window.GIOCHI = {
         sezione: "ricerca-azzardo.md §1.2",
         affidabilita: "UFF"
       }
-    },
-    {
-      id: "lotto-ambo",
-      tipo: "lotto",
-      nome: "Lotto: ambo su una ruota",
-      prezzo: null, // la posta la sceglie l'utente (campo "posta" nella voce dell'abitudine)
-      probabilitaUnoSu: 400.5,
-      moltiplicatore: 250,
-      dichiarati: { payout: 0.624 },
-      fonte: {
-        ente: "Calcolo combinatorio standard sul regolamento del Lotto",
-        descrizione: "Probabilita' e quota pagata; non ancora riscontrate riga per riga sulla pagina ADM",
-        url: "https://www.adm.gov.it/portale/en/-/lotto_note-note-informative-sulle-probabilita-di-vincita",
-        sezione: "ricerca-azzardo.md §2",
-        affidabilita: "TERZI",
-        verificatoSuAdm: false
-      }
-    },
-    {
-      id: "lotto-terno",
-      tipo: "lotto",
-      nome: "Lotto: terno su una ruota",
-      prezzo: null,
-      probabilitaUnoSu: 11748,
-      moltiplicatore: 4500,
-      dichiarati: { payout: 0.383 },
-      fonte: {
-        ente: "Calcolo combinatorio standard sul regolamento del Lotto",
-        descrizione: "Probabilita' e quota pagata; non ancora riscontrate riga per riga sulla pagina ADM",
-        url: "https://www.adm.gov.it/portale/en/-/lotto_note-note-informative-sulle-probabilita-di-vincita",
-        sezione: "ricerca-azzardo.md §2",
-        affidabilita: "TERZI",
-        verificatoSuAdm: false
-      }
     }
   ],
-  // Regola del Lotto per il simulatore dei ritardatari: 5 numeri estratti su 90 per ruota.
-  // Coerente con l'ambo 1 su 400,5 = C(90,2)/C(5,2) (ricerca-azzardo.md §2).
-  lotto: { numeri: 90, estratti: 5, sezione: "ricerca-azzardo.md §2" },
+  // Simulatore dei ritardatari (concetto, non gioco selezionabile): un'estrazione di 5 numeri
+  // su 90, come nel Lotto (ricerca-azzardo.md §2).
+  estrazioni: { numeri: 90, estratti: 5, sezione: "ricerca-azzardo.md §2" },
   // Scala Italia (BR-14, L2): raccolta e perdita netta (spesa = raccolta - vincite) del gioco nel 2024.
   italia2024: {
     anno: 2024,

@@ -2,7 +2,10 @@
 
 > File di passaggio tra sessioni: chi riprende il lavoro legge prima questo. Aggiornarlo a ogni decisione o milestone.
 
-**Freeze: 15:30 del 05/10/2026** (deroga concessa dai docenti, comunicata dall'utente; il regolamento in 00_input/ riporta ancora 15:00). Ultimo aggiornamento: 14:10 (governance).
+**Freeze: 15:30 del 05/10/2026** (deroga concessa dai docenti, comunicata dall'utente; il regolamento in 00_input/ riporta ancora 15:00). Ultimo aggiornamento: 14:23 (governance).
+
+## Checkpoint 14:23 (governance)
+Ora corrente 14:23. Tempo residuo al freeze: **1 h 07 min**. `git status`: solo `docs/qa/verdetto-qa.md` modificato e non committato (riesame 14:20, verdetto PASS con riserva); nessun remote GitHub configurato. Ultimo commit `c485ab5`. Vedi sintesi completa consegnata all'utente in risposta diretta; nessuna nuova decisione presa in questo checkpoint, solo fotografia dello stato.
 
 ## Decisioni prese
 | Ora | Decisione | Chi |
@@ -17,13 +20,14 @@
 | 12:55 | Checkpoint idea e valore alle 14:05 con utente: demo end-to-end, stima del valore (docs/idea/valore-checkpoint.md), decisione sui tagli di perimetro | orchestratore |
 | ~13:10 | **CR approvate dall'utente**: CR1 "Vuoi parlarne con qualcuno?" (soglia di spesa scelta dall'utente → numero verde e messaggio a persona di fiducia, inviato solo dall'utente) come **BR-16 Should**; CR2 "Pausa e Conto" (versione educativa del craving) come **BR-17 Could**, go/no-go al checkpoint delle 14:05. L'architettura multi-agente runtime proposta (Analista, Coach, Craving, Debiti, Barriere, Escalation) va **solo come slide di visione "Fase 2"**, separata dalla struttura agentica di sviluppo. Dettaglio in docs/idea/idea-selezionata.md | utente |
 | ~13:10 | **Deroga sul freeze: push entro le 15:30** (comunicata dall'utente) | utente |
+| 14:30 | BR-17 Pausa e Conto attivo di default; Lotto (ambo/terno) rimosso dall'app; stima valore ~150 mln € confermata; demo taratura a prodotto finito entro 5'00" | utente |
 
 ## Verifiche umane
 | Ora | Punto | Esito |
 |---|---|---|
 | 12:45 | Scelta dell'idea | **APPROVATA dall'utente**: "Fortuna in Chiaro" (nome scelto dall'utente tra 4 proposte). Scheda: docs/idea/idea-selezionata.md |
 | ~13:00–13:10 | Leve di innovazione (L1–L4) e CR (CR1, CR2) | **APPROVATE dall'utente**: dettaglio in docs/idea/idea-selezionata.md (BR-13..BR-17) |
-| ~14:20 | Checkpoint idea e valore (demandato al rientro utente) | **In attesa**: demo end-to-end, stima valore (docs/idea/valore-checkpoint.md), go/no-go CR2, registrazione decisione e conferma |
+| 14:30 | Checkpoint idea e valore | **SVOLTO con l'utente**. Decisioni: BR-17 Pausa e Conto resta (attivo di default); stima ~150 mln € resta (stima nostra); Lotto (ambo/terno) TOLTO dall'app; biglietto didattico 2 € con payout 70% resta. Vincolo ribadito dall'utente: esposizione totale 5'00" demo compresa, taratura della demo a prodotto finito |
 | 15:10 | Conferma utente e go al push | **In attesa** |
 | — | Consegna e push | **In attesa** |
 
@@ -61,14 +65,11 @@
 
 | Ora | Attività | Owner | Criterio di "fatto" |
 |---|---|---|---|
-| 14:20 | **CHECKPOINT idea e valore** con utente: demo end-to-end, stima valore, go/no-go CR2 (BR-17) | orchestratore + utente | Verifica umana registrata in questo file; decisione su scope finali |
-| 14:20–14:40 | Correzioni finali (se segnalate), UAT su DEF-001 (L4) e DEF-002 | sviluppo + business | 41+ test verdi motore, 23 test accettazione verdi |
-| 14:40–15:00 | Finalizzazione presentazione (slide visione Fase 2 se approvata da utente), sync agents/ a .claude/, ultimazione README.md | innovazione + governance | Presentation/index.html pronto, agents/ allineata |
-| 15:00 | **Review QA**: conformità al regolamento, verdetto PASS/FAIL su docs/qa/ | qa | docs/qa/evidenze-hook-t2.md con verdetto; checklist conformita.md approvata |
-| 15:10 | **Conferma utente**: go al push (finale umana) | utente | Verifica umana registrata in questo file |
-| 15:15–15:30 | **Push finale** (main branch) + margine | governance | Commit fatto, repository pubblico aggiornato |
+| 14:30-14:50 | **Applicazione decisioni**: rimozione Lotto, attivazione BR-17 di default, taratura demo; ritest 41 test motore e 23 UAT; QA finale; prova demo dell'utente | sviluppo + business + qa + utente | Motore e UAT verdi, demo taraturata a prodotto finito |
+| 14:50-15:10 | **Conferma consegna dell'utente**: verifica verdetto QA, alignment finale README e agents/ | utente + governance | Verifica umana registrata; go/no-go push |
+| 15:10-15:30 | **Push finale** (main branch): agents/sync.ps1, commit, push su repository GitHub (URL da ricevere utente dopo checkpoint) | governance | Commit fatto, repository pubblico aggiornato |
 
-## Decisioni provvisorie (da confermare al checkpoint 14:20)
+## Decisioni provvisorie (SUPERATE dalle decisioni dell'utente alle 14:30)
 | Decisione | Stato | Note |
 |---|---|---|
 | Lotto mantenuto con etichetta "fonte terzi" (non nominato come marchio) | Provvisoria | Tracciato in data/giochi.json; rispetta T2-V3 (no consigli); confermato BR-04 |

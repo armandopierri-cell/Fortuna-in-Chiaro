@@ -16,7 +16,7 @@
 
   var params = new URLSearchParams(window.location.search);
   var demoDaUrl = params.get("demo") === "1";
-  var pausaDaUrl = params.get("pausa") === "1";   // BR-17 dietro flag (go/no-go 14:05)
+  var pausaDaUrl = params.get("pausa") !== "0";   // BR-17 attivo di default; ?pausa=0 lo disattiva
   var SOGLIA_DEMO = 100;                          // CR1: soglia mensile precompilata solo in ?demo=1
   var N_FOLLA = 10000;                            // L2: persone simulate
   var TOAST_FASE1 = 750, TOAST_DURATA = 1900;     // L1: "HAI VINTO" -> saldo reale
@@ -79,9 +79,6 @@
   }
   function citaFonte(f) {
     if (!f) return "Fonte non indicata.";
-    if (f.affidabilita === "TERZI" || f.verificatoSuAdm === false) {
-      return "Fonte: calcolo combinatorio, terzi (" + f.sezione + "). Non ancora riscontrato riga per riga sulla pagina ADM.";
-    }
     var s = "Fonte: " + f.ente + (f.descrizione ? " — " + f.descrizione : "") + " (" + f.sezione + ").";
     if (f.affidabilita === "STIMA") s += " Stima, non tabella ufficiale completa.";
     return s;
@@ -90,15 +87,15 @@
   // ------------------------------------------------------------------ stato
   function statoIniziale() {
     var sel = {};
-    G.giochi.forEach(function (g) { sel[g.id] = { on: false, volte: 0, periodo: "giorno", posta: 1 }; });
+    G.giochi.forEach(function (g) { sel[g.id] = { on: false, volte: 0, periodo: "giorno" }; });
     var voci = (G.abitudineDemo && G.abitudineDemo.voci) || [];
     var applicate = 0;
     voci.forEach(function (v) {
       if (!sel[v.gioco]) return;
-      sel[v.gioco] = { on: true, volte: v.volte, periodo: v.periodo || "giorno", posta: v.posta || 1 };
+      sel[v.gioco] = { on: true, volte: v.volte, periodo: v.periodo || "giorno" };
       applicate++;
     });
-    if (!applicate && G.giochi.length) sel[G.giochi[0].id] = { on: true, volte: 1, periodo: "giorno", posta: 1 };
+    if (!applicate && G.giochi.length) sel[G.giochi[0].id] = { on: true, volte: 1, periodo: "giorno" };
     var demo = demoDaUrl || ($("demo-toggle") && $("demo-toggle").checked) || false;
     return {
       schermata: 1,
@@ -118,9 +115,7 @@
     G.giochi.forEach(function (g) {
       var s = state.sel[g.id];
       if (!s || !s.on || !(s.volte > 0)) return;
-      var v = { gioco: g.id, volte: s.volte, periodo: s.periodo };
-      if (g.tipo === "lotto") v.posta = s.posta;
-      voci.push(v);
+      voci.push({ gioco: g.id, volte: s.volte, periodo: s.periodo });
     });
     return { voci: voci };
   }
@@ -278,11 +273,9 @@
       head.appendChild(el("span", { text: g.nome }));
       card.appendChild(head);
 
-      var pm = M.probabilitaPremioMax(g.id, 1);
+      var pm = M.probabilitaPremioMax(g.id);
       var dati = el("ul", { class: "gioco-dati" });
-      var costo = g.tipo === "lotto" ? "posta scelta da te (1 € a puntata se non la cambi)" : eur(g.prezzo);
-      var premio = g.tipo === "lotto" ? eur(pm.premio) + " (" + num(g.moltiplicatore) + "× la posta)" : eur(pm.premio);
-      [["Costo", costo], ["Payout", perc(payoutDichiarato(g))], ["Premio massimo", premio], ["Probabilità premio massimo", unoSu(pm.unoSu)]]
+      [["Costo", eur(g.prezzo)], ["Payout", perc(payoutDichiarato(g))], ["Premio massimo", eur(pm.premio)], ["Probabilità premio massimo", unoSu(pm.unoSu)]]
         .forEach(function (r) { dati.appendChild(el("li", null, r[0] + ": <strong>" + r[1] + "</strong>")); });
       card.appendChild(dati);
 
@@ -298,13 +291,6 @@
       });
       inp.appendChild(lv);
       inp.appendChild(per);
-      var posta = null;
-      if (g.tipo === "lotto") {
-        var lp = el("label", null, "Posta per giocata (€) ");
-        posta = el("input", { type: "number", min: "1", max: "100", step: "1", inputmode: "numeric", value: String(s.posta) });
-        lp.appendChild(posta);
-        inp.appendChild(lp);
-      }
       inp.hidden = !s.on;
       card.appendChild(inp);
       card.appendChild(el("p", { class: "fonte", text: citaFonte(g.fonte) }));
@@ -325,10 +311,6 @@
       volte.addEventListener("input", function () { s.volte = intero(volte, 0, 20); aggiornaSpesa(); });
       volte.addEventListener("change", function () { volte.value = String(s.volte); });
       per.addEventListener("change", function () { s.periodo = per.value; aggiornaSpesa(); });
-      if (posta) {
-        posta.addEventListener("input", function () { s.posta = intero(posta, 1, 100); aggiornaSpesa(); });
-        posta.addEventListener("change", function () { posta.value = String(s.posta); });
-      }
       box.appendChild(card);
     });
     aggiornaSpesa();
@@ -436,16 +418,12 @@
       premioMax: top ? top.premio : null,
       anniPremioMax: top && isFinite(top.anni) ? top.anni : null,
       giocoPremioMax: top ? M.trovaGioco(top.gioco).nome : null,
-      unoSuPremioMax: top ? M.probabilitaPremioMax(top.gioco, postaDi(top.gioco)).unoSu : null,
+      unoSuPremioMax: top ? M.probabilitaPremioMax(top.gioco).unoSu : null,
       sim: sim,
       folla: null
     };
   }
-  function postaDi(id) { return state.sel[id] ? state.sel[id].posta : 1; }
-  function costoDi(id) {
-    var g = M.trovaGioco(id);
-    return g.tipo === "lotto" ? postaDi(id) : g.prezzo;
-  }
+  function costoDi(id) { return M.trovaGioco(id).prezzo; }
   // Costo della giocata che ha prodotto l'evento: dal gioco dell'evento o, se c'e' un solo gioco, da quello.
   function costoEvento(e) {
     if (typeof e.costo === "number") return e.costo;
@@ -617,12 +595,10 @@
     var voci = abitudine().voci;
     if (has("riepilogoVincite") && voci.length) {
       var id = voci[0].gioco, g = M.trovaGioco(id);
-      if (g.tipo !== "lotto") {
-        var rv = M.riepilogoVincite(id, postaDi(id));
-        html += '<p class="note">Dalla tabella premi ufficiale (' + g.nome + "): vince il " + perc(rv.quotaBigliettiVincenti) + " dei biglietti (" +
-          unoSu(1 / rv.quotaBigliettiVincenti) + "); il " + perc(rv.quotaRimborso) + " delle vincite è il rimborso della giocata e il " +
-          perc(rv.quotaPiccole) + " è al massimo il doppio della giocata. " + citaFonte(g.fonte) + "</p>";
-      }
+      var rv = M.riepilogoVincite(id);
+      html += '<p class="note">Dalla tabella premi ufficiale (' + g.nome + "): vince il " + perc(rv.quotaBigliettiVincenti) + " dei biglietti (" +
+        unoSu(1 / rv.quotaBigliettiVincenti) + "); il " + perc(rv.quotaRimborso) + " delle vincite è il rimborso della giocata e il " +
+        perc(rv.quotaPiccole) + " è al massimo il doppio della giocata. " + citaFonte(g.fonte) + "</p>";
     }
     return html + "</div>";
   }
@@ -740,7 +716,7 @@
     $("sb-fonte").textContent = citaFonte(g.fonte) + " Prova simulata con seme fisso " + seme() + ": con più giocate la percentuale tende al valore atteso.";
 
     // Scheda C
-    $("sc-testo").textContent = "Ogni estrazione del Lotto è indipendente dalle precedenti: un numero fermo da 100 estrazioni ha la stessa probabilità di uscire di uno uscito ieri.";
+    $("sc-testo").textContent = "Un'estrazione di 5 numeri su 90, come nel Lotto: ogni estrazione è indipendente dalle precedenti, quindi un numero fermo da 100 estrazioni ha la stessa probabilità di uscire di uno uscito ieri.";
     $("sc-lancia").textContent = "Lancia " + num(ESTRAZIONI_RITARDATARI) + " estrazioni";
     $("sc-lancia").addEventListener("click", function () {
       var b = $("sc-lancia");
@@ -758,9 +734,9 @@
         b.textContent = "Lancia di nuovo (stesso seme)";
       }, 30);
     });
-    var L = G.lotto || {};
-    $("sc-fonte").textContent = "Fonte: principio matematico standard di indipendenza delle estrazioni; " +
-      (L.estratti || 5) + " numeri su " + (L.numeri || 90) + " per ruota (" + (L.sezione || "ricerca-azzardo.md §2") + "). Simulazione con seme fisso " + seme() + ".";
+    var L = G.estrazioni || {};
+    $("sc-fonte").textContent = "Fonte: principio matematico standard di indipendenza delle estrazioni (calcolo, non dato ADM); " +
+      (L.estratti || 5) + " numeri estratti su " + (L.numeri || 90) + " (" + (L.sezione || "ricerca-azzardo.md §2") + "). Simulazione con seme fisso " + seme() + ".";
   }
 
   function disegnaGriglia(vincente) {
@@ -814,14 +790,13 @@
     pannelloParlarne($("parlarne-7"), esitoSoglia());
   }
 
-  // ------------------------------------- Pausa e Conto (BR-17, solo con ?pausa=1)
+  // ------------------------- Pausa e Conto (BR-17, attivo di default; ?pausa=0 lo disattiva)
   var pausa = { timer: null };
   function initPausa() {
     if (!pausaDaUrl || !has("contoBiglietto")) return;
     var btn = $("btn-pausa"), sel = $("pausa-gioco");
     btn.hidden = false;
     G.giochi.forEach(function (g) {
-      if (g.tipo === "lotto") return; // posta variabile: il conto per biglietto vale per le lotterie
       sel.appendChild(el("option", { value: g.id, text: g.nome }));
     });
     var rif = giocoRiferimento();
@@ -833,7 +808,7 @@
   }
   function renderPausa() {
     var id = $("pausa-gioco").value;
-    var c = M.contoBiglietto(id, 1);
+    var c = M.contoBiglietto(id);
     $("pausa-dl").innerHTML =
       "<dt>Costo del biglietto</dt><dd>" + eur(c.costo) + "</dd>" +
       "<dt>Perdita media attesa per biglietto</dt><dd class=\"big\" style=\"color:var(--perso)\">" + eur2(c.perditaMediaPerBiglietto) + "</dd>" +
