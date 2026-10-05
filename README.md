@@ -1,247 +1,116 @@
-# Fortuna in Chiaro — Hackathon Hagenthon
+# Fortuna in Chiaro — Hackathon Hagenthon (Tema 02)
 
-## Cos'è "Fortuna in Chiaro"
+## 1. Cos'è
 
-Un simulatore educativo sul gioco d'azzardo che mostra, in 7 schermate interattive, quanto costa davvero un'abitudine di gioco quotidiana: un anno simulato in 10 secondi con le probabilità ufficiali ADM, il valore atteso esatto calcolato dalle tabelle premi, e i concetti per capirlo da soli (probabilità, estrazioni indipendenti, bias dei ritardatari). Non dà consigli né giudizi: mostra numeri e significati. Demo e documentazione complete della ricerca in `docs/idea/`.
+Simulatore educativo sul gioco d'azzardo: in 7 schermate mostra quanto costa un'abitudine
+di gioco quotidiana (persona Salvatore, ~10 €/giorno), con probabilità ufficiali ADM, valore
+atteso esatto e quiz prima/dopo. Non dà consigli né giudizi: solo numeri e significati.
 
-**Tema**: Inclusione Finanziaria (T2-V1).
-**Persona**: Salvatore, 52 anni, autista, ~10 €/giorno di gioco, non sa quanto spende in un anno né le vere probabilità di vincere.
+## 2. Come aprire la demo
 
----
+- Standard: apri `app/index.html` nel browser.
+- Demo con seme fisso e animazione rapida: `app/index.html?demo=1`.
+- Con BR-17 "Pausa e Conto" (bottone educativo): `app/index.html?demo=1&pausa=1`.
 
-## Come aprire la demo
+## 3. Presentazione
 
-### Nel browser
-- **App standard**: doppio click su `app/index.html`
-- **Demo (seme fisso, animazione rapida)**: doppio click su `app/index.html?demo=1`, oppure aprire e usare il toggle "Modalità demo"
-- **Con BR-17 "Pausa e Conto"** (bottone educativo prima della scelta): `app/index.html?demo=1&pausa=1`
+`presentation/index.html` (sezioni in `presentation/sezioni/`): brand Accenture, soluzione,
+struttura agentica, demo compresa.
 
-### Da PowerShell
+## 4. Test
+
 ```powershell
-Start-Process msedge ("file:///" + ((Resolve-Path app\index.html).Path -replace '\\','/') + "?demo=1")
+powershell -NoProfile -ExecutionPolicy Bypass -File app/tests/run-tests.ps1
 ```
 
----
+Esegue `app/tests/tests.html` in Edge headless (unità in `app/tests/motore.test.js`,
+scansione statica dei testi in `app/tests/testi.test.js`); exit 0 = tutti verdi.
 
-## Presentazione
-Apri `presentation/index.html` per il pitch di 5 minuti (brand Accenture, inclusa demo end-to-end di ~2'30" e spiegazione della struttura agentica con evidenza del guardrail L4).
-
----
-
-## Struttura del repository
+## 5. Mappa del repository (file reali)
 
 ```
-app/                          Soluzione
-├── index.html                Punto d'ingresso (senza build, senza node_modules)
-├── style.css                 Stili (tema + accessibilità)
-├── src/
-│   ├── motore.js            Modulo di calcolo (spesa, valore atteso, probabilità)
-│   ├── ui.js                Logica dell'interfaccia (6 schermate) + leve L1–L3
-│   ├── quiz.js              Quiz prima/dopo (3 domande + trasferimento)
-│   ├── data/
-│   │   └── giochi.json      Giochi con struttura premi ufficiale (fonte ADM)
-│   └── simulatore.js        Generatore casuale con seme fisso (riproducibile)
-├── tests/
-│   ├── tests.html           Suite di test (40+ test unitari)
-│   ├── run-tests.ps1        Eseguie tests.html in Edge headless
-│   └── test-data.js         Fixture per test
-└── README.md                 Dettagli tecnici e prerequisiti
+app/
+├── index.html, style.css          Punto d'ingresso e stili
+├── ARCHITETTURA.md, README.md     Note tecniche, tracciabilita.md (BR → verifica)
+├── data/giochi.js, data/quiz.js   Dati ufficiali ADM e domande del quiz
+├── src/motore.js, src/ui.js       Motore di calcolo e interfaccia
+└── tests/                         tests.html, motore.test.js, testi.test.js, run-tests.ps1
 
-agents/                       Struttura agentica (copia di .claude/ con sync.ps1)
-├── governance/              Piano, tempi, deliverable, stato avanzamento
-├── innovazione/             Idea, pitch, presentazione
-├── business/                BR, test di accettazione
-├── sviluppo/                Architettura e codice
-└── qa/                       Conformità al regolamento e verdetti PASS/FAIL
+agents/                            Struttura agentica consegnata (copia di .claude/, via sync.ps1)
+├── agents/*.md                    Prompt di ruolo (business, governance, innovazione, qa, sviluppo)
+├── hooks/                         guard.ps1, guardrail-t2.ps1, post-edit-tests.ps1
+├── skills/presentazioni-accenture/ SKILL.md, reference.md, assets/template.html
+├── settings.json, CLAUDE.md       Config hook/agenti e regole
+├── sync.ps1                        Script di allineamento da .claude/
+└── WORKFLOW.md                     Flusso idea → BR → sviluppo ⇄ test → presentazione → QA → push
 
 presentation/
-└── index.html               Slide Accenture (5 min + demo)
+├── index.html                     Slide Accenture
+└── sezioni/business-case.html     Sezione business case
 
 docs/
-├── governance/
-│   ├── piano-progetto.md    Stream di lavoro, milestone, owner per ogni attività
-│   ├── deliverable-register.md  Elenco deliverable con stato (Da fare / In corso / In review / Approvato / Rilasciato)
-│   ├── stato-avanzamento.md Aggiornato a ogni checkpoint: fatto, decisioni, rischi, prossimi passi
-│   └── release-log.md       Cosa rilasciato, quando, dove
-├── idea/
-│   ├── idea-selezionata.md  Scelta, persona, caso d'uso, leve di innovazione (L1–L4), CR
-│   ├── idee-valutate.md     Scartate con motivazione (tracciabilità di decisione)
-│   ├── ricerca-neet.md      Dati NEET
-│   ├── ricerca-azzardo.md   Numeri ufficiali (ADM) e tabelle premi
-│   └── valore-checkpoint.md Stima valore al checkpoint 14:05
-├── business/
-│   ├── BR-01..BR-17.md      Business Requirements (funzionali e non, BR-17 condizionato)
-│   ├── analisi-funzionale.md Casi d'uso mappati a BR
-│   ├── analisi-tecnica.md   Componenti (motore, UI, quiz) e contratto API
-│   ├── test-accettazione.md Test per stanza e test end-to-end
-│   └── defect-log.md        Difetti trovati, stato, owner
-└── qa/
-    ├── checklist-conformita.md  Conformità al regolamento (00_input/regolamento.md)
-    ├── evidenze-hook-t2.md      Scansione statica testi (guardrail L4): verdetto, log
-    ├── verdetto-*.md            Risultati test per ogni build
-    └── [elenco deliverable]     Tracciabilità verso R-09, R-11 (demo + presentazione)
+├── governance/stato-avanzamento.md   Decisioni, verifiche umane, rischi, piano residuo
+├── idea/                          idea-selezionata, idee-valutate, idee-neet, problem-statement,
+│                                   ricerca-azzardo, ricerca-neet, numeri-business-case, valore-checkpoint
+├── business/                      business-requirements, analisi-funzionale, piano-test,
+│                                   test-report, defect-log
+└── qa/                            checklist-conformita, evidenze-hook-t2, verdetto-qa
 
-00_input/              [ESCLUSO DA GIT, protetto da hook guard.ps1]
-├── regolamento.md     Tempi, consegna, criteri di valutazione
-└── temi-sfida.md      Temi, vincoli, deliverable per tema
-
-kb/                    [ESCLUSO DA GIT, protetto da hook guard.ps1]
-
-.claude/               [Locale, non in git]
-├── agents/            Prompt e config di ruoli
-├── skills/presentazioni-accenture/  Template e stili brand Accenture
-└── hooks/
-    ├── guard.ps1                    Blocca scrittura in 00_input/, KB e API key
-    ├── guardrail-t2.ps1            Scansione statica testi (L4 Tema 02): divieto "conviene", "smetti", ecc.
-    └── post-edit-tests.ps1         Dopo ogni modifica in app/, esegue test e riporta fallimenti
-
-.gitignore            00_input/, kb/, node_modules/, .claude/, venduto/, *.pyc
+.claude/                           Configurazione agentica in uso (tracciata in git): agents/, hooks/,
+                                    skills/presentazioni-accenture/, settings.json
+CLAUDE.md                          Regole del progetto (ruoli, flusso, pattern di validazione)
+.gitignore                         Esclude 00_input/, kb/, settings.local.json, .env, *.key
 ```
+`00_input/` e `kb/` sono fuori dal repository (hook `guard.ps1` ne blocca la scrittura).
 
----
+## 6. Criterio di valutazione → evidenza
 
-## Struttura agentica e pattern di validazione
+| Criterio (regolamento / CLAUDE.md) | Dove trovarlo |
+|---|---|
+| Innovatività dell'idea | `docs/idea/idea-selezionata.md`, `docs/idea/idee-valutate.md` |
+| Messa a terra / concretezza | `app/` funzionante, `docs/business/test-report.md`, `app/tracciabilita.md` |
+| Efficacia della demo | `app/index.html?demo=1`, `presentation/index.html` (sezione demo) |
+| Uso consapevole dei token | Sezione 8 qui sotto; `CLAUDE.md` ("Uso consapevole dei token") |
+| Qualità tecnica | `app/ARCHITETTURA.md`, test in `app/tests/`, `docs/qa/checklist-conformita.md` |
+| Verifica umana | `docs/governance/stato-avanzamento.md` (sezione "Verifiche umane") |
+| Pattern **Rules** | `CLAUDE.md`, `agents/agents/*.md` (prompt di ruolo) |
+| Pattern **Skills** | `agents/skills/presentazioni-accenture/` (usata per `presentation/`) |
+| Pattern **Hooks** | `agents/hooks/*.ps1`; prova indipendente in `docs/qa/evidenze-hook-t2.md` e `docs/qa/verdetto-qa.md` |
+| Strategia di applicazione AI | `CLAUDE.md`, `docs/governance/stato-avanzamento.md` |
+| Conformità al regolamento / verdetto QA | `docs/qa/checklist-conformita.md`, `docs/qa/verdetto-qa.md` (stato in sezione 9 qui sotto) |
 
-### Team agentico (fase sviluppo)
+## 7. Team agentico e stanze agile
+
 | Agente | Ruolo | Scrive in | Modello |
 |---|---|---|---|
 | `governance` | Piano, tempi, deliverable, push finale | `docs/governance/` | Sonnet |
 | `innovazione` | Idea, pitch, presentazione | `docs/idea/`, `presentation/` | Opus |
-| `business` | BR, test di accettazione | `docs/business/` | Sonnet |
+| `business` | Business Requirements, test di accettazione | `docs/business/` | Sonnet |
 | `sviluppo` | Architettura e codice | `app/` | inherit |
 | `qa` | Conformità al regolamento, verdetto PASS/FAIL | `docs/qa/` | Opus |
 
-**Orchestratore**: sessione principale, fa da coordinatore e prende decisioni su scope/tagli.
+Flusso e stanze (Motore, Esperienza) dettagliati in `agents/WORKFLOW.md`.
 
-### Rules (source of truth)
-- **`CLAUDE.md`** (questo file, protetto da hook): ruoli, flusso, regole di scambio tra agenti.
-- **Prompt dei ruoli**: in `.claude/agents/`, usati dall'agente orchestratore per lanciare ogni sessione.
+## 8. Uso dei token
 
-### Skills
-- **`presentazioni-accenture/`** (`.claude/skills/`): template e stili per slide aziendali.
+- Modello per ruolo: Sonnet di default, Opus su idea e QA, inherit su sviluppo (vedi tabella sopra).
+- L'app a runtime è logica deterministica (motore JS su dati ADM in `app/data/`): zero token,
+  nessuna API key, nessun LLM richiesto per funzionare nel browser.
+- In sviluppo, Claude Code è stato usato con contesto mirato per agente (ognuno riceve solo i
+  file del proprio dominio) e con gli hook per automatizzare controlli ripetitivi.
 
-### Hooks (PreToolUse e PostToolUse)
-- **`guard.ps1`**: blocca la scrittura in `00_input/`, `kb/` e contenuti con API key.
-- **`guardrail-t2.ps1`**: scansione statica degli articoli HTML in `app/` per rilevare testi vietati dal Tema 02 (non dà consigli: "conviene", "smetti", "gioca meno", "dovresti"). Verdetto e log in `docs/qa/evidenze-hook-t2.md`. **Eseguito a ogni modifica di `app/`**.
-- **`post-edit-tests.ps1`**: dopo ogni modifica di `app/`, esegue automaticamente `app/tests/run-tests.ps1` e riporta i fallimenti all'agente sviluppo.
+## 9. Stato della consegna (onesto, a questo istante)
 
----
-
-## Stanze agile
-
-Parallelo su 2 stream:
-
-### Stanza Motore (Sviluppo + Business)
-- Proprietario: sviluppo (codice) + business (test)
-- Artefatti: `data/giochi.js`, `src/motore.js`, `src/simulatore.js`, test unitari
-- Contratto API: funzioni esportate (calcolo spesa, valore atteso, simulazione con seme fisso)
-- Criterio "fatto": 41+ test verdi, test di accettazione non blocca Esperienza
-
-### Stanza Esperienza (UI + Quiz + Cruscotto)
-- Proprietario: sviluppo (layout, interazione)
-- Artefatti: `index.html`, `style.css`, `src/ui.js`, `src/quiz.js`
-- Dipendenza: Motore (API del motore)
-- Criterio "fatto": 7 schermate, quiz 3+1, cruscotto prima/dopo, leve L1–L3 integrate, CR1 applicata, CR2 se approvato
+- Ultimo verdetto QA: **FAIL con condizioni** (`docs/qa/verdetto-qa.md`, rilievi QA-001…QA-004
+  bloccanti). Questo README chiude QA-001. Gli altri rilievi (remote GitHub assente, stato
+  `test-report.md`/`defect-log.md` su DEF-001) vanno verificati dai rispettivi owner prima del push.
+- **Non esiste ancora un remote GitHub**: `git remote -v` non restituisce nulla. Il repository
+  pubblico non è stato ancora creato né il push eseguito.
+- Nessun nuovo giro QA con verdetto PASS è stato ancora emesso dopo questa revisione.
+- Verifiche umane di checkpoint (14:20) e di consegna sono registrate come "In attesa" in
+  `docs/governance/stato-avanzamento.md`: non ancora confermate.
+- **Push non eseguito**: non va fatto finché non c'è un verdetto QA PASS sulla versione corrente
+  e la conferma umana di consegna.
 
 ---
-
-## Leve di innovazione (già integrate)
-
-| Leva | Cosa fa | BR proposto |
-|---|---|---|
-| **L1 — Le vincite che non sono vincite** | Quando un biglietto simulato vince, mostra il saldo reale: se è il rimborso, "HAI VINTO 5 €" diventa "guadagno 0 €". Riepilogo: % di vincite che erano solo rimborso | **BR-13** |
-| **L2 — Dalla parte del banco** | Tasto che mostra 10.000 Salvatori per un anno: quanti in attivo, quanto incassa il banco. Scala Italia: 21,5 miliardi persi nel 2024 | **BR-14** |
-| **L3 — Probabilità in cose fisiche** | "1 su N" tradotto in scala tangibile: "208 stadi da 60.000 posti pieni, una sola persona vince"; "2 biglietti al giorno, una vincita del massimo ogni ~17.000 anni" | **BR-15** |
-| **L4 — Hook guardrail del Tema 02** | PreToolUse e PostToolUse bloccano e scansionano i testi di `app/` per rilevare formule vietate (consiglio, giudizio); verdetto automatico e riproducibile nella presentazione | Rafforza **BR-11** |
-
-**Change Request approvate:**
-- **CR1 — "Vuoi parlarne con qualcuno?"**: soglia di spesa mensile scelta dall'utente → numero verde ISS 800 55 88 22 e messaggio a persona di fiducia (inviato solo dall'utente). **BR-16 (Should)**.
-- **CR2 — "Pausa e Conto"**: bottone educativo "Sto per comprare un biglietto" che mostra i numeri del biglietto scelto per 30 secondi (versione educativa del craving). **BR-17 (Could)**, go/no-go al checkpoint 14:05.
-
----
-
-## Uso consapevole dei token
-
-**Modello per ruolo:**
-- **Governance**: Sonnet (piano, coordinamento)
-- **Innovazione**: Opus (creatività e pitch)
-- **Business**: Sonnet (BR, test)
-- **Sviluppo**: inherit (misto)
-- **QA**: Opus (valutazione critica)
-
-**Complessità della soluzione:**
-- **Zero token a runtime**: l'app è logica deterministica su dati ufficiali (giochi.json con probabilità e premi ADM). Nessuna API key nel browser, nessun modello LLM richiesto alla consegna.
-- **In sviluppo (fase hackathon)**: Claude Code per ricerca, codice generativo, testi, test; verifica umana su numeri, testi e tono.
-- **Ripiego offline**: se non c'è rete, l'app funziona normalmente (tutto è locale).
-
----
-
-## Test
-
-```powershell
-powershell -ExecutionPolicy Bypass -File app\tests\run-tests.ps1
-```
-
-Esegue `app/tests/tests.html` in Edge headless; exit code 0 = tutti i test passano, diverso da 0 = almeno uno fallisce. In alternativa si apre `app/tests/tests.html` nel browser per esaminare i risultati interattivamente.
-
-**Test automatici** (dopo ogni modifica di `app/`): lo script `post-edit-tests.ps1` (hook PostToolUse) esegue i test e riporta all'agente gli eventuali fallimenti.
-
----
-
-## Conformità al regolamento (checklist)
-
-Leggi `docs/qa/checklist-conformita.md` per il dettaglio. Punti critici:
-- ✅ Repository pubblico con app/, agents/, presentation/, docs/, README.md
-- ✅ 00_input/ e kb/ non nel repository (hook guard.ps1)
-- ✅ Nessuna API key nei file (hook guard.ps1)
-- ✅ agents/ allineata a .claude/ (esegui `agents/sync.ps1` prima del push)
-- ✅ Verdetto QA **PASS** su versione corrente prima del push (docs/qa/)
-- ✅ Deliverable dei tema (R-09): dentro presentazione e demo, tracciati in docs/qa/
-- ✅ Push entro le **15:30** (deroga concessa dai docenti; il regolamento riporta 15:00)
-
----
-
-## Checkpoint finale (14:05) e consegna
-
-1. **Demo end-to-end** con utente: tutte le 7 schermate, leve L1–L3, CR1, CR2 (se approvato).
-2. **Stima del valore** (docs/idea/valore-checkpoint.md): miglioramento atteso sulla persona Salvatore.
-3. **Go/no-go su CR2** (BR-17 "Pausa e Conto"): è approvata?
-4. **Verifica umana** registrata in `docs/governance/stato-avanzamento.md`.
-5. **QA finale**: verdetto PASS su `docs/qa/`.
-6. **Sincronizzazione agents/** con `.claude/` (`agents/sync.ps1`).
-7. **Push entro le 15:30**.
-
----
-
-## Domande frequenti
-
-### Come si lanciano i test?
-```powershell
-powershell -ExecutionPolicy Bypass -File app\tests\run-tests.ps1
-```
-
-### Dove stanno i dati dei giochi?
-In `app/src/data/giochi.json`, con fonte ADM (Amministrazione dei Monopoli e delle Dogane) e tabelle premi complete.
-
-### Come si riproduce la demo?
-La simulazione usa un generatore pseudo-casuale con seme fisso. Con `?demo=1` o il toggle "Modalità demo", il seme è costante e i risultati sono riproducibili.
-
-### Cosa succede se tocco "Pausa e Conto"?
-Se BR-17 è approvato, per 30 secondi (10 secondi in demo) l'app mostra i numeri del biglietto scelto (perdita media attesa, quota di rimborsi, probabilità del massimo); poi "La scelta è tua" (non è un consiglio).
-
-### Quali dati vengono salvati?
-**Nessuno**: tutto resta in memoria nella pagina e si perde alla chiusura. Non c'è backend, non c'è account, non c'è tracciamento.
-
-### Il hook L4 cosa blocca?
-Scansiona i testi HTML di `app/` alla ricerca di formule vietate dal Tema 02:
-- "conviene", "non conviene", "meglio"
-- "smetti", "prova a smettere", "smetti di giocare"
-- "gioca meno", "dovresti giocare meno/smettere"
-- Elenco completo in `docs/qa/evidenze-hook-t2.md`
-
-Se ne trova una, il hook blocca la modifica. Se passano tutti i controlli, il verdetto è registrato nel log.
-
----
-
-**Ultimo aggiornamento:** 05/10/2026, 14:10 — Governance  
-**Congelato**: 15:30 del 05/10/2026
+**Aggiornato:** 05/10/2026, 14:25 — Governance. **Freeze:** 15:30 (deroga; regolamento riporta 15:00).
