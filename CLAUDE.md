@@ -1,6 +1,6 @@
 # Hagenthon — Hackathon Agentic Coding (Accenture)
 
-Lingua di lavoro: italiano. **Freeze: oggi alle 15:00.** Il tempo è il vincolo che decide ogni scelta.
+Lingua di lavoro: italiano. **Freeze: oggi alle 15:30** (deroga dei docenti; il regolamento riporta 15:00). Il tempo è il vincolo che decide ogni scelta.
 
 ## Fonti di verità (sola lettura, protette da un hook)
 - `00_input/regolamento.md`: tempi, consegna, criteri di valutazione.

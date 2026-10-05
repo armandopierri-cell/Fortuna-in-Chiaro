@@ -172,7 +172,7 @@ Controlli ricavati da `00_input/regolamento.md`. Valgono per tutti i temi, in ag
 | R-08 | È stato usato **Claude Code** come strumento di agentic coding? (Nessun altro vincolo su tecnologie, linguaggi o dati.) | § Strumenti ("Claude Code obbligatorio. Nessun altro vincolo...") (rinforza C-08) | Bloccante |
 | R-09 | I **3 deliverable specifici** del tema scelto sono presenti **dentro** la presentazione e la demo, e **non** come documenti separati a parte? | § Cosa si consegna ("non come documenti separati") — nota: corregge l'interpretazione prudenziale precedente (ex A-05) | Bloccante |
 | R-10 | L'esposizione al gruppo (presentazione **+** demo) dura in totale **5 minuti**, demo compresa? | § Cosa si consegna | Bloccante |
-| R-11 | Il **push** del progetto e della presentazione su GitHub è avvenuto **entro il freeze delle ore 15:00** del 05/10/2026? | § Tempi ("Freeze e scadenza: ore 15:00") | Bloccante |
+| R-11 | Il **push** del progetto e della presentazione su GitHub è avvenuto **entro il freeze delle ore 15:30** del 05/10/2026? (Deroga dei docenti comunicata dall'utente, registrata in `docs/governance/stato-avanzamento.md`; il regolamento riporta 15:00.) | § Tempi ("Freeze e scadenza: ore 15:00") + deroga | Bloccante |
 | R-12 | La soluzione risulta **caricata anche sul portale** indicato dall'organizzazione, oltre che su GitHub? | § Modalità di consegna ("La soluzione viene caricata su un portale") | Bloccante |
 
 ---
