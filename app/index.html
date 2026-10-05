@@ -14,6 +14,7 @@
   <ol class="steps" id="steps" aria-label="Avanzamento"></ol>
   <div class="bar-actions">
     <span class="demo-badge" id="demo-badge" hidden>Modalità demo</span>
+    <button type="button" class="btn btn-ghost" id="btn-pausa" hidden>Sto per comprare un biglietto</button>
     <button type="button" class="btn btn-ghost" id="btn-ricomincia-top" hidden>Ricomincia</button>
   </div>
   <p class="disclaimer">Strumento educativo: mostra numeri e significati, non dà consigli.</p>
@@ -54,8 +55,14 @@
       <aside class="riepilogo" aria-live="polite">
         <h2>La tua spesa</h2>
         <div id="riepilogo-spesa"></div>
+        <div class="soglia">
+          <label for="soglia">La tua soglia di spesa mensile (facoltativa)</label>
+          <div class="soglia-input"><input type="number" id="soglia" min="0" step="1" inputmode="numeric" placeholder="es. 100"> <span>€ al mese</span></div>
+          <p class="note">La scegli tu. Serve solo a confrontarla con la spesa qui sopra; non viene salvata.</p>
+        </div>
       </aside>
     </div>
+    <div class="parlarne" id="parlarne-3" aria-live="polite" hidden></div>
     <div class="nav">
       <button type="button" class="btn" data-nav="back">Indietro</button>
       <button type="button" class="btn btn-primary" id="avanti-3">Avanti</button>
@@ -66,6 +73,7 @@
   <section class="screen" data-screen="4" aria-labelledby="t4" hidden>
     <h1 id="t4">Un anno in 10 secondi</h1>
     <p class="note" id="seme-info"></p>
+    <div id="vista-mia">
     <div class="layout-2 sim">
       <div class="sim-anim">
         <div class="progress" aria-hidden="true"><div class="progress-fill" id="sim-progress"></div></div>
@@ -75,6 +83,8 @@
           <div class="cont"><span class="cont-l">Vinto</span><span class="cont-v" id="c-vinto">0 €</span></div>
           <div class="cont cont-perso"><span class="cont-l">Perso</span><span class="cont-v" id="c-perso">0 €</span></div>
         </div>
+        <div class="toast-zona"><div class="toast" id="toast" aria-live="polite" hidden></div></div>
+        <p class="conto-vincite" id="conto-vincite"></p>
         <div class="calendario" id="calendario" aria-hidden="true"></div>
         <p class="legenda"><span class="sw sw-spesa"></span> giorno di gioco <span class="sw sw-vinto"></span> vincita da 100 € in su</p>
         <ul class="vincite" id="vincite" aria-label="Vincite da 100 euro in su"></ul>
@@ -84,12 +94,16 @@
         <p class="note">Calcolato dalla tabella premi, non dal caso.</p>
         <dl id="atteso-dl"></dl>
         <p id="atteso-media"></p>
+        <div class="stadi-box" id="stadi-anno"></div>
       </aside>
     </div>
     <div class="finale" id="sim-finale" aria-live="polite"></div>
+    </div>
+    <div class="banco" id="vista-banco" aria-live="polite" hidden></div>
     <div class="nav">
       <button type="button" class="btn" data-nav="back">Indietro</button>
       <button type="button" class="btn" id="btn-rivedi">Rivedi</button>
+      <button type="button" class="btn" id="btn-banco" disabled>Dalla parte del banco</button>
       <button type="button" class="btn btn-primary" data-nav="next">Avanti</button>
     </div>
   </section>
@@ -101,6 +115,7 @@
       <article class="scheda" aria-labelledby="sa">
         <h2 id="sa">La probabilità, vista</h2>
         <p id="sa-testo"></p>
+        <div class="stadi-box" id="sa-stadi"></div>
         <canvas id="griglia" width="300" height="300" aria-label="Griglia di 10.000 puntini"></canvas>
         <label class="slider">Ingrandisci: <strong id="sa-k">1</strong> <span id="sa-u">griglia</span>
           <input type="range" id="sa-range" min="1" value="1">
@@ -143,6 +158,7 @@
   <section class="screen" data-screen="7" aria-labelledby="t7" hidden>
     <h1 id="t7">Il tuo cruscotto</h1>
     <div id="cruscotto"></div>
+    <div class="parlarne" id="parlarne-7" hidden></div>
     <p class="privacy">I tuoi dati restano nel tuo browser: nessuna informazione viene salvata o inviata altrove.</p>
     <div class="nav">
       <button type="button" class="btn" data-nav="back">Indietro</button>
@@ -151,6 +167,16 @@
   </section>
 
 </main>
+
+<div class="pausa" id="pausa" role="dialog" aria-modal="true" aria-labelledby="pausa-t" hidden>
+  <div class="pausa-box">
+    <h2 id="pausa-t">Pausa e Conto: i numeri di questo biglietto</h2>
+    <label>Biglietto <select id="pausa-gioco"></select></label>
+    <dl id="pausa-dl"></dl>
+    <p class="pausa-timer" id="pausa-timer" aria-live="polite"></p>
+    <button type="button" class="btn btn-primary" id="pausa-chiudi">Chiudi</button>
+  </div>
+</div>
 
 <footer class="bar bar-bottom" role="contentinfo">
   <p id="numero-verde">Hai domande o preoccupazioni sul gioco? Telefono Verde Nazionale ISS: <strong>800 55 88 22</strong> — gratuito, anonimo, lun-ven 10:00-16:00.</p>

@@ -16,15 +16,34 @@
 
   var params = new URLSearchParams(window.location.search);
   var demoDaUrl = params.get("demo") === "1";
+  var pausaDaUrl = params.get("pausa") === "1";   // BR-17 dietro flag (go/no-go 14:05)
+  var SOGLIA_DEMO = 100;                          // CR1: soglia mensile precompilata solo in ?demo=1
+  var N_FOLLA = 10000;                            // L2: persone simulate
+  var TOAST_FASE1 = 750, TOAST_DURATA = 1900;     // L1: "HAI VINTO" -> saldo reale
+  var MAX_STADI_DISEGNATI = 600;
+  var PAUSA_SECONDI = 30, PAUSA_SECONDI_DEMO = 10;
+  // Italia 2024: spesa netta (raccolta - vincite). docs/idea/ricerca-azzardo.md, riga "Spesa netta 2024".
+  var ITALIA = { spesaNettaMld: 21.5, perResidente: 360, anno: 2024,
+    fonte: "ADM, Bilancio di esercizio 2024, ripreso da Agipronews (fonte ufficiale riportata dalla stampa di settore)" };
 
   var state;
   var anim = null; // animazione in corso: { raf, watch, ultimo }
+  var toast = { timers: [], libero: 0, coda: null };
+  function fermaToast() {
+    toast.timers.forEach(clearTimeout);
+    toast.timers = [];
+    toast.libero = 0;
+    toast.coda = null;
+    var t = $("toast");
+    if (t) { t.hidden = true; t.className = "toast"; }
+  }
   function fermaAnimazione() {
     if (!anim) return;
     cancelAnimationFrame(anim.raf);
     clearInterval(anim.watch);
     anim = null;
   }
+  function has(nome) { return !!M && typeof M[nome] === "function"; }
 
   // ---------------------------------------------------------------- utilita'
   function $(id) { return document.getElementById(id); }
@@ -80,9 +99,12 @@
       applicate++;
     });
     if (!applicate && G.giochi.length) sel[G.giochi[0].id] = { on: true, volte: 1, periodo: "giorno", posta: 1 };
+    var demo = demoDaUrl || ($("demo-toggle") && $("demo-toggle").checked) || false;
     return {
       schermata: 1,
-      demo: demoDaUrl || ($("demo-toggle") && $("demo-toggle").checked) || false,
+      demo: demo,
+      soglia: demo ? SOGLIA_DEMO : null,
+      vistaBanco: false,
       sel: sel,
       rispostePrima: {},
       risposteDopo: {},
@@ -107,6 +129,7 @@
   function vai(n) {
     if (n < 1 || n > N_SCHERMATE) return;
     fermaAnimazione();
+    fermaToast();
     state.schermata = n;
     document.querySelectorAll(".screen").forEach(function (s) {
       s.hidden = Number(s.getAttribute("data-screen")) !== n;
@@ -140,6 +163,7 @@
     aggiornaDemo();
     renderQuiz($("quiz-prima"), domandePrima(), state.rispostePrima, null, aggiornaQuizPrima);
     $("quiz-dopo").innerHTML = "";
+    $("soglia").value = state.soglia === null ? "" : String(state.soglia);
     renderAbitudine();
     schedeInit = false;
     vai(1);
@@ -148,6 +172,11 @@
   // --------------------------------------------------------- 1. Benvenuto
   function aggiornaDemo() {
     state.demo = $("demo-toggle").checked;
+    if (state.demo && state.soglia === null && $("soglia")) {
+      state.soglia = SOGLIA_DEMO;
+      $("soglia").value = String(SOGLIA_DEMO);
+      aggiornaSoglia();
+    }
     $("demo-badge").hidden = !state.demo;
     $("demo-info").textContent = state.demo
       ? "Modalità demo attiva: seme fisso " + G.seme.demo + ", animazione di circa 3 secondi, risultato identico a ogni esecuzione."
@@ -312,6 +341,7 @@
     var vuoto = !ab.voci.length || !(sp.giorno > 0);
     $("avanti-3").disabled = vuoto;
     state.risultati = null; // l'abitudine e' cambiata: la simulazione va rifatta
+    aggiornaSoglia();
     if (vuoto) {
       box.innerHTML = '<p class="avviso">Seleziona almeno un gioco per vedere la tua spesa</p>';
       return;
@@ -323,6 +353,70 @@
       "<dt>All'anno</dt><dd class=\"big\">" + eur(sp.anno) + "</dd>" +
       "</dl>" +
       '<p class="note">Anno = giorno × 365; mese = anno ÷ 12, arrotondato al centesimo.</p>';
+  }
+
+  // ------------------------------------- 3b. Soglia scelta dall'utente (CR1, BR-16)
+  function leggiSoglia() {
+    var inp = $("soglia");
+    var v = Number(inp.value);
+    state.soglia = inp.value === "" || !isFinite(v) || v < 0 ? null : v;
+    aggiornaSoglia();
+  }
+  function esitoSoglia() {
+    if (state.soglia === null || !has("superaSoglia")) return null;
+    var ab = abitudine();
+    if (!ab.voci.length) return null;
+    var r = M.superaSoglia(ab, state.soglia);
+    return r && r.supera ? r : null;
+  }
+  function aggiornaSoglia() {
+    var r = esitoSoglia();
+    pannelloParlarne($("parlarne-3"), r);
+  }
+  // Pannello neutro: numeri, contatti, nessun invio automatico. Il messaggio lo invia solo l'utente.
+  function pannelloParlarne(box, r) {
+    if (!box) return;
+    if (!r) { box.hidden = true; box.innerHTML = ""; return; }
+    var nv = G.numeroVerde || {};
+    var numero = nv.numero || "800 55 88 22";
+    var tel = numero.replace(/\D/g, "");
+    var orari = nv.orari || "lunedì-venerdì 10:00-16:00";
+    var msg = "Ciao, ho fatto due conti su quanto spendo nel gioco e mi farebbe piacere parlarne con te. Quando hai un momento?";
+    box.innerHTML =
+      "<h2>Vuoi parlarne con qualcuno?</h2>" +
+      "<p>La spesa mensile della tua abitudine (<strong>" + eur2(r.spesaMese) + "</strong>) supera di <strong>" + eur2(r.eccedenza) +
+      "</strong> la soglia che hai scelto tu (" + eur(state.soglia) + " al mese).</p>" +
+      '<p><a class="btn btn-primary" id="link-tel" href="tel:' + tel + '">Chiama il Telefono Verde ISS ' + numero + "</a></p>" +
+      '<p class="note">Gratuito e anonimo, ' + orari + ".</p>" +
+      "<p>Oppure scrivi a una persona di fiducia. Il messaggio è già scritto: puoi cambiarlo e lo invii solo tu, se vuoi.</p>" +
+      '<blockquote class="msg">' + msg + "</blockquote>" +
+      '<p class="azioni"><a class="btn" id="link-wa" target="_blank" rel="noopener" href="https://wa.me/?text=' + encodeURIComponent(msg) + '">Scrivi su WhatsApp</a> ' +
+      '<a class="btn" id="link-mail" href="mailto:?subject=' + encodeURIComponent("Due parole") + "&body=" + encodeURIComponent(msg) + '">Scrivi una email</a></p>' +
+      '<p class="note">Questa pagina non salva e non invia nulla: né la soglia, né il messaggio, né i contatti.</p>';
+    box.hidden = false;
+  }
+
+  // ---------------------------------------- L3: probabilita' in cose fisiche (BR-15)
+  function stadiHtml(unoSuN) {
+    if (!has("scalaFisica") || !(unoSuN > 0) || !isFinite(unoSuN)) return "";
+    var sf = M.scalaFisica(unoSuN);
+    var n = Math.round(sf.stadi);
+    var html;
+    if (n >= 2) {
+      html = "<p>Per il premio massimo (" + unoSu(unoSuN) + ") servirebbero <strong>" + num(n) + " stadi da " + num(sf.postiStadio) +
+        " posti</strong>, tutti pieni: tra tutte queste persone, vincerebbe <strong>una persona sola</strong>.</p>";
+      var disegnati = Math.min(n, MAX_STADI_DISEGNATI);
+      var vincente = Math.floor(disegnati * 0.62);
+      var celle = "";
+      for (var i = 0; i < disegnati; i++) celle += i === vincente ? '<i class="win"></i>' : "<i></i>";
+      html += '<div class="stadi" role="img" aria-label="' + num(n) + ' stadi, uno solo contiene la persona che vince">' + celle + "</div>" +
+        '<p class="note">Ogni quadrato è uno stadio da ' + num(sf.postiStadio) + " posti; quello rosso contiene la sola persona che vince" +
+        (n > disegnati ? " (disegnati " + num(disegnati) + " stadi su " + num(n) + ")" : "") + ". Calcolo nostro: " + num(unoSuN) + " ÷ " + num(sf.postiStadio) + ".</p>";
+    } else {
+      html = "<p>Per il premio massimo (" + unoSu(unoSuN) + "): " + num(unoSuN) + " persone, meno di " + (n < 1 ? "uno stadio" : "due stadi") +
+        " da " + num(sf.postiStadio) + " posti. Tra loro, in media, vince una persona sola.</p>";
+    }
+    return html;
   }
 
   // ------------------------------------------------ 4. Un anno in 10 secondi
@@ -341,8 +435,62 @@
       premioMax: top ? top.premio : null,
       anniPremioMax: top && isFinite(top.anni) ? top.anni : null,
       giocoPremioMax: top ? M.trovaGioco(top.gioco).nome : null,
-      sim: sim
+      unoSuPremioMax: top ? M.probabilitaPremioMax(top.gioco, postaDi(top.gioco)).unoSu : null,
+      sim: sim,
+      folla: null
     };
+  }
+  function postaDi(id) { return state.sel[id] ? state.sel[id].posta : 1; }
+  function costoDi(id) {
+    var g = M.trovaGioco(id);
+    return g.tipo === "lotto" ? postaDi(id) : g.prezzo;
+  }
+  // Costo della giocata che ha prodotto l'evento: dal gioco dell'evento o, se c'e' un solo gioco, da quello.
+  function costoEvento(e) {
+    if (typeof e.costo === "number") return e.costo;
+    if (e.gioco) return costoDi(e.gioco);
+    var voci = abitudine().voci;
+    return voci.length === 1 ? costoDi(voci[0].gioco) : null;
+  }
+  function classeEvento(e) {
+    if (e.classe) return e.classe;
+    var c = costoEvento(e);
+    if (c === null) return "reali";
+    return e.premio <= c ? "rimborso" : e.premio <= 2 * c ? "piccole" : "reali";
+  }
+
+  // L1 (BR-13): toast "HAI VINTO X €" che diventa il saldo reale della giocata.
+  function mostraToast(e) {
+    var t = $("toast");
+    var cl = classeEvento(e), c = costoEvento(e);
+    var seconda;
+    if (cl === "rimborso") seconda = "hai recuperato la giocata: guadagno 0 €";
+    else if (c !== null) seconda = "tolta la giocata da " + eur(c) + ": guadagno " + eur(e.premio - c);
+    else seconda = "vincita di " + eur(e.premio);
+    t.className = "toast t-vinto";
+    t.innerHTML = "<strong>HAI VINTO " + eur(e.premio) + "</strong>";
+    t.hidden = false;
+    toast.timers.push(setTimeout(function () {
+      t.className = "toast t-saldo t-" + cl;
+      t.innerHTML = "<strong>HAI VINTO " + eur(e.premio) + "</strong><span>" + seconda + "</span>";
+    }, TOAST_FASE1));
+    toast.libero = performance.now() + TOAST_DURATA;
+    toast.timers.push(setTimeout(function () {
+      if (toast.coda) { var n = toast.coda; toast.coda = null; mostraToast(n); }
+    }, TOAST_DURATA));
+  }
+  function proponiToast(e) {
+    if (performance.now() >= toast.libero) mostraToast(e);
+    else toast.coda = e; // si mostra la vincita piu' recente appena il toast si libera
+  }
+
+  // Conteggio delle vincite per classe (dal motore se disponibile, altrimenti dagli eventi).
+  function nuovoConto() { return { rimborso: 0, piccole: 0, reali: 0, totale: 0, euroRimborso: 0 }; }
+  function contaEvento(k, e) {
+    var cl = classeEvento(e);
+    k[cl] = (k[cl] || 0) + 1;
+    k.totale++;
+    if (cl === "rimborso") k.euroRimborso += e.premio;
   }
 
   function avviaSimulazione() {
@@ -367,6 +515,13 @@
     $("vincite").innerHTML = "";
     $("sim-finale").innerHTML = "";
     $("btn-rivedi").disabled = true;
+    $("btn-banco").disabled = true;
+    mostraVista(false);
+    fermaToast();
+    $("stadi-anno").innerHTML = r.unoSuPremioMax ? "<h3>Il premio massimo, in scala</h3>" + stadiHtml(r.unoSuPremioMax) : "";
+    var conto = nuovoConto();
+    var haEventi = !!r.sim.totale.classiVincite || r.sim.giorni.some(function (d) { return Array.isArray(d.eventi); });
+    $("conto-vincite").textContent = haEventi ? testoConto(conto) : "";
 
     var durata = state.demo ? DURATA_DEMO : DURATA_NORMALE;
     var tot = r.sim.giorni.length;
@@ -382,10 +537,13 @@
       if (inizio === null) inizio = ts;
       var t = Math.min(1, (ts - inizio) / durata);
       var fino = Math.round(t * tot);
+      var ultimo = null;
       for (; mostrati < fino; mostrati++) {
         var g = r.sim.giorni[mostrati];
         celle[mostrati].className = giorniVincita[g.giorno] ? "w" : (g.speso > 0 ? "g" : "");
+        if (g.eventi) g.eventi.forEach(function (e) { contaEvento(conto, e); ultimo = e; });
       }
+      if (ultimo) { proponiToast(ultimo); $("conto-vincite").textContent = testoConto(conto); }
       while (vinciteMostrate < r.sim.vincite.length && r.sim.vincite[vinciteMostrate].giorno <= fino) {
         var v = r.sim.vincite[vinciteMostrate++];
         $("vincite").insertBefore(el("li", { text: "Giorno " + v.giorno + ": vinti " + eur(v.premio) }), $("vincite").firstChild);
@@ -423,8 +581,101 @@
     } else {
       html += "<p>Il premio massimo di questo gioco non è raggiungibile nella simulazione.</p>";
     }
+    html += riepilogoClassiHtml(r);
     $("sim-finale").innerHTML = html;
     $("btn-rivedi").disabled = false;
+    $("btn-banco").disabled = !has("simulaFolla");
+  }
+
+  function testoConto(k) {
+    return "Biglietti vincenti finora: " + num(k.totale) + " — di cui solo il rimborso della giocata: " + num(k.rimborso);
+  }
+
+  // L1: riepilogo di fine anno delle vincite per classe + quote esatte dalla tabella ufficiale.
+  function riepilogoClassiHtml(r) {
+    var t = r.sim.totale;
+    var k = nuovoConto(), haEventi = false;
+    r.sim.giorni.forEach(function (g) { if (g.eventi) { haEventi = true; g.eventi.forEach(function (e) { contaEvento(k, e); }); } });
+    if (t.classiVincite) { // fonte primaria: i conteggi del motore
+      k.rimborso = t.classiVincite.rimborso; k.piccole = t.classiVincite.piccole;
+      k.reali = t.classiVincite.reali; k.totale = t.classiVincite.totale;
+    } else if (!haEventi) return "";
+    if (!k.totale) return "";
+    var euroRimborso = haEventi ? k.euroRimborso : null;
+    var html = '<div class="classi"><h2>Le vincite di quest\'anno, una per una</h2>' +
+      "<p>Biglietti vincenti: <strong>" + num(k.totale) + "</strong>. Di questi:</p>" +
+      '<div class="barra-classi" role="img" aria-label="Ripartizione delle vincite">' +
+      '<span class="c-rimborso" style="flex:' + k.rimborso + '"></span>' +
+      '<span class="c-piccole" style="flex:' + k.piccole + '"></span>' +
+      '<span class="c-reali" style="flex:' + k.reali + '"></span></div>' +
+      '<ul class="lista-classi">' +
+      '<li><span class="sw c-rimborso"></span> <strong>' + num(k.rimborso) + "</strong> (" + perc(k.rimborso / k.totale, 0) + ") erano solo il rimborso della giocata: guadagno 0 €" +
+      (euroRimborso !== null ? " (in tutto " + eur(euroRimborso) + " tornati indietro, già spesi prima)" : "") + "</li>" +
+      '<li><span class="sw c-piccole"></span> <strong>' + num(k.piccole) + "</strong> (" + perc(k.piccole / k.totale, 0) + ") piccole vincite, fino al doppio della giocata</li>" +
+      '<li><span class="sw c-reali"></span> <strong>' + num(k.reali) + "</strong> (" + perc(k.reali / k.totale, 0) + ") vincite più grandi del doppio della giocata</li></ul>";
+    var voci = abitudine().voci;
+    if (has("riepilogoVincite") && voci.length) {
+      var id = voci[0].gioco, g = M.trovaGioco(id);
+      if (g.tipo !== "lotto") {
+        var rv = M.riepilogoVincite(id, postaDi(id));
+        html += '<p class="note">Dalla tabella premi ufficiale (' + g.nome + "): vince " + perc(rv.quotaBigliettiVincenti) + " dei biglietti (" +
+          unoSu(1 / rv.quotaBigliettiVincenti) + "); il " + perc(rv.quotaRimborso) + " delle vincite è il rimborso della giocata e il " +
+          perc(rv.quotaPiccole) + " è al massimo il doppio della giocata. " + citaFonte(g.fonte) + "</p>";
+      }
+    }
+    return html + "</div>";
+  }
+
+  // ------------------------------------------------ L2: Dalla parte del banco (BR-14)
+  function mostraVista(banco) {
+    state.vistaBanco = banco;
+    $("vista-mia").hidden = banco;
+    $("vista-banco").hidden = !banco;
+    $("btn-banco").textContent = banco ? "Torna alla tua vista" : "Dalla parte del banco";
+  }
+  function apriBanco() {
+    if (state.vistaBanco) { mostraVista(false); return; }
+    var r = state.risultati;
+    if (!r || !has("simulaFolla")) return;
+    var box = $("vista-banco");
+    fermaToast();
+    mostraVista(true);
+    if (r.folla) { renderBanco(r); return; }
+    box.innerHTML = '<p class="note">Simulo un anno per ' + num(N_FOLLA) + " persone…</p>";
+    $("btn-banco").disabled = true;
+    setTimeout(function () {
+      r.folla = M.simulaFolla(abitudine(), r.seme, N_FOLLA);
+      $("btn-banco").disabled = false;
+      renderBanco(r);
+    }, 30);
+  }
+  function renderBanco(r) {
+    var f = r.folla;
+    var q = f.quotaInAttivo !== undefined ? f.quotaInAttivo : f.inAttivo / f.n;
+    var verdi = Math.round(q * 100);
+    if (f.inAttivo > 0 && verdi === 0) verdi = 1;
+    var celle = "";
+    for (var i = 0; i < 100; i++) celle += i < verdi ? '<i class="attivo"></i>' : "<i></i>";
+    var html =
+      "<h2>Dalla parte del banco: " + num(f.n) + " persone con la tua stessa abitudine, per un anno</h2>" +
+      '<div class="banco-grid">' +
+      '<div><div class="folla" role="img" aria-label="' + num(f.inAttivo) + " persone su " + num(f.n) + ' in attivo">' + celle + "</div>" +
+      '<p class="note">Ogni quadrato = ' + num(f.n / 100) + " persone. Verde: in attivo a fine anno" +
+      (f.inAttivo > 0 && Math.round(q * 100) === 0 ? " (meno di un quadrato, arrotondato per essere visibile)" : "") + ".</p></div>" +
+      "<dl>" +
+      "<dt>In attivo a fine anno</dt><dd class=\"big\" style=\"color:var(--vinto)\">" + num(f.inAttivo) + " su " + num(f.n) + " (" + perc(q) + ")</dd>" +
+      "<dt>In perdita</dt><dd>" + num(f.n - f.inAttivo) + "</dd>" +
+      "<dt>Giocato da tutti</dt><dd>" + eur(f.speso) + "</dd>" +
+      "<dt>Tornato in vincite</dt><dd>" + eur(f.vinto) + "</dd>" +
+      "<dt>Incasso del banco</dt><dd class=\"big\" style=\"color:var(--perso)\">" + eur(f.incassoBanco) + "</dd>" +
+      "<dt>Perdita media per persona</dt><dd>" + eur2(f.perditaMedia) + "</dd>" +
+      "<dt>Perdita mediana per persona</dt><dd>" + eur2(f.perditaMediana) + "</dd>" +
+      "</dl></div>" +
+      '<p class="note">Stesso motore e stesse probabilità ufficiali della tua simulazione; seme fisso ' + r.seme + ".</p>" +
+      '<div class="italia"><h3>E in Italia</h3><p>Nel ' + ITALIA.anno + " la spesa netta nel gioco (giocato meno vinto) è stata di <strong>" +
+      num(ITALIA.spesaNettaMld, 1) + " miliardi di euro</strong>: oltre " + eur(ITALIA.perResidente) + " l'anno per ogni residente, neonati inclusi.</p>" +
+      '<p class="fonte">Fonte: ' + ITALIA.fonte + "; docs/idea/ricerca-azzardo.md.</p></div>";
+    $("vista-banco").innerHTML = html;
   }
 
   // -------------------------------------------------- 5. Capire i numeri
@@ -441,6 +692,7 @@
       eur(pm.premio) + ")." + (g.emissione ? " Nella serie completa da " + num(g.emissione) + " biglietti i vincenti sono " +
       num(Math.round(g.emissione / pm.unoSu)) + "." : "") +
       " È come scegliere a caso una sola persona tra tutti gli abitanti di una grande città europea.";
+    $("sa-stadi").innerHTML = stadiHtml(pm.unoSu);
     var griglie = Math.max(1, Math.ceil(pm.unoSu / PUNTI_GRIGLIA));
     var range = $("sa-range");
     range.max = String(griglie);
@@ -558,6 +810,55 @@
         (r.anniPremioMax !== null ? num(Math.round(r.anniPremioMax)) : "—") + "</span></div></div>";
     }
     box.innerHTML = html;
+    pannelloParlarne($("parlarne-7"), esitoSoglia());
+  }
+
+  // ------------------------------------- Pausa e Conto (BR-17, solo con ?pausa=1)
+  var pausa = { timer: null };
+  function initPausa() {
+    if (!pausaDaUrl || !has("contoBiglietto")) return;
+    var btn = $("btn-pausa"), sel = $("pausa-gioco");
+    btn.hidden = false;
+    G.giochi.forEach(function (g) {
+      if (g.tipo === "lotto") return; // posta variabile: il conto per biglietto vale per le lotterie
+      sel.appendChild(el("option", { value: g.id, text: g.nome }));
+    });
+    var rif = giocoRiferimento();
+    if (rif) sel.value = rif.id;
+    btn.addEventListener("click", apriPausa);
+    sel.addEventListener("change", renderPausa);
+    $("pausa-chiudi").addEventListener("click", chiudiPausa);
+    document.addEventListener("keydown", function (e) { if (e.key === "Escape" && !$("pausa").hidden) chiudiPausa(); });
+  }
+  function renderPausa() {
+    var id = $("pausa-gioco").value;
+    var c = M.contoBiglietto(id, 1);
+    $("pausa-dl").innerHTML =
+      "<dt>Costo del biglietto</dt><dd>" + eur(c.costo) + "</dd>" +
+      "<dt>Perdita media attesa per biglietto</dt><dd class=\"big\" style=\"color:var(--perso)\">" + eur2(c.perditaMediaPerBiglietto) + "</dd>" +
+      "<dt>Vincite che sono solo il rimborso della giocata</dt><dd>" + perc(c.quotaRimborso) + "</dd>" +
+      "<dt>Probabilità del premio massimo</dt><dd>" + unoSu(c.unoSu) + "</dd>" +
+      "<dt>In scala</dt><dd>" + (c.stadi >= 1 ? num(c.stadi) + " stadi da 60.000 posti pieni, vince una persona" : "meno di uno stadio") + "</dd>";
+  }
+  function apriPausa() {
+    fermaToast();
+    renderPausa();
+    $("pausa").hidden = false;
+    var resta = state.demo ? PAUSA_SECONDI_DEMO : PAUSA_SECONDI;
+    var t = $("pausa-timer");
+    t.textContent = "I numeri restano qui per " + resta + " secondi.";
+    clearInterval(pausa.timer);
+    pausa.timer = setInterval(function () {
+      resta--;
+      if (resta > 0) t.textContent = "Ancora " + resta + " secondi.";
+      else { clearInterval(pausa.timer); t.innerHTML = "<strong>La scelta è tua.</strong>"; }
+    }, 1000);
+    $("pausa-chiudi").focus();
+  }
+  function chiudiPausa() {
+    clearInterval(pausa.timer);
+    $("pausa").hidden = true;
+    $("btn-pausa").focus();
   }
 
   // ------------------------------------------------------------- avvio
@@ -576,8 +877,12 @@
       nv.numero + "</strong> — gratuito, anonimo, lun-ven 10:00-16:00.";
 
     renderQuiz($("quiz-prima"), domandePrima(), state.rispostePrima, null, aggiornaQuizPrima);
+    $("soglia").value = state.soglia === null ? "" : String(state.soglia);
+    $("soglia").addEventListener("input", leggiSoglia);
     renderAbitudine();
+    initPausa();
 
+    $("btn-banco").addEventListener("click", apriBanco);
     $("btn-inizia").addEventListener("click", function () { vai(2); });
     $("avanti-2").addEventListener("click", function () { if (completo(domandePrima(), state.rispostePrima)) vai(3); });
     $("avanti-3").addEventListener("click", function () { if (!$("avanti-3").disabled) vai(4); });
