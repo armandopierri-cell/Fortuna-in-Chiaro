@@ -253,3 +253,7 @@ Se dopo questo riesame si modificano solo README, `stato-avanzamento.md`, `test-
 ### 7.2 Verdetto del riesame 15:00: **PASS**
 
 Le modifiche sono circoscritte alla UI richiesta, non toccano il motore né le tabelle dati, non introducono testi di consiglio/giudizio e non introducono numeri scritti a mano: tutti i valori mostrati restano derivati da `G.giochi` e da `M.*` (Motore). I 40 test automatici restano verdi (40/40) e il repository è pulito. Nessun nuovo rilievo bloccante o maggiore. Restano valide, invariate, le condizioni per il push già registrate nella sezione 6 (remote pubblico, conferma umana di consegna, README §9).
+
+## Riesame 15:11 (786ad9a)
+
+**Verdetto: PASS.** Diff 052545..786ad9a (pp/src/ui.js): schedina con importo per giocata x quante volte x periodo. T2-V3 rispettato: testi nuovi (etichette, conversione biglietti) sono descrittivi, nessuna formula da consiglio/giudizio. I numeri derivano da G (prezzo del gioco in data/giochi.js) e dal Motore (M.trovaGioco, calcolo biglietti/importi); nessun valore inventato nella UI. Test: powershell -NoProfile -ExecutionPolicy Bypass -File app/tests/run-tests.ps1 -> **40 passati, 0 falliti**.
