@@ -1,6 +1,6 @@
 # Hagenthon — Hackathon Agentic Coding (Accenture)
 
-Lingua di lavoro: italiano. **Freeze: oggi alle 15:00.** Il tempo è il vincolo che decide ogni scelta.
+Lingua di lavoro: italiano. **Freeze: oggi alle 15:30** (deroga dei docenti; il regolamento riporta 15:00). Il tempo è il vincolo che decide ogni scelta.
 
 ## Fonti di verità (sola lettura, protette da un hook)
 - `00_input/regolamento.md`: tempi, consegna, criteri di valutazione.
@@ -42,6 +42,7 @@ idea → **[conferma umana]** → BR → sviluppo ⇄ test (business) → presen
 - **Skills**: `.claude/skills/presentazioni-accenture/` per la presentazione in brand Accenture.
 - **Hooks** (`.claude/settings.json`, script in `.claude/hooks/`):
   - `guard.ps1` (PreToolUse): blocca la scrittura in `00_input/` e i contenuti con API key;
+  - `guardrail-t2.ps1` (PreToolUse, leva L4): blocca in `app/` (eccetto `app/tests/` e i `.md`) formule da consiglio o giudizio ("ti consiglio", "smetti", ...), vincolo T2-V3 del Tema 02; provato su caso positivo/negativo in `docs/qa/evidenze-hook-t2.md` e verificato da `app/tests/testi.test.js`;
   - `post-edit-tests.ps1` (PostToolUse): dopo ogni modifica a `app/` esegue i test e riporta all'agente quelli falliti.
 
 ## Uso consapevole dei token
