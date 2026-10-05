@@ -2,7 +2,7 @@
 
 > File di passaggio tra sessioni: chi riprende il lavoro legge prima questo. Aggiornarlo a ogni decisione o milestone.
 
-**Freeze: 15:00 del 05/10/2026.** Ultimo aggiornamento: 12:10.
+**Freeze: 15:00 del 05/10/2026.** Ultimo aggiornamento: 12:45.
 
 ## Decisioni prese
 | Ora | Decisione | Chi |
@@ -10,11 +10,12 @@
 | 12:05 | Repository strutturato come da regolamento: app/, agents/, presentation/, docs/, README.md. 00_input/ e kb/ esclusi | orchestratore |
 | 12:05 | App in HTML/JS statico (sulla macchina mancano Node e Python), test in Edge headless | orchestratore |
 | 12:05 | Git installato con winget. Repository GitHub pubblico fornito dai docenti (URL da ricevere) | utente |
+| 12:45 | **Idea: "Fortuna in Chiaro"** (Tema 02): simulatore educativo sul gioco d'azzardo con probabilità ufficiali. Scartate dopo valutazione: 3A Palestra Digitale, N1 Prova Generale (NEET), 2B/Rata Vera+, X2 Truffa o No | utente |
 
 ## Verifiche umane
 | Ora | Punto | Esito |
 |---|---|---|
-| — | Scelta dell'idea | **IN ATTESA**: l'utente valuta in una chat separata. Raccomandata 3A "Palestra Digitale", riserva 2B "Rata Vera" (vedi docs/idea/) |
+| 12:45 | Scelta dell'idea | **APPROVATA dall'utente**: "Fortuna in Chiaro" (nome scelto dall'utente tra 4 proposte). Scheda: docs/idea/idea-selezionata.md. Prima della scelta l'utente ha chiesto una verifica di fattibilità e di efficacia della demo |
 | — | Consegna e push | da fare |
 
 ## Fatto

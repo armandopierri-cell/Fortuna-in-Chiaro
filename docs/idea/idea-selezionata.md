@@ -1,102 +1,69 @@
-# Idea selezionata
+# Idea selezionata: "Fortuna in Chiaro"
 
-> **PROPOSTA — in attesa di conferma utente.**
-> La raccomandazione si basa su **criteri proxy** (vedi `idee-valutate.md`) perché regolamento e criteri ufficiali non sono ancora disponibili. Va riconfermata quando arriveranno.
+> **CONFERMATA dall'utente il 05/10/2026 alle 12:45** (verifica umana registrata in `docs/governance/stato-avanzamento.md`).
+> Percorso di scelta: 6 idee iniziali (`idee-valutate.md`), 5 idee sul target NEET (`idee-neet.md`, con dati in `ricerca-neet.md`), rivalutazione finale sui 4 criteri ufficiali con 2 idee nuove. La proposta precedente (3A "Palestra Digitale") è nello storico git.
+> Numeri e tabelle premi: `ricerca-azzardo.md` (in corso di verifica). **Nessun numero entra nell'app o nel pitch se non è lì con fonte.**
 
----
+## In una frase
+Un simulatore educativo che mostra a chi gioca ogni giorno **quanto costa davvero sperare**: un anno di gioco in 10 secondi, con le probabilità ufficiali, e i concetti per capirlo da solo.
 
-## Raccomandazione: 3A — "Palestra Digitale" (Tema 03, Educazione Digitale Inclusiva) — 29/30
+## Tema e scenario
+- **Tema 02 — Inclusione Finanziaria.** Scenari del vincolo T2-V1: **simulazione di una scelta quotidiana** (la spesa giornaliera di gioco) e **comprensione di costi** (quanto si perde in media).
+- Un solo tema (C-01): niente capability o deliverable presi da altri temi.
 
-### Il concept in una frase
+## Persona (User Difficulty Statement)
+**Salvatore, 52 anni, autista, circa 1.300 € al mese.** Ogni giorno spende circa 10 € tra lotterie istantanee e lotto: "prima o poi tocca a me", "quel numero è in ritardo, deve uscire". Non ha mai fatto il conto di quanto spende in un anno, non sa che probabilità ha di vincere il premio massimo e crede che un numero "ritardatario" sia più probabile. **Difficoltà**: bassa alfabetizzazione finanziaria e statistica su una spesa quotidiana che pesa sul suo budget. **Perché è rilevante**: il gioco pesa di più su redditi e titoli di studio bassi (dati in `ricerca-azzardo.md`).
 
-Una palestra sicura dove **Teresa, 77 anni**, impara a comprare da sola il biglietto del treno su una replica realistica dell'app. Un coach si accorge di dove si blocca, la aiuta in modo graduato e toglie gli aiuti man mano che impara, finché non ce la fa senza nessuno.
+## Caso d'uso (cosa sviluppiamo)
+1. **Benvenuto** — "Quanto ti costa sperare?". Tono non giudicante.
+2. **Quiz prima** (3 domande a scelta multipla, punteggio registrato):
+   - quanto spendi in un anno giocando 10 € al giorno;
+   - che probabilità hai di vincere il premio massimo di un biglietto;
+   - un numero che non esce da 100 estrazioni ha più probabilità di uscire?
+3. **La mia abitudine** — scelgo i giochi (lotteria istantanea da 5 €, da 10 €, lotto) e quante volte al giorno/settimana → spesa giornaliera, mensile, annuale.
+4. **Un anno in 10 secondi** — simulazione animata giorno per giorno con le **probabilità ufficiali** e generatore pseudo-casuale con seme fisso (riproducibile in demo). Contatori: speso, vinto, perso. In parallelo il **valore atteso esatto** ("in media, su 100 € giocati ne tornano X"). Messaggio finale: "Per vincere il premio massimo una volta, in media, dovresti giocare per N anni".
+5. **Capire i numeri** — 3 schede brevi, ciascuna con un mini-esperimento:
+   - probabilità ("1 su N" reso visibile);
+   - valore atteso (perché "in media" si perde);
+   - estrazioni indipendenti (simulatore dei "ritardatari": la probabilità resta uguale).
+6. **Quiz dopo** (stesse 3 domande + 1 di trasferimento su un biglietto **mai visto**: "un biglietto da 2 € con payout X%: quanto perdi in media su 100 giocate?") → confronto prima/dopo.
+7. **Sempre visibili**: "Strumento educativo: mostra numeri e significati, non dà consigli" + numero verde nazionale per il gioco d'azzardo (dato verificato in `ricerca-azzardo.md`).
 
-### Value proposition
+## Miglioramento misurabile (T2-V2)
+- Quiz: da 0–1/3 prima a 3/3 dopo.
+- Trasferimento: calcola da solo la perdita attesa di un biglietto nuovo (no → sì).
+- Il cruscotto finale mostra i due punteggi a confronto.
 
-- **Per Teresa:** smette di dipendere dal nipote per un'azione che fa ogni mese e si allena senza paura di sbagliare o di pagare due volte.
-- **Per chi la aiuta (famiglia, volontari, sportelli di facilitazione digitale):** vede su cosa si blocca la persona e quanto è migliorata, senza doverle stare accanto.
-- **Differenziazione:** non è un tutorial video né un chatbot. Il sistema **osserva le azioni**, **decide** quale aiuto dare e **misura** l'apprendimento. L'intelligenza è nella logica del percorso, non in un testo generato.
-
-### Perché questa
-
-1. **Copre tutti i vincoli del tema in modo dimostrabile.** Profilo preciso (anziana con bassa alfabetizzazione digitale), scenario concreto, **miglioramento misurabile** su 4 dimensioni (completamento, errori, autonomia, ripetibilità) e **tutte e cinque** le capability agentiche elencate nel tema.
-2. **Ha la demo più forte e meno rischiosa.** Il prima/dopo è visibile sul cruscotto con numeri prodotti dal sistema stesso. C'è un **replay** di sessioni registrate come rete di sicurezza.
-3. **Non dipende da un LLM a runtime.** Il nucleo è a regole: se le API non sono consentite, l'idea resta intatta.
-4. **Rischio di contenuto basso.** Nessun tema sensibile (sanità, fisco, legale), nessun consiglio, pagamento solo simulato.
-5. **Si adatta bene all'agentic coding.** È tanta interfaccia + logica ben definita: il tipo di lavoro che Claude Code accelera di più. Due persone possono dividerselo bene (flusso app / motore coach + cruscotto).
-
-### Perimetro MVP
-
-**Dentro (3 ore):**
-- Replica senza marchi del flusso di acquisto ("TrenoFacile"): 5–6 schermate (tratta → data/ora → scelta treno → tariffa → riepilogo e passeggero → pagamento simulato → biglietto).
-- Tracciamento degli eventi per ogni passo: tocchi fuori dal punto giusto, inattività, ritorni indietro, errori nei campi, tempo per passo.
-- **Motore del coach a regole:** soglie per passo che dicono quando c'è un blocco. 3 livelli di aiuto (evidenzia / spiega / mostra), con testi semplici scritti e rivisti per ogni passo.
-- **Adattamento tra tentativi:** il livello di partenza dell'aiuto per ogni passo dipende da come è andato il tentativo precedente (fading).
-- **Modalità Allenamento** (con coach) e **Prova da sola** (senza aiuti, solo misurata).
-- **Cruscotto** dei tentativi: completato sì/no, errori, aiuti usati, tempo, passi "imparati".
-- **Replay** di 3 sessioni registrate (prima / allenamento / prova) per una demo sicura.
-- Interfaccia leggibile: caratteri grandi, alto contrasto, bersagli ampi.
-
-**Fuori (esplicitamente):**
-- Integrazione con app o servizi ferroviari reali, prezzi e orari reali.
-- Pagamenti reali o dati reali di carte.
-- Riconoscimento vocale (eventuale sintesi vocale degli aiuti solo se avanza tempo).
-- Altri scenari (SPID, app IO, home banking): sono la "visione", non l'MVP.
-- Account utente, salvataggio persistente su server, gestione di più utenti.
-- Promemoria personalizzato stampabile con i passi difficili (*nice-to-have*, solo se avanza tempo).
-- Aiuti generati da LLM a runtime (*opzionale*, dietro un interruttore, solo se le API sono consentite).
-
-### Mappatura sui deliverable del tema
-
+## Mappatura sui deliverable del tema (dentro presentazione e demo, R-09)
 | Deliverable | Come lo copriamo |
 |---|---|
-| 01 Learner Profile Statement | Teresa: chi è, perché le serve, i 3 punti precisi in cui si blocca. |
-| 02 Adaptive Evidence | Stesso passo ("tariffa") in 3 tentativi: aiuto di livello 3 → livello 1 → nessun aiuto, guidato dal tracciamento. |
-| 03 Learning Outcome Note | Prova da sola completata senza aiuti. Metriche dal cruscotto (prima/dopo). Limite dichiarato: verificato su persona simulata, da validare con utenti reali. |
+| 01 User Difficulty Statement | Salvatore: chi è, cosa crede, quanto spende, perché conta (numeri ufficiali) |
+| 02 Before / After Simplicity Evidence | Prima: "10 € al giorno, prima o poi vinco". Dopo: "3.650 € in un anno, me ne tornano in media X, premio massimo 1 volta ogni N anni" + quiz 1/3 → 3/3 |
+| 03 Risk & Clarity Note | Cosa è semplificato (un anno simulato, giochi selezionati), cosa non è alterato (probabilità e premi ufficiali, citati), come si evita ambiguità (valore atteso esatto accanto alla simulazione; nessun consiglio; nessun giudizio) |
 
-### Assunzioni
+## Vincoli e guardrail
+- **T2-V3**: mai consigli, mai "smetti", "gioca meno" o "conviene": solo numeri e significati. La decisione resta a Salvatore.
+- **Non è un servizio clinico**: nessuna valutazione di dipendenza; solo il rimando al numero verde ufficiale.
+- **Nessun marchio commerciale**: "lotteria istantanea da 5 €" con struttura premi ufficiale citata come fonte.
+- **T2-E4**: probabilità e premi identici alla fonte ufficiale; arrotondamenti dichiarati.
+- **Nessun dato personale** salvato fuori dal browser.
 
-- Le API LLM a runtime **potrebbero non** essere consentite: il design non ne ha bisogno.
-- È lecito costruire una **replica** di un flusso reale purché senza marchi, loghi e nomi commerciali.
-- In demo un membro del team **interpreta Teresa**. Le metriche sono reali per quella sessione, ma non sono un test con utenti veri.
-- Si può usare un browser moderno e il proiettore. Se serve, la demo gira in locale senza rete.
+## Perimetro MVP
+**Dentro**: le 7 schermate sopra; modulo di calcolo (spesa, valore atteso, probabilità) e simulatore con seme fisso, entrambi con test; dati dei giochi in JSON con fonte; quiz con punteggio; cruscotto prima/dopo; modalità demo (seme fisso, animazione rapida).
+**Fuori**: slot e gioco online, scommesse sportive, dati reali dell'utente, profilazione del rischio di dipendenza, account, LLM a runtime.
 
-### Rischi e mitigazioni
+## Strategia AI
+Claude Code (team agentico in `.claude/agents/`) usato in fase di sviluppo per ricerca, codice, testi e test; **zero token a runtime**: l'app è logica deterministica su dati ufficiali, quindi nessuna chiave API nel browser e costo per utente nullo. Revisione umana su numeri, testi e tono.
 
+## Demo (circa 2'30")
+1. 0:00–0:20 — Salvatore e il quiz prima (1/3).
+2. 0:20–1:20 — La sua abitudine e **un anno in 10 secondi**: i contatori corrono, perdita finale, "premio massimo una volta ogni N anni".
+3. 1:20–1:50 — Il simulatore dei ritardatari.
+4. 1:50–2:30 — Quiz dopo 3/3 + trasferimento sul biglietto nuovo; cruscotto prima/dopo; Risk & Clarity Note.
+
+## Rischi
 | Rischio | Mitigazione |
 |---|---|
-| Troppe schermate per 3 ore | Partire da 4 schermate essenziali (tratta, treno, tariffa, pagamento). Aggiungere le altre solo se il coach funziona. |
-| Soglie del coach "a caso" | Soglie semplici e dichiarate (es. 15 s di inattività, 2 tocchi sbagliati), da spiegare con trasparenza come scelta di design. |
-| Demo dal vivo instabile | Modalità replay delle sessioni registrate. Video di backup. |
-| "È solo un mock" | Raccontarla come **palestra**: il valore è allenarsi senza rischi. Il trasferimento sull'app vera è il passo successivo dichiarato. |
-| Metriche poco credibili | Dichiarare che la persona è simulata. Mostrare la logica di misura e proporre un mini test con utenti reali dopo l'hackathon. |
-| AI poco "visibile" | Spiegare dove ha lavorato Claude Code (sviluppo, bozze dei testi di aiuto) e dove c'è stata revisione umana (testi, soglie, prove). |
-
----
-
-## Riserva: 2B — "Rata Vera" (Tema 02, Inclusione Finanziaria) — 27/30
-
-### Perché è la riserva
-
-1. **Il momento wow più immediato per il pubblico:** "10 rate a tasso zero" diventa "645 €, TAEG circa 18%" (numeri di esempio, da ricalcolare nel prototipo). Chiunque in sala capisce subito.
-2. **La capability più solida e testabile:** motore di calcolo deterministico (piano rate, TAEG calcolato dai flussi, simulazione del budget), con test automatici. Nessuna dipendenza da LLM.
-3. **Diversifica il rischio:** è su un tema diverso. Se il tema 03 fosse affollato, o se i criteri ufficiali premiassero la correttezza tecnica, diventa la scelta migliore.
-4. **Contro:** è al limite del divieto di consulenza. Serve una regola ferma: **una sola offerta, solo numeri e significati, mai "conviene" né classifiche**. Su questo si gioca la "Risk & Clarity Note".
-
-### Perimetro MVP (sintesi)
-
-- **Dentro:** foglio SECCI di esempio precompilato e modificabile; calcolo di rata, totale, costo del credito, TAEG ricalcolato e confronto con quello dichiarato; timeline della rata dentro il budget inserito dall'utente; scenario "rata saltata"; glossario di 8 termini; quiz di 3 domande prima/dopo.
-- **Fuori:** confronto tra più offerte, qualsiasi raccomandazione, lettura automatica di PDF reali, dati bancari reali.
-
-### Nota sull'alternativa 1B "Slot Parlante" (27/30)
-
-A pari punteggio con 2B, ma con una fattibilità più bassa (riconoscimento e sintesi vocale, audio in sala). Da preferire alla riserva **solo** se i criteri ufficiali premiano molto impatto emotivo e innovazione e il team è a suo agio con le tecnologie vocali del browser.
-
----
-
-## Prossimi passi (dopo la conferma)
-
-1. Conferma (o scelta diversa) dell'utente.
-2. Ricalcolo della matrice con i criteri ufficiali appena disponibili.
-3. Stesura di `pitch-narrative.md` (storyline, momento wow, script della demo).
-4. Passaggio ai requisiti di business (BR).
+| Tema delicato davanti alla giuria | Tono educativo e non giudicante; dati ufficiali; rimando al numero verde |
+| Tabella premi ufficiale non reperibile per intero | Usare payout medio e probabilità del premio massimo ufficiali, dichiarando la semplificazione nella Risk & Clarity Note |
+| Simulazione percepita come "truccata" | Valore atteso esatto mostrato accanto; seme fisso dichiarato; test automatici sui calcoli |
