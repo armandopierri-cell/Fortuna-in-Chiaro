@@ -1,6 +1,6 @@
 # Verdetto QA pre-rilascio: "Fortuna in Chiaro" (Tema 02)
 
-> **Verdetto corrente (Riesame 14:20, commit `c485ab5`): PASS con riserva, condizionato ai soli punti in attesa dell'utente.** Vedi la sezione 5 "Riesame 14:20" in fondo. Le sezioni 1-4 restano come registro della review delle 14:15.
+> **Verdetto corrente (Riesame finale 14:41, commit `ae31895`): PASS con riserva. Condizioni per il push: QA-002 (remote e URL pubblico), conferma umana di consegna, QA-019 (README §9).** Vedi la sezione 6 "Riesame finale 14:41" in fondo. Le sezioni 1-5 restano come registro delle review delle 14:15 e delle 14:20.
 
 | Campo | Valore |
 |---|---|
@@ -175,3 +175,61 @@ I bloccanti in carico ai team (QA-001, QA-003, QA-004) sono chiusi e committati 
 **Riserve, consigliate prima del push (circa 5 minuti, non bloccanti)**: QA-016 (percorso inesistente `presentation/sezioni/` nel README), QA-019 (§9 del README aggiornato con verdetto e URL), QA-018, QA-017. Prima della demo dal vivo: QA-008, cioè la prova di DEF-002 in un browser reale.
 
 Se dopo questo riesame si modifica `.claude/`, `CLAUDE.md`, `app/` o `presentation/`, bisogna rieseguire `agents/sync.ps1` e `run-tests.ps1`. Se le modifiche toccano qualcosa oltre README, stato-avanzamento e defect-log, serve un nuovo giro QA rapido.
+
+## 6. Riesame finale 14:41 (solo differenze)
+
+| Campo | Valore |
+|---|---|
+| Versione revisionata | commit `ae31895` ("UAT v3: TC-01/06/24 Pass (24/24), DEF-002 chiuso"), `git status` pulito |
+| Decisioni dell'utente verificate | checkpoint 14:30 (`stato-avanzamento.md` r.23 e r.30): Lotto tolto; BR-17 attivo di default; nome "Fortuna in Chiaro"; stima ~150 mln € e biglietto didattico da 2 € mantenuti |
+| Freeze | 15:30 (deroga; `CLAUDE.md` e `stato-avanzamento.md` r.5) |
+
+### 6.1 Verifiche eseguite
+
+| Verifica | Esito | Evidenza |
+|---|---|---|
+| Test automatici | **OK** | `run-tests.ps1` rieseguito da QA alle 14:4x: `RISULTATO: 40 passati, 0 falliti`, exit 0 |
+| Lotto non più gioco selezionabile (app) | **OK** | `app/index.html` non contiene "Lotto". `motore.test.js` r.67 verifica "nessun Lotto" tra i giochi selezionabili. In app il Lotto resta solo come esempio nel concetto dei ritardatari (`ui.js` r.719, `motore.js` r.288, `giochi.js` r.73) e nella domanda del quiz sulla fallacia del giocatore (`quiz.js` r.36). È coerente con la decisione |
+| Lotto (BR, tracciabilità, README) | **OK** | `business-requirements.md` r.44 (criterio "nessuna opzione Lotto"), `analisi-funzionale.md` r.25, `app/tracciabilita.md` r.5 e r.11, `app/README.md` r.13, `app/ARCHITETTURA.md` r.35 sono allineati. Il README di radice non nomina il Lotto |
+| Lotto (presentazione) | **OK** | `presentation/index.html` non contiene "Lotto", "ambo" né "terno". La slide 06 ora ha 5 righe, senza la riga Lotto |
+| Nome del progetto | **OK** | "Quanto costa sperare?" non compare più come nome. "Fortuna in Chiaro" compare in README r.1, `<title>` e slide 01, 09 e appendice della presentazione, `app/index.html`, BR e test. L'unica occorrenza simile è una frase del parlato nella nota della slide 09 ("quanto gli costa sperare"): è una frase, non il nome. Accettabile |
+| BR-17 attivo di default | **OK** | `ui.js` r.19 (`?pausa=0` lo disattiva), BR-17 r.226-230, README r.13. DEF-002 è chiuso nel `defect-log.md`, TC-24 è Pass (24/24) |
+| Stima ~150 mln € | **OK** | Slide 18 (A8) con badge "Stima nostra", calcolo e "Ipotesi non misurata" dichiarati. È in appendice, non nel parlato |
+| R-10: 5'00" demo compresa | **OK, con riserva** | La scaletta (commento r.15-25 e note delle slide 01-09) somma 300" = 5'00". Pausa e Conto è un tasto: compare solo se lo si preme, quindi non allunga la demo da solo. Riserva: le note non sono state riallineate alla decisione (QA-017, QA-020) |
+| R-09: i 3 deliverable | **OK** | Slide 02 "Deliverable 01" (User Difficulty Statement), slide 05 "Deliverable 02" (Before/After), slide 06 "Deliverable 03" (Risk & Clarity Note) |
+| `agents/` allineata a `.claude/` | **OK** | Confronto per hash di tutti i file di `.claude/` (escluso `settings.local.json`): nessuna differenza e nessun file mancante. L'ultimo commit su `.claude/` (`ecf4a34`, 13:15) precede l'ultimo sync in `agents/` (`99454b4`, 14:19). `CLAUDE.md` e `agents/CLAUDE.md` coincidono (freeze 15:30). Non serve un nuovo sync |
+| Igiene del repository | **OK** | `.gitignore` esclude `00_input/`, `kb/`, `.claude/settings.local.json`, `.env`, `*.key`. `git ls-files` (61 file) non contiene nulla di `00_input/` o `kb/`. Nessun pattern di segreto (`sk-…`, `AKIA…`, `ghp_…`, `xox…`) nei file di lavoro. Nessun file di prova o temporaneo tracciato: gli unici `*.test.js` sono la suite ufficiale in `app/tests/` |
+
+### 6.2 Stato dei rilievi precedenti
+
+| Rilievo | Stato | Nota |
+|---|---|---|
+| QA-008 DEF-002 | **Chiuso** | `defect-log.md` DEF-002 chiuso; TC-24 Pass nel `test-report.md` (UAT v3) |
+| QA-006 Go/no-go BR-17 | **Chiuso** | Decisione dell'utente registrata al checkpoint delle 14:30 (`stato-avanzamento.md` r.23 e r.30) |
+| QA-012 Slide 06 | **Aperto** (Minore) | La riga Lotto è stata tolta. Manca ancora una voce esplicita "Ambiguità evitata" |
+| QA-017 Nota della slide 04 | **Aperto** (Minore) | La nota dice ancora "Se BR-17 è approvato: ... al posto del passo 4 **o 10" prima della chiusura**". La seconda opzione porta sopra i 5'00" (R-10) |
+| QA-018 Conteggio dei test | **Aperto** (Minore) | `test-report.md` r.7 dice ancora "41 test passati", mentre r.43 dice 40. Va allineato a 40 |
+| QA-019 README §9 | **Aperto** (Maggiore, condizione al push) | Il §9 dice ancora "Ultimo verdetto QA: FAIL con condizioni", "verifiche umane (14:20) In attesa" e ha data 14:25. È in contrasto con R-06 (README onesto alla consegna) |
+| QA-005, 009, 010, 011, 013, 014, 015 | Invariati | Non bloccanti. Per QA-009: i 40 "passati" comprendono ancora 2 test che dichiarano "verifica NON eseguita" |
+
+### 6.3 Nuovi rilievi (non bloccanti)
+
+| ID | Gravità | Regola | Rilievo | Cosa correggere | Owner |
+|---|---|---|---|---|---|
+| QA-020 | Minore | Coerenza tra BR e presentazione; R-10 | La presentazione non è stata riallineata a BR-17 "attivo di default". (a) Slide 17 (A7): badge "Opzionale · BR-17" e testo "Attivata solo da Salvatore (BR-17, Could). Se approvata al checkpoint…". Ora BR-17 è Should e attivo. (b) Il commento in testa al file (r.27-40) dice ancora "TARATURA DEMO DA FARE A PRODOTTO FINITO" | (a) Cambiare il badge in "BR-17 · attivo" e togliere "Could" e "se approvata". (b) Dopo la prova della demo dell'utente, fissare il copione della slide 04 (Pausa e Conto al posto del passo 4, oppure fuori dal copione) e togliere il commento "DA FARE". Insieme a QA-017 sono circa 3 minuti di lavoro | innovazione |
+| QA-021 | Minore | Coerenza tra deliverable dopo la rimozione del Lotto | Restano riferimenti al Lotto come gioco: `analisi-funzionale.md` r.45 (domanda "tra lotterie istantanee e lotto"); `stato-avanzamento.md` r.75 ("Lotto mantenuto con etichetta fonte terzi … Provvisoria", contraddice r.30). `idea-selezionata.md` r.23 è un documento storico dell'idea, accettabile | Correggere r.45 e chiudere r.75 come "Superata: Lotto tolto al checkpoint 14:30" | business (r.45), governance (r.75) |
+
+Nota: le righe 55 e 136 di questo file (sezioni 2 e 5) descrivono lo stato precedente al checkpoint delle 14:30. Restano come registro storico. Vale la sezione 6.
+
+### 6.4 Verdetto del riesame finale 14:41: **PASS con riserva**
+
+Non restano violazioni del regolamento in carico ai team. App, BR, test, README e presentazione sono coerenti con le decisioni delle 14:30: niente Lotto selezionabile, nome "Fortuna in Chiaro", BR-17 attivo. R-09 e R-10 sono rispettati (300" = 5'00"). I test sono verdi (40/0), l'UAT è 24/24, `agents/` è allineata e il repository è pulito.
+
+**Condizioni per il push**, nessuna eccezione:
+1. QA-002: remote GitHub **pubblico** creato e URL verificato da una sessione non autenticata (in attesa dell'utente).
+2. Conferma umana di consegna registrata in `stato-avanzamento.md` (r.31-32 ora "In attesa").
+3. QA-019: §9 del README aggiornato con il verdetto corrente (questo), l'URL del repository e la conferma umana. Il README è il punto d'ingresso di chi valuta e oggi dichiara un FAIL.
+
+**Riserve, consigliate prima del push (circa 5 minuti in tutto)**: QA-017 e QA-020 (innovazione), QA-018 e QA-021 (business, governance).
+
+Se dopo questo riesame si modificano solo README, `stato-avanzamento.md`, `test-report.md`, `analisi-funzionale.md` o le note e i badge della presentazione, non serve un nuovo giro QA. Se si modifica `app/`, bisogna rieseguire `run-tests.ps1`. Se si modifica `.claude/` o `CLAUDE.md`, bisogna rieseguire `agents/sync.ps1`.

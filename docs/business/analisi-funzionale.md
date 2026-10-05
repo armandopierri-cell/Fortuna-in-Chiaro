@@ -42,7 +42,7 @@ Ogni scheda gioco in app mostra costo, payout, probabilità del premio massimo e
 ### 2. Quiz prima
 - **Elementi**: 3 domande a scelta multipla (radio), pulsanti "Avanti"/"Indietro".
 - **Domande** (risposta corretta in **grassetto**, spiegazione mostrata dopo la risposta):
-  1. "Se spendi 10 € al giorno tra lotterie istantanee e lotto, quanto spendi in un anno?"
+  1. "Se spendi 10 € al giorno in lotterie istantanee, quanto spendi in un anno?"
      A) 365 €  B) 1.825 €  **C) 3.650 €**  D) 7.300 €
      Spiegazione: "10 € × 365 giorni = 3.650 €."
   2. "Qual è la probabilità di vincere il premio massimo (500.000 €) con una lotteria istantanea da 5 € come il modello A?"

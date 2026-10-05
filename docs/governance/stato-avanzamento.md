@@ -72,7 +72,7 @@ Ora corrente 14:23. Tempo residuo al freeze: **1 h 07 min**. `git status`: solo 
 ## Decisioni provvisorie (SUPERATE dalle decisioni dell'utente alle 14:30)
 | Decisione | Stato | Note |
 |---|---|---|
-| Lotto mantenuto con etichetta "fonte terzi" (non nominato come marchio) | Provvisoria | Tracciato in data/giochi.json; rispetta T2-V3 (no consigli); confermato BR-04 |
+| ~~Lotto mantenuto con etichetta "fonte terzi"~~ | **Superata** | Decisione utente 14:30: Lotto tolto dall'app (app/data/giochi.js contiene solo le lotterie istantanee A e B) |
 | Biglietto didattico da 2 € con payout 70% (esempio per BR-17) | Provvisoria | Usato solo per quiz di trasferimento (domanda 4); non influenza l'UA con Salvatore (che gioca il suo biglietto da 5 € o 10 €) |
 | BR-17 "Pausa e Conto" nascosto dietro flag `?pausa=1` | Provvisoria | Se approvato al checkpoint, integrare nella demo; se no, rimuovere il flag e il bottone |
 | Stima valore ~150 mln € in appendice della presentazione | Provvisoria | Stima nostra (docs/idea/valore-checkpoint.md): 1% dei 18 mln di giocatori adulti (ISS) × 70% che arriva a 3/3 × perdita media ~1.190 €/anno (21,5 mld € ADM / 18 mln). Perdite rese consapevoli, non risparmi |

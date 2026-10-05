@@ -100,16 +100,12 @@ Flusso e stanze (Motore, Esperienza) dettagliati in `agents/WORKFLOW.md`.
 
 ## 9. Stato della consegna (onesto, a questo istante)
 
-- Ultimo verdetto QA: **FAIL con condizioni** (`docs/qa/verdetto-qa.md`, rilievi QA-001…QA-004
-  bloccanti). Questo README chiude QA-001. Gli altri rilievi (remote GitHub assente, stato
-  `test-report.md`/`defect-log.md` su DEF-001) vanno verificati dai rispettivi owner prima del push.
-- **Non esiste ancora un remote GitHub**: `git remote -v` non restituisce nulla. Il repository
-  pubblico non è stato ancora creato né il push eseguito.
-- Nessun nuovo giro QA con verdetto PASS è stato ancora emesso dopo questa revisione.
-- Verifiche umane di checkpoint (14:20) e di consegna sono registrate come "In attesa" in
-  `docs/governance/stato-avanzamento.md`: non ancora confermate.
-- **Push non eseguito**: non va fatto finché non c'è un verdetto QA PASS sulla versione corrente
-  e la conferma umana di consegna.
+- Ultimo verdetto QA: **PASS con riserva** (`docs/qa/verdetto-qa.md`, riesame finale 14:41 su `ae31895`):
+  UAT 24/24, DEF-001 e DEF-002 chiusi, 40 test automatici verdi, `agents/` allineata a `.claude/`.
+- Checkpoint idea e valore: **svolto con l'utente alle 14:30** (decisioni in `docs/governance/stato-avanzamento.md`).
+- Restano prima del push: remote GitHub (URL dall'utente), taratura della demo a 5'00" e
+  **conferma umana di consegna**.
+- **Push non ancora eseguito.**
 
 ---
-**Aggiornato:** 05/10/2026, 14:25 — Governance. **Freeze:** 15:30 (deroga; regolamento riporta 15:00).
+**Aggiornato:** 05/10/2026, 14:45 — orchestratore. **Freeze:** 15:30 (deroga; regolamento riporta 15:00).
