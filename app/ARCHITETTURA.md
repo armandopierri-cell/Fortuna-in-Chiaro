@@ -59,9 +59,9 @@ Tutte funzioni pure: nessun accesso al DOM, nessuno stato globale. Importi in eu
 | `trovaGioco(id)` | oggetto gioco o eccezione | `trovaGioco("istantanea-5-a").prezzo` → `5` |
 | `spesa(abitudine)` | `{ giorno, mese, anno }` (mese = anno/12, anno = giorno×365) | 2×5 €/giorno → `{ giorno: 10, mese: 304.17, anno: 3650 }` |
 | `spesaAnnuaDaGiornaliera(eur)` | numero | `10` → `3650` |
-| `valoreAtteso(giocoId, posta?)` | `{ costo, ritorno, perPerEuro }` per una giocata | A → `{ costo: 5, ritorno: 3.5607, perEuro: 0.7121 }` |
+| `valoreAtteso(giocoId, posta?)` | `{ costo, ritorno, perEuro }` per una giocata | A → `{ costo: 5, ritorno: 3.5607, perEuro: 0.7121 }` |
 | `payout(giocoId)` | frazione restituita per euro | A → `0.7121`, B → `0.6006`, ambo → `0.6242` |
-| `perditaAttesa(abitudine)` | `{ giorno, anno, spesaAnno, ritornoAnno, perEuro }` | Salvatore → `anno ≈ 1051.3` (su 3.650) |
+| `perditaAttesa(abitudine)` | `{ giorno, anno, spesaAnno, ritornoAnno, perEuro }` | Salvatore → `anno ≈ 1050.83` (su 3.650) |
 | `perditaAttesaSu(prezzo, payout, giocate)` | numero (per la domanda di trasferimento) | `(2, 0.7, 100)` → `60` |
 | `probabilitaPremioMax(giocoId)` | `{ premio, p, unoSu }` | A → `{ premio: 500000, p: 8.01e-8, unoSu: 12480000 }` |
 | `probabilitaVincita(giocoId)` | p di vincere qualunque premio (rimborso incluso) | A → `0.2383` |

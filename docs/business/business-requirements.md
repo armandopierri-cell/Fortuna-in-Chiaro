@@ -52,8 +52,8 @@
 **Vincolo di tema**: T2-V1, T2-V2, T2-E2; rischio "simulazione percepita come truccata" mitigato dal valore atteso esatto accanto (vedi Risk & Clarity Note, T2-E3).
 
 **Criteri di accettazione**
-- Dato il gioco "lotteria istantanea modello A" (payout 71,2%, fonte `ricerca-azzardo.md` §1.1) e una spesa di 10€/giorno per 365 giorni, quando la simulazione gira con seme fisso, allora il valore atteso esatto mostrato è **perdita attesa ≈ 1.051,80 €/anno** (3.650 € × 28,8%), calcolato analiticamente e non dal campionamento casuale.
-- Dato lo stesso gioco, quando viene mostrato "N anni per il premio massimo", allora il numero è calcolato come (1 / probabilità vincita premio massimo) ÷ (biglietti giocati all'anno); con 1 biglietto/giorno (365/anno) e probabilità 1/12.480.000 (fonte §1.1 [UFF]), il risultato è **N ≈ 34.192 anni** [DERIV, calcolo nostro — da segnalare come stima derivata, non dato di fonte diretta].
+- Dato il default Salvatore — "lotteria istantanea modello A" (payout 71,2%, fonte `ricerca-azzardo.md` §1.1), 2 biglietti al giorno = 10 €/giorno, 365 giorni — quando la simulazione gira con seme fisso, allora il valore atteso esatto mostrato è **perdita attesa ≈ 1.051,20 €/anno** (3.650 € × 28,8%), calcolato analiticamente e non dal campionamento casuale.
+- Dato lo stesso default (2 biglietti/giorno = 730 biglietti/anno), quando viene mostrato "N anni per il premio massimo", allora il numero è calcolato come 1 / (probabilità vincita premio massimo × biglietti giocati all'anno); con probabilità 1/12.480.000 (fonte §1.1 [UFF]) e 730 biglietti/anno, il risultato è **N ≈ 17.096 anni** [DERIV, calcolo nostro, coerente con `docs/business/analisi-funzionale.md` §4 — da segnalare come stima derivata, non dato di fonte diretta].
 - Dato che la modalità demo è attiva (BR-10), quando si lancia la simulazione, allora il seme è fisso e il risultato (contatori finali) è identico ad ogni esecuzione in demo.
 - Dato la simulazione in corso, quando l'utente la osserva, allora i contatori "speso/vinto/perso" si aggiornano progressivamente senza bloccare l'interfaccia per più di ~10-15 secondi totali.
 

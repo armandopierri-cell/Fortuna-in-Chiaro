@@ -1,0 +1,167 @@
+// Test del motore di calcolo (eseguiti da tests.html in Edge headless).
+(function () {
+  var M = window.Motore, G = window.GIOCHI;
+  function vicino(a, b, tol, msg) {
+    if (Math.abs(a - b) > tol) throw new Error((msg ? msg + ": " : "") + "atteso " + b + " ± " + tol + ", ottenuto " + a);
+  }
+  var salvatore = { voci: [{ gioco: "istantanea-5-a", volte: 2, periodo: "giorno" }] };
+
+  // ---- Spesa (BR-03) ----
+  test("10 €/giorno -> 3.650 €/anno", function () {
+    assertEqual(M.spesaAnnuaDaGiornaliera(10), 3650);
+    var s = M.spesa(salvatore);
+    assertEqual(s.giorno, 10); assertEqual(s.anno, 3650);
+    vicino(s.mese, 304.1667, 0.001, "mese");
+  });
+  test("spesa settimanale: 7 volte a settimana = 1 al giorno", function () {
+    var s = M.spesa({ voci: [{ gioco: "istantanea-5-b", volte: 7, periodo: "settimana" }] });
+    vicino(s.giorno, 5, 1e-9); vicino(s.anno, 1825, 1e-9);
+  });
+  test("spesa lotto con posta scelta + abitudine mista", function () {
+    var s = M.spesa({ voci: [salvatore.voci[0], { gioco: "lotto-ambo", volte: 1, periodo: "giorno", posta: 2 }] });
+    assertEqual(s.giorno, 12);
+  });
+  test("abitudine vuota -> spesa 0", function () { assertEqual(M.spesa({ voci: [] }).anno, 0); });
+  test("gioco sconosciuto -> eccezione", function () {
+    var ok = false; try { M.trovaGioco("xyz"); } catch (e) { ok = true; } assert(ok);
+  });
+
+  // ---- Dati coerenti con la fonte (BR-09) ----
+  test("ogni gioco ha fonte con sezione di ricerca-azzardo.md", function () {
+    G.giochi.forEach(function (g) {
+      assert(g.fonte && g.fonte.url && /ricerca-azzardo\.md §/.test(g.fonte.sezione), "fonte mancante per " + g.id);
+    });
+    assert(/ricerca-azzardo\.md §6/.test(G.numeroVerde.sezione));
+  });
+  test("probabilita' calcolate = probabilita' dichiarate nella tabella ufficiale", function () {
+    G.giochi.filter(function (g) { return g.tipo === "istantanea"; }).forEach(function (g) {
+      g.premi.forEach(function (p) {
+        if (p.unoSu === null) return;
+        var calc = g.emissione / p.vincenti;
+        // la fonte arrotonda all'intero (o a 2 decimali sotto 100)
+        vicino(calc, p.unoSu, p.unoSu < 100 ? 0.51 : 0.5, g.id + " premio " + p.premio);
+      });
+    });
+  });
+  test("premio massimo modello A: 500.000 € con 1 su 12.480.000", function () {
+    var pm = M.probabilitaPremioMax("istantanea-5-a");
+    assertEqual(pm.premio, 500000); assertEqual(pm.unoSu, 12480000);
+    assertEqual(M.formattaUnoSu(pm.unoSu), "1 su 12.480.000");
+  });
+  test("montepremi modello A = 177.740.800 € (§1.1)", function () {
+    vicino(M.valoreAtteso("istantanea-5-a").ritorno * 49920000, 177740800, 1e-3);
+  });
+  test("payout = valori dichiarati (A 71,2%, B 60,1%, ambo 62,4%, terno 38,3%)", function () {
+    G.giochi.forEach(function (g) { vicino(M.payout(g.id), g.dichiarati.payout, 0.0006, g.id); });
+  });
+  test("quota biglietti vincenti = dichiarata (A 23,8%, B 13,9% = 1 su 7,20)", function () {
+    vicino(M.probabilitaVincita("istantanea-5-a"), 0.238, 0.0005);
+    vicino(M.probabilitaVincita("istantanea-5-b"), 0.139, 0.0005);
+    vicino(1 / M.probabilitaVincita("istantanea-5-b"), 7.20, 0.005);
+  });
+  test("payout dei biglietti sotto il tetto medio di legge del 75% (§3)", function () {
+    G.giochi.filter(function (g) { return g.tipo === "istantanea"; }).forEach(function (g) {
+      assert(M.payout(g.id) <= G.tettoPayoutLotterie.valore, g.id);
+    });
+  });
+  test("lotto: 1 su 400,5 = C(90,2)/C(5,2) con 5 estratti su 90", function () {
+    vicino((90 * 89 / 2) / (5 * 4 / 2), M.trovaGioco("lotto-ambo").probabilitaUnoSu, 1e-9);
+  });
+
+  // ---- Valore atteso e perdita attesa (BR-04) ----
+  test("perdita attesa Salvatore: 3.650 € × 28,79% ≈ 1.050,83 €/anno", function () {
+    var p = M.perditaAttesa(salvatore);
+    vicino(p.anno, 3650 * (1 - 177740800 / 249600000), 1e-6);
+    vicino(p.anno, 1050.83, 0.01); vicino(p.perEuro, 0.288, 0.0006);
+    vicino(p.spesaAnno, 3650, 1e-9);
+  });
+  test("anni attesi per il premio massimo: Salvatore ≈ 17.096 anni", function () {
+    var a = M.anniAttesiPremioMax(salvatore)[0];
+    assertEqual(a.giocateAnno, 730); vicino(a.anni, 12480000 / 730, 1e-6);
+  });
+  test("trasferimento: 2 € × 100 giocate, payout 70% -> 60 €", function () {
+    vicino(M.perditaAttesaSu(2, 0.7, 100), 60, 1e-9);
+  });
+
+  // ---- PRNG e simulazione (BR-04, BR-10) ----
+  test("PRNG: stesso seme -> stessa sequenza, semi diversi -> sequenze diverse", function () {
+    var a = M.creaPRNG(42), b = M.creaPRNG(42), c = M.creaPRNG(43);
+    var sa = [], sb = [], sc = [];
+    for (var i = 0; i < 20; i++) { sa.push(a()); sb.push(b()); sc.push(c()); }
+    assertEqual(sa, sb); assert(JSON.stringify(sa) !== JSON.stringify(sc));
+    sa.forEach(function (x) { assert(x >= 0 && x < 1); });
+  });
+  test("simulaAnno riproducibile con lo stesso seme (seme demo)", function () {
+    var s1 = M.simulaAnno(G.abitudineDemo, G.seme.demo), s2 = M.simulaAnno(G.abitudineDemo, G.seme.demo);
+    assertEqual(s1, s2);
+  });
+  test("simulaAnno: 365 giorni, speso 3.650 €, cumulati coerenti", function () {
+    var s = M.simulaAnno(salvatore, 7);
+    assertEqual(s.giorni.length, 365); assertEqual(s.totale.speso, 3650);
+    var ultimo = s.giorni[364];
+    assertEqual(ultimo.spesoCum, 3650); assertEqual(ultimo.vintoCum, s.totale.vinto);
+    assertEqual(s.totale.perso, s.totale.speso - s.totale.vinto);
+    s.vincite.forEach(function (v) { assert(v.premio >= 100); });
+  });
+  test("simulaAnno settimanale: 3 volte a settimana -> 156 giocate in 365 giorni", function () {
+    var s = M.simulaAnno({ voci: [{ gioco: "lotto-ambo", volte: 3, periodo: "settimana", posta: 1 }] }, 1);
+    assertEqual(s.totale.speso, Math.floor(365 * 3 / 7));
+  });
+  test("convergenza lotteria A: quota vincenti e ritorno medio (premi <= 1.000 €) su 400.000 giocate", function () {
+    var g = M.trovaGioco("istantanea-5-a"), rnd = M.creaPRNG(12345), n = 400000;
+    var vincenti = 0, somma = 0;
+    for (var i = 0; i < n; i++) {
+      var p = M.estraiPremio(g.id, rnd);
+      if (p > 0) vincenti++;
+      if (p <= 1000) somma += p;
+    }
+    var attesoCap = g.premi.filter(function (x) { return x.premio <= 1000; })
+      .reduce(function (s, x) { return s + x.premio * x.vincenti / g.emissione; }, 0);
+    vicino(vincenti / n, M.probabilitaVincita(g.id), 0.003, "quota vincenti");
+    vicino(somma / n, attesoCap, 0.1, "ritorno medio per giocata");
+  });
+  test("convergenza lotto ambo: payout simulato ~ 62,4% su 400.000 giocate", function () {
+    var rnd = M.creaPRNG(99), n = 400000, somma = 0;
+    for (var i = 0; i < n; i++) somma += M.estraiPremio("lotto-ambo", rnd, 1);
+    vicino(somma / n, M.payout("lotto-ambo"), 0.06);
+  });
+
+  // ---- Ritardatari (BR-05) ----
+  test("ritardatari: frequenza dopo un ritardo = frequenza generale = 5/90", function () {
+    var r = M.simulaRitardatari(2026, 200000, 90, 30);
+    vicino(r.probabilitaTeorica, 5 / 90, 1e-12);
+    vicino(r.frequenza, 5 / 90, 0.003, "frequenza generale");
+    assert(r.casiInRitardo > 1000, "pochi casi in ritardo: " + r.casiInRitardo);
+    vicino(r.frequenzaDopoRitardo, 5 / 90, 0.008, "frequenza dopo ritardo");
+  });
+  test("ritardatari riproducibile con lo stesso seme", function () {
+    assertEqual(M.simulaRitardatari(5, 5000), M.simulaRitardatari(5, 5000));
+  });
+
+  // ---- Quiz (BR-06/07) ----
+  test("quiz: le risposte corrette coincidono con il motore", function () {
+    window.QUIZ.domande.forEach(function (q) {
+      assert(q.opzioni.some(function (o) { return o.chiave === q.corretta; }), q.id + " senza opzione corretta");
+      var v = q.verifica; if (!v) return;
+      if (v.tipo === "spesaAnnua") assertEqual(M.spesaAnnuaDaGiornaliera(v.giornaliera), v.valore);
+      if (v.tipo === "premioMax") assertEqual(M.probabilitaPremioMax(v.gioco).unoSu, v.unoSu);
+      if (v.tipo === "trasferimento") vicino(M.perditaAttesaSu(v.prezzo, v.payout, v.giocate), v.valore, 1e-9);
+    });
+  });
+  test("verificaQuiz e confrontaQuiz: 1/3 prima, 3/3 dopo", function () {
+    var tre = window.QUIZ.domande.filter(function (q) { return q.fase === "entrambi"; });
+    var prima = M.verificaQuiz(tre, { q1: "c", q2: "a" });
+    assertEqual(prima.punteggio, 1); assertEqual(prima.totale, 3);
+    assertEqual(prima.dettaglio[2].risposta, null);
+    var dopo = M.verificaQuiz(tre, { q1: "c", q2: "c", q3: "b" });
+    assertEqual(M.confrontaQuiz(prima, dopo), { prima: 1, totalePrima: 3, dopo: 3, totaleDopo: 3, delta: 2 });
+  });
+
+  // ---- Formattazione ----
+  test("formattaEuro in it-IT", function () {
+    assertEqual(M.formattaEuro(3650), "3.650 €");
+    assertEqual(M.formattaEuro(1050.8256, 2), "1.050,83 €");
+    assertEqual(M.formattaEuro(5), "5 €");
+    assertEqual(M.formattaUnoSu(400.5), "1 su 401");
+  });
+})();
