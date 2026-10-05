@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<title>Fortuna in Chiaro — I numeri del business case</title>
+<style>
+  :root{
+    --purple:#A100FF;
+    --purple-dark:#7500C0;
+    --purple-darker:#460073;
+    --purple-light:#BE82FF;
+    --purple-pastel:#DCAFFF;
+    --purple-pink:#B455AA;
+    --black:#000000;
+    --white:#FFFFFF;
+    --grey:#96968C;
+    --grey-light:#E6E6DC;
+    --font:"Graphik", Arial, Helvetica, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{
+    margin:0; padding:0; width:100%; height:100%;
+    background:#1b1b1b; font-family:var(--font); overflow:hidden;
+  }
+  #viewport{
+    position:fixed; inset:0; display:flex; align-items:center; justify-content:center;
+  }
+  #deck{
+    position:relative; width:1280px; height:720px;
+    transform-origin:center center;
+    box-shadow:0 0 60px rgba(0,0,0,.5);
+  }
+  .slide{
+    position:absolute; inset:0; width:1280px; height:720px;
+    display:none; flex-direction:column;
+    background:var(--white); color:var(--black);
+    padding:56px 72px 40px 72px;
+  }
+  .slide.active{ display:flex; }
+
+  .bg-dark{ background:var(--purple-darker); color:var(--white); }
+  .bg-purple{ background:var(--purple-dark); color:var(--white); }
+  .bg-light-grey{ background:var(--grey-light); color:var(--black); }
+
+  h1{ font-size:48px; font-weight:700; margin:0 0 8px 0; line-height:1.1; }
+  h2{ font-size:34px; font-weight:700; margin:0 0 20px 0; line-height:1.15; }
+  h2 .accent{ color:var(--purple); }
+  .bg-dark h2, .bg-purple h2{ color:var(--white); }
+  .subtitle{ font-size:20px; font-weight:400; color:var(--grey); margin:0 0 24px 0; }
+  .bg-dark .subtitle, .bg-purple .subtitle{ color:var(--purple-pastel); }
+  p, li{ font-size:18px; line-height:1.5; }
+  .kicker{
+    display:inline-block; font-size:14px; font-weight:700; letter-spacing:.08em;
+    text-transform:uppercase; color:var(--purple); margin-bottom:14px;
+  }
+  .bg-dark .kicker, .bg-purple .kicker{ color:var(--purple-light); }
+
+  .footer{
+    position:absolute; left:72px; right:72px; bottom:18px;
+    display:flex; justify-content:space-between; align-items:center;
+    font-size:13px; color:var(--grey);
+  }
+  .bg-dark .footer, .bg-purple .footer{ color:var(--purple-pastel); }
+  .wordmark{ font-weight:700; letter-spacing:.01em; }
+  .wordmark .chevron{ color:var(--purple); font-weight:700; }
+  .bg-dark .wordmark .chevron, .bg-purple .wordmark .chevron{ color:var(--purple-light); }
+
+  .content{ flex:1; display:flex; flex-direction:column; min-height:0; }
+
+  ul.bullets{ list-style:none; margin:0; padding:0; }
+  ul.bullets li{ position:relative; padding-left:26px; margin-bottom:12px; }
+  ul.bullets li::before{
+    content:""; position:absolute; left:0; top:9px; width:10px; height:10px;
+    background:var(--purple); border-radius:50%;
+  }
+  .bg-dark ul.bullets li::before, .bg-purple ul.bullets li::before{ background:var(--purple-light); }
+
+  /* KPI */
+  .kpi-row{ display:flex; gap:28px; align-items:stretch; margin-bottom:8px; }
+  .kpi{ flex:1; text-align:center; padding:24px 14px; background:var(--grey-light); border-radius:4px; }
+  .kpi .value{ font-size:52px; font-weight:700; color:var(--purple); line-height:1; }
+  .kpi .label{ font-size:15px; color:var(--grey); margin-top:10px; }
+
+  /* source note */
+  .source-note{
+    position:absolute; left:72px; right:72px; bottom:42px;
+    font-size:12px; color:var(--grey); line-height:1.4;
+  }
+  .bg-dark .source-note, .bg-purple .source-note{ color:var(--purple-pastel); }
+  .source-note .tag{ font-weight:700; }
+
+  /* slide 5 divario: due colonne contrasto */
+  .gap-row{ display:flex; gap:40px; align-items:center; flex:1; }
+  .gap-col{ flex:1; text-align:center; }
+  .gap-col .big{ font-size:72px; font-weight:700; color:var(--purple); line-height:1; }
+  .gap-col .small{ font-size:16px; color:var(--grey); margin-top:10px; }
+  .gap-vs{ font-size:22px; font-weight:700; color:var(--grey); }
+
+  #nav-ui{
+    position:fixed; left:0; right:0; bottom:10px; display:flex;
+    justify-content:center; gap:14px; align-items:center; z-index:10;
+    font-family:var(--font); color:#fff; font-size:13px; user-select:none;
+  }
+  #nav-ui button{
+    background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.3);
+    color:#fff; border-radius:4px; padding:6px 14px; cursor:pointer; font-size:14px;
+  }
+  #nav-ui button:hover{ background:rgba(161,0,255,.5); }
+  #counter{ min-width:70px; text-align:center; }
+  .nav-hit{ position:absolute; top:0; bottom:0; width:30%; cursor:pointer; z-index:5; }
+  .nav-hit.left{ left:0; }
+  .nav-hit.right{ right:0; }
+
+  @media print{
+    html,body{ overflow:visible; background:#fff; }
+    #nav-ui, .nav-hit{ display:none !important; }
+    #viewport{ position:static; display:block; }
+    #deck{ transform:none !important; width:auto; height:auto; box-shadow:none; }
+    .slide{
+      display:flex !important; position:relative; width:1280px; height:720px;
+      page-break-after:always; break-after:page;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div id="viewport">
+  <div id="deck">
+
+    <!-- SLIDE: numeri-01-il-problema -->
+    <section class="slide">
+      <div class="content">
+        <div class="kicker">I numeri · Scala nazionale</div>
+        <h2>Il gioco d'azzardo in Italia <span class="accent">non è un'eccezione</span></h2>
+        <p class="subtitle">157 miliardi di euro giocati nel 2024, 21,5 persi: un fenomeno di massa, non un caso isolato.</p>
+        <div class="kpi-row">
+          <div class="kpi"><div class="value">157,45 mld €</div><div class="label">Raccolta totale 2024</div></div>
+          <div class="kpi"><div class="value">21,5 mld €</div><div class="label">Perdita netta 2024</div></div>
+        </div>
+        <div class="kpi-row">
+          <div class="kpi"><div class="value">18 mln</div><div class="label">Adulti che hanno giocato nell'ultimo anno</div></div>
+          <div class="kpi"><div class="value">1,5 mln</div><div class="label">Giocatori "problematici" (~3% della popolazione adulta)</div></div>
+        </div>
+      </div>
+      <div class="source-note"><span class="tag">Fonte:</span> ADM, Bilancio di esercizio 2024 · ISS, Rapporti ISTISAN 19/28</div>
+      <div class="footer">
+        <span class="wordmark">accenture<span class="chevron">&gt;</span></span>
+        <span class="page-num"></span>
+      </div>
+    </section>
+    <!-- /SLIDE -->
+
+    <!-- SLIDE: numeri-02-chi-paga-di-piu -->
+    <section class="slide">
+      <div class="content">
+        <div class="kicker">I numeri · Fragilità</div>
+        <h2>Il peso non è uguale per tutti</h2>
+        <p class="subtitle">Pesa di più dove il reddito è più basso, e cresce tra i più giovani.</p>
+        <div class="kpi-row">
+          <div class="kpi"><div class="value">3.319 €</div><div class="label">Spesa pro capite/anno in Abruzzo (2024)</div></div>
+          <div class="kpi"><div class="value">845 €</div><div class="label">Spesa pro capite/anno in Trentino-Alto Adige, canale fisico (2024)</div></div>
+        </div>
+        <div class="kpi-row">
+          <div class="kpi"><div class="value">68.000 → 90.000</div><div class="label">Studenti 14-17 anni problematici, 2018 → 2024</div></div>
+          <div class="kpi"><div class="value">80.000 → 136.000+</div><div class="label">Studenti 14-17 anni a rischio, 2018 → 2024</div></div>
+        </div>
+      </div>
+      <div class="source-note"><span class="tag">Fonte:</span> Il Centro / PressGiochi su dati ADM territoriali · ISS, usciredalgioco.iss.it, monitoraggio popolazione scolastica 2024. Nesso individuale reddito/istruzione non quantificato da uno studio ISS: solo correlazione territoriale.</div>
+      <div class="footer">
+        <span class="wordmark">accenture<span class="chevron">&gt;</span></span>
+        <span class="page-num"></span>
+      </div>
+    </section>
+    <!-- /SLIDE -->
+
+    <!-- SLIDE: numeri-03-salvatore -->
+    <section class="slide bg-light-grey">
+      <div class="content">
+        <div class="kicker">I numeri · Salvatore</div>
+        <h2>Dietro i numeri nazionali, una spesa quotidiana</h2>
+        <p class="subtitle">52 anni, autista, circa 1.300 €/mese: 10 € al giorno tra lotterie istantanee e lotto.</p>
+        <div class="kpi-row">
+          <div class="kpi"><div class="value">3.650 €</div><div class="label">Spesa annua (10 €/giorno × 365)</div></div>
+          <div class="kpi"><div class="value">23,4%</div><div class="label">Quota del suo reddito annuo</div></div>
+        </div>
+        <div class="kpi-row">
+          <div class="kpi"><div class="value">1.051–1.456 €</div><div class="label">Perdita attesa annua (88-121 €/mese)</div></div>
+          <div class="kpi"><div class="value">~17.100 anni</div><div class="label">Tempo medio atteso per il premio massimo</div></div>
+        </div>
+      </div>
+      <div class="source-note"><span class="tag">Fonte:</span> calcolo su tabelle premi ufficiali ADM (lotteria istantanea da 5 €, modelli A/B) — vedi `docs/idea/numeri-business-case.md`</div>
+      <div class="footer">
+        <span class="wordmark">accenture<span class="chevron">&gt;</span></span>
+        <span class="page-num"></span>
+      </div>
+    </section>
+    <!-- /SLIDE -->
+
+    <!-- SLIDE: numeri-04-verita-biglietto -->
+    <section class="slide">
+      <div class="content">
+        <div class="kicker">I numeri · La verità del biglietto</div>
+        <h2>Non tutte le "vincite" sono un guadagno</h2>
+        <p class="subtitle">Lotteria istantanea da 5 €, modello A/B (ADM): quando si vince, spesso si recupera solo la giocata.</p>
+        <div class="kpi-row">
+          <div class="kpi"><div class="value">38,5%</div><div class="label">Delle vincite è solo il rimborso dei 5 € giocati</div></div>
+          <div class="kpi"><div class="value">79,4%</div><div class="label">Delle vincite vale 5 o 10 €</div></div>
+        </div>
+        <div class="kpi-row">
+          <div class="kpi"><div class="value">71,2% / 60,1%</div><div class="label">Payout reale: quanto torna ogni € giocato (modello A / B)</div></div>
+          <div class="kpi"><div class="value">208 stadi</div><div class="label">Da 60.000 posti pieni per vincere una sola volta il premio massimo</div></div>
+        </div>
+      </div>
+      <div class="source-note"><span class="tag">Fonte:</span> ADM, tabelle premi lotteria istantanea da 5 € (modelli A/B), calcolo nostro sui dati ufficiali. Nessun marchio commerciale citato.</div>
+      <div class="footer">
+        <span class="wordmark">accenture<span class="chevron">&gt;</span></span>
+        <span class="page-num"></span>
+      </div>
+    </section>
+    <!-- /SLIDE -->
+
+    <!-- SLIDE: numeri-05-divario-supporto -->
+    <section class="slide bg-dark">
+      <div class="content">
+        <div class="kicker">I numeri · Il divario di supporto</div>
+        <h2>Tra chi ha un problema e chi riceve aiuto</h2>
+        <div class="gap-row">
+          <div class="gap-col">
+            <div class="big">1,5 mln</div>
+            <div class="small">Giocatori "problematici" in Italia</div>
+          </div>
+          <div class="gap-vs">↔</div>
+          <div class="gap-col">
+            <div class="big">~15.000</div>
+            <div class="small">Persone in carico ai SerD per gioco d'azzardo (stima)</div>
+          </div>
+        </div>
+        <p class="subtitle" style="margin-top:20px;">Numero verde nazionale ISS, gratuito e anonimo: <strong style="color:var(--white)">800 55 88 22</strong>. Da qui nasce CR1, "Vuoi parlarne con qualcuno?": una soglia scelta da chi gioca, non una diagnosi.</p>
+      </div>
+      <div class="source-note"><span class="tag">Fonte:</span> ISS, Rapporti ISTISAN 19/28 (1,5 mln) · Relazione annuale al Parlamento sulle tossicodipendenze, Dipartimento Politiche Antidroga, e stima Centro Studi CeDo (SerD) · ISS, TVNGA (numero verde)</div>
+      <div class="footer">
+        <span class="wordmark">accenture<span class="chevron">&gt;</span></span>
+        <span class="page-num"></span>
+      </div>
+    </section>
+    <!-- /SLIDE -->
+
+    <!-- SLIDE: numeri-06-valore-su-scala -->
+    <section class="slide">
+      <div class="content">
+        <div class="kicker">I numeri · Il valore su scala</div>
+        <h2>Un simulatore a costo marginale zero</h2>
+        <p class="subtitle">Stima nostra, dichiarata come tale: non sono risparmi, lo strumento mostra numeri e non dà consigli.</p>
+        <div class="kpi-row">
+          <div class="kpi"><div class="value">~1.190 €</div><div class="label">Perdita media stimata per giocatore adulto/anno</div></div>
+          <div class="kpi"><div class="value">~150 mln €</div><div class="label">Stima: perdite rese consapevoli raggiungendo l'1% dei giocatori</div></div>
+        </div>
+        <div class="kpi-row">
+          <div class="kpi"><div class="value">0 token</div><div class="label">Costo per utente a runtime (motore deterministico)</div></div>
+          <div class="kpi"><div class="value">1/3 → 3/3</div><div class="label">Miglioramento del quiz misurato in demo</div></div>
+        </div>
+      </div>
+      <div class="source-note"><span class="tag">Fonte:</span> stima nostra su ADM (perdita netta 2024) e ISS (18 mln giocatori) — vedi `docs/idea/numeri-business-case.md` per il metodo di calcolo</div>
+      <div class="footer">
+        <span class="wordmark">accenture<span class="chevron">&gt;</span></span>
+        <span class="page-num"></span>
+      </div>
+    </section>
+    <!-- /SLIDE -->
+
+  </div>
+</div>
+
+<div class="nav-hit left" id="hit-prev"></div>
+<div class="nav-hit right" id="hit-next"></div>
+
+<div id="nav-ui">
+  <button id="btn-prev" aria-label="Slide precedente">&#8592;</button>
+  <span id="counter">1 / 1</span>
+  <button id="btn-next" aria-label="Slide successiva">&#8594;</button>
+</div>
+
+<script>
+(function(){
+  var deck = document.getElementById('deck');
+  var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+  var total = slides.length;
+  var current = 0;
+
+  slides.forEach(function(s, i){
+    var pn = s.querySelector('.page-num');
+    if (pn) pn.textContent = String(i + 1).padStart(2, '0') + ' / ' + String(total).padStart(2, '0');
+  });
+
+  function render(){
+    slides.forEach(function(s, i){ s.classList.toggle('active', i === current); });
+    var counter = document.getElementById('counter');
+    if (counter) counter.textContent = (current + 1) + ' / ' + total;
+  }
+
+  function goTo(i){
+    if (i < 0 || i >= total) return;
+    current = i;
+    render();
+  }
+  function next(){ goTo(current + 1); }
+  function prev(){ goTo(current - 1); }
+
+  function resize(){
+    var scale = Math.min(window.innerWidth / 1280, window.innerHeight / 720);
+    deck.style.position = 'absolute';
+    deck.style.top = '50%';
+    deck.style.left = '50%';
+    deck.style.transform = 'translate(-50%,-50%) scale(' + scale + ')';
+  }
+
+  window.addEventListener('resize', resize);
+  window.addEventListener('keydown', function(e){
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown' || e.key === 'ArrowDown'){
+      e.preventDefault(); next();
+    } else if (e.key === 'ArrowLeft' || e.key === 'PageUp' || e.key === 'ArrowUp'){
+      e.preventDefault(); prev();
+    } else if (e.key === 'Home'){
+      goTo(0);
+    } else if (e.key === 'End'){
+      goTo(total - 1);
+    }
+  });
+
+  document.getElementById('btn-next').addEventListener('click', next);
+  document.getElementById('btn-prev').addEventListener('click', prev);
+  document.getElementById('hit-next').addEventListener('click', next);
+  document.getElementById('hit-prev').addEventListener('click', prev);
+
+  resize();
+  render();
+})();
+</script>
+
+</body>
+</html>

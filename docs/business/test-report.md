@@ -22,5 +22,11 @@
 | TC-16 | BR-11 | — (solo UI/testo: assenza di consigli/giudizi) | | | |
 | TC-17 | BR-12 | — (da verificare manualmente con DevTools → Network) | | | |
 | TC-18 | BR-12 | — (da verificare manualmente ispezionando il codice sorgente) | | | |
+| TC-19 | BR-13 | — (da verificare manualmente: messaggio rimborso e riepilogo vincite in UI) | | | |
+| TC-20 | BR-14 | — (da verificare manualmente: vista 10.000 persone e scala Italia in UI) | | | |
+| TC-21 | BR-15 | — (da verificare manualmente: testi "208 stadi" e "17.096 anni" in UI) | | | |
+| TC-22 | BR-11 (L4) | — (da verificare: hook PreToolUse su caso positivo/negativo; test automatico sui testi dell'app) | | | |
+| TC-23 | BR-16 | — (da verificare manualmente: pannello soglia, link tel/WhatsApp/mailto, DevTools Network/Storage) | | | |
+| TC-24 | BR-17 | — (condizionato al go/no-go delle 14:05; da verificare manualmente se "go") | | | |
 
 **Nota**: i test automatici in `app/tests/motore.test.js` coprono la correttezza dei calcoli (motore) ma non sostituiscono la verifica dell'interfaccia utente (presenza a schermo, testi, tono, visibilità). L'UAT su app/index.html resta necessaria per tutti i TC prima del verdetto QA.

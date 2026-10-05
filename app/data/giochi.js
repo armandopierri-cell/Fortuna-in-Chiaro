@@ -106,6 +106,19 @@ window.GIOCHI = {
   // Regola del Lotto per il simulatore dei ritardatari: 5 numeri estratti su 90 per ruota.
   // Coerente con l'ambo 1 su 400,5 = C(90,2)/C(5,2) (ricerca-azzardo.md §2).
   lotto: { numeri: 90, estratti: 5, sezione: "ricerca-azzardo.md §2" },
+  // Scala Italia (BR-14, L2): raccolta e perdita netta (spesa = raccolta - vincite) del gioco nel 2024.
+  italia2024: {
+    anno: 2024,
+    perditaNetta: 21500000000,
+    raccolta: 157450000000,
+    testo: "Nel 2024 in Italia sono stati giocati 157,45 miliardi di euro e ne sono stati persi 21,5 miliardi",
+    fonte: {
+      ente: "ADM - Bilancio di esercizio 2024 (ripreso da agipronews.it e gioconews.it)",
+      url: "https://www.agipronews.it/adm-bilancio-di-esercizio-2024-dal-settore-giochi-raccolta-superiore-a-157-miliardi-6-5-spesa-a-21-5-miliardi",
+      sezione: "ricerca-azzardo.md §4",
+      affidabilita: "UFF-sec"
+    }
+  },
   indipendenza: {
     testo: "Ogni estrazione e' indipendente dalle precedenti: un numero in ritardo non ha piu' probabilita' di uscire.",
     sezione: "ricerca-azzardo.md §2"

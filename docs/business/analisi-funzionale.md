@@ -102,3 +102,28 @@ Ogni scheda gioco in app mostra costo, payout, probabilità del premio massimo e
 
 ## 4. Payout medio pesato (uso in schermata 4)
 `payoutMedio = Σ(spesaAnnua_i × payout_i) / Σ(spesaAnnua_i)` sui soli giochi selezionati in schermata 3. Default Salvatore (solo G1, 2×/giorno = 10 €/giorno): `payoutMedio = 71,2%`, `spesaAnnua = 3.650 €`, `valoreAttesoPerso ≈ 1.051,20 €/anno`, `anniAttesiPremioMassimo = 1 / (1/12.480.000 × 730) ≈ 17.096 anni`.
+
+## 5. Leve L1, L2, L3 e CR1 — testi definitivi (BR-13..BR-16)
+
+Testi verificati contro l'hook L4 (nessuna formula da consiglio o giudizio: niente "dovresti", "conviene", "ti consiglio", "smetti", "gioca meno").
+
+**L1 — vincita che è solo rimborso (BR-13)**, mostrato in schermata 4 quando il premio estratto coincide con la giocata:
+- Messaggio singolo biglietto: "Hai recuperato la giocata: guadagno netto 0 €." (mai "HAI VINTO").
+- Riepilogo fine anno: "Su tutte le tue vincite di quest'anno, il 38,5% era solo il rimborso della giocata (5 €) e il 79,4% era una vincita da 5 € o 10 €." (fonte §1, modello A: 4.576.000 su 11.893.456 vincite totali = rimborso; 79,4% da 5 o 10 €).
+
+**L2 — dalla parte del banco (BR-14)**, tasto "Guarda dalla parte del banco" in schermata 4:
+- Vista 10.000 persone: "Su 10.000 persone con la tua stessa abitudine, in un anno, {N} finiscono con vincite nette positive; il banco incassa in totale {importo} €." (N e importo calcolati dal motore sul payout del gioco selezionato: 71,2% modello A, 60,1% modello B).
+- Vista scala Italia: "In Italia, nel 2024, la perdita netta complessiva al gioco è stata di 21,5 miliardi di euro." (fonte `ricerca-azzardo.md`, [UFF-sec]).
+
+**L3 — probabilità in cose fisiche (BR-15)**, mostrato in schermata 4 e nella scheda A di "Capire i numeri":
+- Scala spaziale: "Per trovare un biglietto vincente il premio massimo, servirebbero 208 stadi da 60.000 posti pieni — e in tutti vincerebbe una sola persona." (12.480.000 ÷ 60.000 = 208).
+- Scala temporale: "Giocando 2 biglietti al giorno come nel tuo caso, in media una vincita del premio massimo capiterebbe ogni circa 17.096 anni." (12.480.000 ÷ 730 ≈ 17.096, stima derivata [DERIV]).
+
+**CR1 — "Vuoi parlarne con qualcuno?" (BR-16)**, pannello in schermata 3 quando la spesa mensile supera la soglia scelta dall'utente:
+- Titolo pannello: "Vuoi parlarne con qualcuno?"
+- Corpo: "La tua spesa mensile stimata ({importo} €) supera la soglia che hai scelto ({soglia} €). Qui trovi il Telefono Verde Nazionale ISS, gratuito e anonimo, e un messaggio pronto per una persona di fiducia, se vuoi inviarlo tu."
+- Link numero verde: `tel:800558822` con etichetta "Chiama il Telefono Verde ISS — 800 55 88 22".
+- Messaggio precompilato per la persona di fiducia (testo neutro, nessuna menzione di diagnosi o dipendenza), usato sia nel link WhatsApp sia nel `mailto:`: "Ciao, volevo condividere con te due numeri sulla mia spesa di gioco di questo mese: {importo} € su una soglia personale di {soglia} € che mi ero dato. Se hai cinque minuti mi farebbe piacere parlarne con te."
+- Link WhatsApp: `https://wa.me/?text=` + testo sopra con URL-encoding.
+- Link mailto: `mailto:?subject=Una%20cosa%20di%20cui%20parlare&body=` + testo sopra con URL-encoding.
+- Nota tecnica: nessun contatto, importo o esito di invio viene salvato o inviato dall'app (BR-12); l'app compone solo il link, l'invio è un'azione dell'utente nell'app esterna scelta (WhatsApp o client email).

@@ -39,6 +39,7 @@ GIOCHI.giochi = [
 GIOCHI.lotto = { numeri: 90, estratti: 5 }            // regola del gioco, coerente con 1/400,5 (§2)
 GIOCHI.numeroVerde = { numero: "800 55 88 22", orari: "lunedì-venerdì 10:00-16:00", ... } // §6
 GIOCHI.tettoPayoutLotterie = 0.75                      // §3
+GIOCHI.italia2024 = { perditaNetta: 21.5e9, raccolta: 157.45e9, fonte: { sezione: "ricerca-azzardo.md §4", affidabilita: "UFF-sec" } } // BR-14
 GIOCHI.seme = { demo: 20261005 }                      // BR-10
 GIOCHI.abitudineDemo = { voci: [{ gioco: "istantanea-5-a", volte: 2, periodo: "giorno" }] } // Salvatore, 10 €/giorno
 ```
@@ -68,7 +69,13 @@ Tutte funzioni pure: nessun accesso al DOM, nessuno stato globale. Importi in eu
 | `anniAttesiPremioMax(abitudine)` | `[{ gioco, premio, giocateAnno, anni }]` per voce | Salvatore → `anni ≈ 17096` |
 | `creaPRNG(seme)` | funzione `() => [0,1)` (mulberry32) | stesso seme → stessa sequenza |
 | `estraiPremio(giocoId, rnd, posta?)` | importo vinto in una giocata | `0`, `10`, ... |
-| `simulaAnno(abitudine, seme, giorni = 365)` | `{ giorni: [{ giorno, speso, vinto, spesoCum, vintoCum }], totale: { speso, vinto, perso }, vincite: [{ giorno, gioco, premio }] }` (`vincite` = solo premi ≥ 100 €) | la UI anima `giorni[i]` |
+| `simulaAnno(abitudine, seme, giorni = 365)` | `{ giorni: [{ giorno, speso, vinto, spesoCum, vintoCum, eventi? }], totale: { speso, vinto, perso, classiVincite: { rimborso, piccole, reali, totale }, vinciteRimborso }, vincite: [{ giorno, gioco, premio }] }`. `eventi: [{ premio, classe, gioco, costo }]` presente **solo** nei giorni con vincite (L1); `vincite` = solo premi ≥ 100 € | demo (seme 20261005): 175 vincite, 72 solo rimborso, 69 piccole, 34 reali |
+| `classeVincita(premio, costo)` | `"rimborso"` (premio = costo), `"piccole"` (costo < premio ≤ 2×costo), `"reali"` (> 2×costo), `null` se 0 | `(10, 5)` → `"piccole"` |
+| `riepilogoVincite(giocoId, posta?)` | calcolo **esatto** dalla tabella: `{ quotaBigliettiVincenti, quotaRimborso, quotaPiccole, quotaSoloPiccole, quotaReali, vincenti: {rimborso, piccole, reali, totale}, emissione }`. Definizioni: `quotaBigliettiVincenti` = biglietti premiati / emissione; le altre quote sono **sul totale delle vincite**; `quotaPiccole` è **cumulata** (rimborso incluso, premio ≤ 2×costo); `quotaSoloPiccole` la esclude | A → `0.23825 / 0.38475 / 0.79398` (11.893.456 vincite: 4.576.000 da 5 €, 4.867.200 da 10 €) |
+| `simulaFolla(abitudine, seme, n = 10000)` | `{ n, inAttivo, quotaInAttivo, speso, vinto, incassoBanco, perditaMedia, perditaMediana }`; `inAttivo` = vinto > speso a fine anno | demo: 174 su 10.000 in attivo (1,74%), perdita media 1.073,82 € (atteso 1.050,83), mediana 1.140 €; ~100-150 ms |
+| `scalaFisica(unoSu)` | `{ stadi: round(unoSu / 60000), postiStadio: 60000 }` | `12480000` → `208` stadi |
+| `superaSoglia(abitudine, sogliaMensile)` | `{ supera, spesaMese, eccedenza }`; soglia non numerica, vuota o negativa = nessuna soglia (`supera: false`) | Salvatore, 100 € → `{ true, 304.17, 204.17 }` |
+| `contoBiglietto(giocoId, posta?)` | `{ costo, perditaMediaPerBiglietto, quotaRimborso, unoSu, stadi }` (BR-17) | A → `{ 5, 1.4395, 0.3847, 12480000, 208 }` |
 | `simulaRitardatari(seme, n, numero = 90, ritardoMinimo = 100)` | `{ estrazioni, probabilitaTeorica, uscite, frequenza, casiInRitardo, usciteDopoRitardo, frequenzaDopoRitardo, ritardoMassimo }` | frequenza ≈ frequenzaDopoRitardo ≈ 5/90 |
 | `verificaQuiz(domande, risposte)` | `{ punteggio, totale, dettaglio: [{ id, risposta, corretta, ok }] }` | `risposte = { q1: "b", ... }` |
 | `confrontaQuiz(prima, dopo)` | `{ prima, dopo, delta, totalePrima, totaleDopo }` | cruscotto BR-07 |
@@ -79,7 +86,8 @@ Regole della simulazione:
 - giocate **giornaliere**: `volte` giocate ogni giorno; **settimanali**: distribuite in modo deterministico, `floor((d+1)·v/7) − floor(d·v/7)` al giorno `d`.
 - lotteria istantanea: estrazione per categoria con probabilità `vincenti / emissione` (estrazione con reinserimento, approssimazione dichiarata);
 - lotto: vincita `moltiplicatore × posta` con probabilità `1 / probabilitaUnoSu`;
-- ritardatari: 5 numeri distinti su 90 a ogni estrazione, eventi indipendenti.
+- ritardatari: 5 numeri distinti su 90 a ogni estrazione, eventi indipendenti;
+- folla (`simulaFolla`): un solo PRNG con seme, persone in sequenza (riproducibile). Prestazioni: campionatore precalcolato per voce (nessuna ricerca del gioco per giocata), uscita immediata per i biglietti non vincenti (~76%) e ricerca binaria sulla cumulata; 7,3 milioni di giocate in ~0,1-0,15 s in Edge. La mappatura u → premio è identica a `estraiPremio`, quindi `simulaAnno` dà gli stessi risultati di prima a parità di seme.
 
 Arrotondamenti: il motore restituisce valori non arrotondati; l'arrotondamento è solo nella presentazione (`formatta*`).
 

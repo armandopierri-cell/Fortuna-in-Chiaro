@@ -157,6 +157,93 @@
     assertEqual(M.confrontaQuiz(prima, dopo), { prima: 1, totalePrima: 3, dopo: 3, totaleDopo: 3, delta: 2 });
   });
 
+  // ---- Le vincite che non sono vincite (BR-13, L1) ----
+  test("riepilogoVincite modello A: valori esatti dalla tabella ADM (23,8% / 38,5% / 79,4%)", function () {
+    var r = M.riepilogoVincite("istantanea-5-a");
+    assertEqual(r.vincenti, { rimborso: 4576000, piccole: 4867200, reali: 2450256, totale: 11893456 });
+    vicino(r.quotaBigliettiVincenti, 11893456 / 49920000, 1e-12);
+    vicino(r.quotaRimborso, 4576000 / 11893456, 1e-12);
+    vicino(r.quotaPiccole, (4576000 + 4867200) / 11893456, 1e-12);
+    vicino(r.quotaBigliettiVincenti, 0.238, 0.0005);
+    vicino(r.quotaRimborso, 0.385, 0.0005);
+    vicino(r.quotaPiccole, 0.794, 0.0005);
+    vicino(r.quotaSoloPiccole + r.quotaRimborso + r.quotaReali, 1, 1e-12);
+  });
+  test("riepilogoVincite modello B (nessun rimborso) e lotto", function () {
+    var b = M.riepilogoVincite("istantanea-5-b");
+    assertEqual(b.quotaRimborso, 0);
+    vicino(b.quotaPiccole, 2816000 / 5332875, 1e-12);
+    var l = M.riepilogoVincite("lotto-ambo");
+    vicino(l.quotaBigliettiVincenti, 1 / 400.5, 1e-12); assertEqual(l.quotaRimborso, 0);
+  });
+  test("classeVincita: rimborso, piccole, reali", function () {
+    assertEqual(M.classeVincita(5, 5), "rimborso"); assertEqual(M.classeVincita(10, 5), "piccole");
+    assertEqual(M.classeVincita(20, 5), "reali"); assertEqual(M.classeVincita(0, 5), null);
+  });
+  test("simulaAnno: classiVincite coerenti con gli eventi dei giorni", function () {
+    var s = M.simulaAnno(G.abitudineDemo, G.seme.demo), c = s.totale.classiVincite;
+    var conta = { rimborso: 0, piccole: 0, reali: 0 }, vinto = 0;
+    s.giorni.forEach(function (g) {
+      if (!g.eventi) { assertEqual(g.vinto, 0); return; }
+      assert(g.eventi.length > 0);
+      g.eventi.forEach(function (e) { conta[e.classe]++; vinto += e.premio; assertEqual(M.classeVincita(e.premio, 5), e.classe); });
+    });
+    assertEqual([c.rimborso, c.piccole, c.reali], [conta.rimborso, conta.piccole, conta.reali]);
+    assertEqual(c.totale, c.rimborso + c.piccole + c.reali);
+    assertEqual(s.totale.vinciteRimborso, c.rimborso); assertEqual(vinto, s.totale.vinto);
+    // 730 biglietti: ~174 vincite attese, ~67 rimborsi
+    vicino(c.totale / 730, 0.238, 0.05); vicino(c.rimborso / c.totale, 0.385, 0.1);
+  });
+
+  // ---- Dalla parte del banco (BR-14, L2) ----
+  var folla = null, tempoFolla = 0;
+  function follaDemo() {
+    if (!folla) { var t0 = performance.now(); folla = M.simulaFolla(G.abitudineDemo, G.seme.demo); tempoFolla = performance.now() - t0; }
+    return folla;
+  }
+  test("simulaFolla 10.000 persone: sotto 1,5 s", function () {
+    follaDemo(); assert(tempoFolla < 1500, "tempo " + tempoFolla.toFixed(0) + " ms");
+    window.__tempoFolla = tempoFolla;
+  });
+  test("simulaFolla riproducibile con lo stesso seme, diversa con altro seme", function () {
+    var a = M.simulaFolla(G.abitudineDemo, 7, 300), b = M.simulaFolla(G.abitudineDemo, 7, 300), c = M.simulaFolla(G.abitudineDemo, 8, 300);
+    assertEqual(a, b); assert(a.vinto !== c.vinto);
+  });
+  test("simulaFolla: perdita media ≈ valore atteso (1.050,83 €), quota in attivo plausibile", function () {
+    var f = follaDemo(), atteso = M.perditaAttesa(G.abitudineDemo).anno;
+    assertEqual(f.n, 10000); assertEqual(f.speso, 3650 * 10000);
+    assertEqual(f.incassoBanco, f.speso - f.vinto);
+    vicino(f.perditaMedia, atteso, 160, "perdita media");   // sd della media ~39 € (dominata dai premi rari)
+    assert(f.perditaMediana > atteso, "mediana > media: la maggior parte perde piu' del valore atteso");
+    assert(f.quotaInAttivo > 0.003 && f.quotaInAttivo < 0.05, "quota in attivo " + f.quotaInAttivo);
+    assertEqual(f.quotaInAttivo, f.inAttivo / f.n);
+    window.__folla = f;
+  });
+
+  // ---- Scale fisiche, soglie, conto biglietto (BR-15, BR-16, BR-17) ----
+  test("scalaFisica: 1 su 12.480.000 = 208 stadi da 60.000 posti", function () {
+    assertEqual(M.scalaFisica(12480000), { stadi: 208, postiStadio: 60000 });
+  });
+  test("superaSoglia: 304,17 €/mese contro soglie 100, 304,17, 500", function () {
+    var s = M.superaSoglia(salvatore, 100);
+    assertEqual(s.supera, true); vicino(s.spesaMese, 304.1667, 0.001); vicino(s.eccedenza, 204.1667, 0.001);
+    assertEqual(M.superaSoglia(salvatore, 3650 / 12).supera, false);
+    assertEqual(M.superaSoglia(salvatore, 500), { supera: false, spesaMese: 3650 / 12, eccedenza: 0 });
+    assertEqual(M.superaSoglia(salvatore, 0).supera, true);
+    assertEqual(M.superaSoglia(salvatore, null).supera, false);
+    assertEqual(M.superaSoglia(salvatore, "abc").supera, false);
+    assertEqual(M.superaSoglia({ voci: [] }, 0).supera, false);
+  });
+  test("contoBiglietto modello A", function () {
+    var c = M.contoBiglietto("istantanea-5-a");
+    assertEqual(c.costo, 5); vicino(c.perditaMediaPerBiglietto, 5 - 177740800 / 49920000, 1e-9);
+    vicino(c.quotaRimborso, 0.385, 0.0005); assertEqual(c.unoSu, 12480000); assertEqual(c.stadi, 208);
+  });
+  test("dato Italia 2024: 21,5 mld persi, fonte §4", function () {
+    assertEqual(G.italia2024.perditaNetta, 21500000000);
+    assert(/ricerca-azzardo\.md §4/.test(G.italia2024.fonte.sezione));
+  });
+
   // ---- Formattazione ----
   test("formattaEuro in it-IT", function () {
     assertEqual(M.formattaEuro(3650), "3.650 €");

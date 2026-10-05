@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<title>Fortuna in Chiaro — Hagenthon, Tema 02</title>
+<!--
+  BOZZA v2 (13:25) — agente innovazione, da skill presentazioni-accenture.
+  Allineata a docs/idea/idea-selezionata.md (leve L1-L4, CR1, CR2, Fase 2, demo aggiornata).
+  SCALETTA (5:00, demo compresa). Note del relatore: tasto N.
+  01  0:00-0:10  Titolo
+  02  0:10-0:35  Salvatore (Deliverable 01)
+  03  0:35-0:50  Il problema
+  04  0:50-1:00  La soluzione
+  05  1:00-3:30  DEMO live (2'30"): L3 208 stadi, L1 rimborso, L2 10.000 Salvatori, quiz 3/3, CR1
+  06  (0")       OPZIONALE BR-17 "Pausa e Conto": go/no-go al checkpoint 14:05 (se approvato: passo demo da 10")
+  07  3:30-3:45  Prima/Dopo (Deliverable 02)
+  08  3:45-4:00  Risk & Clarity Note (Deliverable 03)
+  09  4:00-4:25  Struttura agentica di sviluppo + L4 hook guardrail
+  10  4:25-4:35  Token e AI
+  11  4:35-4:45  Visione Fase 2 (architettura del prodotto, fuori MVP)
+  12  4:45-4:52  Valore su scala (STIMA NOSTRA, da confermare al checkpoint 14:05)
+  13  4:52-5:00  Chiusura
+  Fonti numeri: docs/idea/valore-checkpoint.md, docs/idea/ricerca-azzardo.md
+  (38,5%, 79,4%, 208 stadi: ricalcolati sulle tabelle ADM di ricerca-azzardo.md §1, vedi idea-selezionata.md)
+-->
+<style>
+  :root{
+    --purple:#A100FF;
+    --purple-dark:#7500C0;
+    --purple-darker:#460073;
+    --purple-light:#BE82FF;
+    --purple-pastel:#DCAFFF;
+    --purple-pink:#B455AA;
+    --black:#000000;
+    --white:#FFFFFF;
+    --grey:#96968C;
+    --grey-light:#E6E6DC;
+    --font:"Graphik", Arial, Helvetica, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{
+    margin:0; padding:0; width:100%; height:100%;
+    background:#1b1b1b; font-family:var(--font); overflow:hidden;
+  }
+  #viewport{ position:fixed; inset:0; display:flex; align-items:center; justify-content:center; }
+  #deck{
+    position:relative; width:1280px; height:720px;
+    transform-origin:center center; box-shadow:0 0 60px rgba(0,0,0,.5);
+  }
+  .slide{
+    position:absolute; inset:0; width:1280px; height:720px;
+    display:none; flex-direction:column;
+    background:var(--white); color:var(--black);
+    padding:56px 72px 40px 72px;
+  }
+  .slide.active{ display:flex; }
+
+  .bg-dark{ background:var(--purple-darker); color:var(--white); }
+  .bg-purple{ background:var(--purple-dark); color:var(--white); }
+  .bg-light-grey{ background:var(--grey-light); color:var(--black); }
+
+  h1{ font-size:48px; font-weight:700; margin:0 0 8px 0; line-height:1.1; }
+  h2{ font-size:34px; font-weight:700; margin:0 0 20px 0; line-height:1.15; }
+  h2 .accent{ color:var(--purple); }
+  .bg-dark h2, .bg-purple h2{ color:var(--white); }
+  .subtitle{ font-size:22px; font-weight:400; color:var(--grey); margin:0 0 24px 0; }
+  .bg-dark .subtitle, .bg-purple .subtitle{ color:var(--purple-pastel); }
+  p, li{ font-size:18px; line-height:1.45; }
+  .kicker{
+    display:inline-block; font-size:14px; font-weight:700; letter-spacing:.08em;
+    text-transform:uppercase; color:var(--purple); margin-bottom:12px;
+  }
+  .bg-dark .kicker, .bg-purple .kicker{ color:var(--purple-light); }
+
+  .footer{
+    position:absolute; left:72px; right:72px; bottom:18px;
+    display:flex; justify-content:space-between; align-items:center;
+    font-size:13px; color:var(--grey);
+  }
+  .bg-dark .footer, .bg-purple .footer{ color:var(--purple-pastel); }
+  .wordmark{ font-weight:700; letter-spacing:.01em; }
+  .wordmark .chevron{ color:var(--purple); font-weight:700; }
+  .bg-dark .wordmark .chevron, .bg-purple .wordmark .chevron{ color:var(--purple-light); }
+  .footer .src{ flex:1; margin:0 24px; font-size:13px; text-align:left; }
+
+  .content{ flex:1; display:flex; flex-direction:column; min-height:0; }
+
+  .cover{ justify-content:center; align-items:flex-start; }
+  .cover .wordmark-big{ font-size:26px; font-weight:700; margin-bottom:40px; }
+  .cover h1{ font-size:56px; max-width:950px; }
+  .cover .subtitle{ font-size:24px; max-width:850px; }
+  .cover .meta{ margin-top:auto; font-size:16px; color:var(--purple-pastel); }
+
+  .columns{ display:flex; gap:48px; flex:1; min-height:0; }
+  .col{ flex:1; min-width:0; }
+  .col h3{ font-size:20px; font-weight:700; color:var(--purple); margin:0 0 12px 0; }
+
+  .kpi-row{ display:flex; gap:24px; align-items:stretch; }
+  .kpi{ flex:1; text-align:center; padding:24px 14px; background:var(--grey-light); border-radius:4px; }
+  .kpi .value{ font-size:52px; font-weight:700; color:var(--purple); line-height:1; }
+  .kpi .label{ font-size:16px; color:#555; margin-top:10px; }
+  .kpi .tag{ font-size:14px; color:var(--grey); margin-top:6px; }
+
+  .before-after{ display:flex; gap:24px; flex:1; min-height:0; }
+  .ba-panel{ flex:1; border-radius:4px; padding:26px; display:flex; flex-direction:column; }
+  .ba-before{ background:var(--grey-light); }
+  .ba-after{ background:var(--purple-darker); color:var(--white); }
+  .ba-tag{ font-size:14px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; margin-bottom:12px; }
+  .ba-before .ba-tag{ color:#6b6b63; }
+  .ba-after .ba-tag{ color:var(--purple-light); }
+  .ba-quote{ font-size:30px; font-weight:700; line-height:1.2; margin:0 0 16px 0; }
+  .ba-after .num{ color:var(--purple-pastel); }
+
+  .flow{ display:flex; align-items:center; justify-content:center; gap:0; margin:6px 0 18px 0; }
+  .flow-box{
+    background:var(--grey-light); border:2px solid var(--purple);
+    border-radius:6px; padding:12px 10px; font-size:15px; font-weight:600;
+    text-align:center; width:150px;
+  }
+  .flow-box.highlight{ background:var(--purple); color:var(--white); border-color:var(--purple-darker); }
+  .flow-box.human{ background:var(--white); border-style:dashed; }
+  .flow-arrow{ width:26px; height:2px; background:var(--purple); position:relative; margin:0 4px; }
+  .flow-arrow::after{
+    content:""; position:absolute; right:-1px; top:-5px;
+    border:6px solid transparent; border-left-color:var(--purple);
+  }
+
+  .demo-frame{
+    flex:1; border:2px solid var(--grey-light); border-radius:6px;
+    display:flex; align-items:center; justify-content:center;
+    background:var(--grey-light); overflow:hidden; position:relative;
+  }
+  .demo-frame iframe{ width:100%; height:100%; border:0; background:var(--white); pointer-events:none; }
+  .demo-caption{ margin-top:12px; font-size:15px; color:#6b6b63; }
+  .demo-caption a{ color:var(--purple); font-weight:700; text-decoration:none; position:relative; z-index:6; }
+
+  .closing{ justify-content:center; align-items:flex-start; }
+  .closing h1{ font-size:52px; }
+  .closing .contacts{ margin-top:28px; font-size:18px; color:var(--purple-pastel); }
+
+  ul.bullets{ list-style:none; margin:0; padding:0; }
+  ul.bullets li{ position:relative; padding-left:26px; margin-bottom:10px; }
+  ul.bullets li::before{
+    content:""; position:absolute; left:0; top:9px; width:10px; height:10px;
+    background:var(--purple); border-radius:50%;
+  }
+  .bg-dark ul.bullets li::before, .ba-after ul.bullets li::before{ background:var(--purple-light); }
+
+  /* tabelle compatte */
+  table.t{ border-collapse:collapse; width:100%; font-size:16px; }
+  table.t th{ text-align:left; font-size:14px; text-transform:uppercase; letter-spacing:.05em; color:var(--purple); border-bottom:2px solid var(--purple); padding:6px 10px; }
+  table.t td{ padding:7px 10px; border-bottom:1px solid var(--grey-light); vertical-align:top; }
+  table.t td.m{ font-weight:700; white-space:nowrap; }
+
+  /* persona */
+  .persona{ display:flex; gap:40px; flex:1; min-height:0; }
+  .persona .card{ width:380px; background:var(--grey-light); border-radius:4px; padding:24px 26px; }
+  .persona .card .name{ font-size:28px; font-weight:700; margin-bottom:6px; }
+  .persona .card .role{ font-size:16px; color:#6b6b63; margin-bottom:16px; }
+  .persona .quote{ font-size:26px; font-weight:700; line-height:1.25; margin:0 0 18px 0; }
+  .persona .quote .accent{ color:var(--purple); }
+
+  /* badge */
+  .badge{ display:inline-block; font-size:13px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; padding:5px 10px; border-radius:3px; background:var(--purple-pastel); color:var(--purple-darker); margin-left:10px; vertical-align:middle; }
+  .badge.warn{ background:var(--black); color:var(--white); }
+  .deliv{ display:inline-block; font-size:13px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; padding:4px 10px; border:2px solid var(--purple); color:var(--purple); border-radius:3px; margin-left:12px; vertical-align:middle; }
+
+  .note-box{ margin-top:14px; padding:12px 16px; border-left:4px solid var(--purple); background:#f6f6f1; font-size:16px; }
+  .small{ font-size:15px; color:#6b6b63; }
+
+  /* note del relatore: nascoste, tasto N per mostrarle */
+  .notes{ display:none; }
+  #notes-panel{
+    display:none; position:fixed; left:0; right:0; top:0; z-index:20;
+    background:rgba(0,0,0,.88); color:#fff; font-family:var(--font); font-size:15px;
+    padding:12px 24px; line-height:1.45; max-height:40vh; overflow:auto;
+  }
+  #notes-panel.on{ display:block; }
+
+  #nav-ui{
+    position:fixed; left:0; right:0; bottom:10px; display:flex;
+    justify-content:center; gap:14px; align-items:center; z-index:10;
+    font-family:var(--font); color:#fff; font-size:13px; user-select:none;
+  }
+  #nav-ui button{
+    background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.3);
+    color:#fff; border-radius:4px; padding:6px 14px; cursor:pointer; font-size:14px;
+  }
+  #nav-ui button:hover{ background:rgba(161,0,255,.5); }
+  #counter{ min-width:70px; text-align:center; }
+  .nav-hit{ position:absolute; top:0; bottom:0; width:30%; cursor:pointer; z-index:5; }
+  .nav-hit.left{ left:0; }
+  .nav-hit.right{ right:0; }
+
+  @media print{
+    html,body{ overflow:visible; background:#fff; }
+    #nav-ui, .nav-hit, #notes-panel{ display:none !important; }
+    #viewport{ position:static; display:block; }
+    #deck{ transform:none !important; width:auto; height:auto; box-shadow:none; }
+    .slide{
+      display:flex !important; position:relative; width:1280px; height:720px;
+      page-break-after:always; break-after:page;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div id="viewport">
+  <div id="deck">
+
+    <!-- SLIDE: 01 copertina -->
+    <section class="slide cover bg-dark">
+      <div class="content cover">
+        <div class="wordmark-big">accenture<span style="color:var(--purple-light)">&gt;</span></div>
+        <div class="kicker">Hagenthon · Tema 02</div>
+        <h1>Quanto costa sperare?</h1>
+        <p class="subtitle"><strong style="color:#fff">Fortuna in Chiaro</strong>: un anno di gioco in 10 secondi, con le probabilità ufficiali. Solo numeri, nessun consiglio.</p>
+        <div class="meta">Team Hagenthon · 5 ottobre 2026</div>
+      </div>
+      <div class="footer">
+        <span class="wordmark">accenture<span class="chevron">&gt;</span></span>
+        <span class="page-num"></span>
+      </div>
+      <aside class="notes">0:00-0:10 (10") — "Quanto costa sperare? Fortuna in Chiaro mostra in 10 secondi un anno di gioco, con le probabilità ufficiali ADM. Non giudica, non consiglia: mostra i numeri."</aside>
+    </section>
+    <!-- /SLIDE -->
+
+    <!-- SLIDE: 02 Salvatore, Deliverable 01 -->
+    <section class="slide">
+      <div class="content">
+        <div class="kicker">User Difficulty Statement <span class="deliv">Deliverable 01</span></div>
+        <h2>Salvatore non sa <span class="accent">quanto gli costa</span> sperare</h2>
+        <div class="persona">
+          <div class="card">
+            <div class="name">Salvatore</div>
+            <div class="role">Reddito 1.300 € al mese · 2 biglietti da 5 € al giorno</div>
+            <ul class="bullets">
+              <li>Gioca 10 € al giorno, "è poco"</li>
+              <li>Crede nei numeri "in ritardo"</li>
+              <li>Conta le vincite, non le giocate</li>
+            </ul>
+          </div>
+          <div style="flex:1">
+            <p class="quote">"10 € al giorno, <span class="accent">prima o poi vinco</span>."</p>
+            <div class="kpi-row">
+              <div class="kpi"><div class="value">3.650 €</div><div class="label">spesi in un anno</div><div class="tag">10 € × 365 [DERIV]</div></div>
+              <div class="kpi"><div class="value">23,4%</div><div class="label">del suo reddito annuo</div><div class="tag">3.650 / 15.600 € [DERIV]</div></div>
+            </div>
+            <p class="note-box"><strong>La difficoltà:</strong> le probabilità sono pubbliche, ma scritte in tabelle che nessuno legge. Salvatore non riesce a trasformare "1 su 12.480.000" in una conseguenza per la sua vita.</p>
+          </div>
+        </div>
+      </div>
+      <div class="footer">
+        <span class="wordmark">accenture<span class="chevron">&gt;</span></span>
+        <span class="src">Fonte: valore-checkpoint.md §1; tabella premi ADM "Nuovo 20X" (ricerca-azzardo.md §1.1)</span>
+        <span class="page-num"></span>
+      </div>
+      <aside class="notes">0:10-0:35 (25") — Deliverable 01. Presentare Salvatore: 1.300 € al mese, 10 € al giorno. Lui pensa "prima o poi vinco". In un anno sono 3.650 €, il 23% del reddito. Il problema non è l'accesso ai dati (sono pubblici, ADM) ma la loro leggibilità.</aside>
+    </section>
+    <!-- /SLIDE -->
+
+    <!-- SLIDE: 03 il problema -->
+    <section class="slide">
+      <div class="content">
+        <div class="kicker">Il problema</div>
+        <h2>Salvatore non è un caso isolato</h2>
+        <div class="kpi-row" style="margin-top:10px">
+          <div class="kpi"><div class="value">18 mln</div><div class="label">adulti che hanno giocato nell'ultimo anno</div><div class="tag">ISS, Rapporti ISTISAN 19/28</div></div>
+          <div class="kpi"><div class="value">1,4 mln</div><div class="label">a rischio moderato</div><div class="tag">ISS, Rapporti ISTISAN 19/28</div></div>
+          <div class="kpi"><div class="value">21,5 mld €</div><div class="label">persi netti dagli italiani nel 2024</div><div class="tag">ADM, Bilancio di esercizio 2024</div></div>
+        </div>
+        <p class="note-box" style="margin-top:28px">Un biglietto da 5 € (modello A, ADM) restituisce in media <strong>71,2 centesimi per euro</strong>: il 28,8% resta perso per costruzione [UFF + DERIV].</p>
+      </div>
+      <div class="footer">
+        <span class="wordmark">accenture<span class="chevron">&gt;</span></span>
+        <span class="src">Fonti: ricerca-azzardo.md §0, §1.1, §4, §5 (ISS; ADM via agipronews.it e gioconews.it)</span>
+        <span class="page-num"></span>
+      </div>
+      <aside class="notes">0:35-0:50 (15") — 18 milioni di giocatori, 1,4 milioni a rischio moderato: è il nostro pubblico. I 1,5 milioni problematici vanno al numero verde, non a un simulatore. 21,5 miliardi persi nel 2024. Il gioco non è "sfortuna": è costruito per restituire meno di quanto si gioca.</aside>
+    </section>
+    <!-- /SLIDE -->
+
+    <!-- SLIDE: 04 la soluzione -->
+    <section class="slide">
+      <div class="content">
+        <div class="kicker">La soluzione</div>
+        <h2>Fortuna in Chiaro: <span class="accent">tre concetti</span>, un percorso</h2>
+        <div class="flow">
+          <div class="flow-box">Quiz prima</div><div class="flow-arrow"></div>
+          <div class="flow-box">La tua abitudine</div><div class="flow-arrow"></div>
+          <div class="flow-box highlight">Un anno in 10 secondi</div><div class="flow-arrow"></div>
+          <div class="flow-box">Dalla parte del banco</div><div class="flow-arrow"></div>
+          <div class="flow-box">Quiz dopo + trasferimento</div>
+        </div>
+        <div class="columns">
+          <div class="col"><h3>Probabilità in cose fisiche</h3><p>"1 su 12.480.000" diventa 208 stadi pieni con un solo vincitore.</p></div>
+          <div class="col"><h3>Vincite che non sono vincite</h3><p>"Hai vinto 5 €" diventa "hai recuperato la giocata: guadagno 0 €".</p></div>
+          <div class="col"><h3>Dalla parte del banco</h3><p>10.000 persone come Salvatore per un anno: chi incassa davvero.</p></div>
+        </div>
+        <p class="small">Statico, offline, nessun dato personale raccolto. Nessun consiglio: solo numeri e significati (vincolo T2-V3).</p>
+      </div>
+      <div class="footer">
+        <span class="wordmark">accenture<span class="chevron">&gt;</span></span>
+        <span class="page-num"></span>
+      </div>
+      <aside class="notes">0:50-1:00 (10") — Tre leve: le probabilità diventano cose fisiche, le vincite finte si smascherano, si guarda dalla parte del banco. Il percorso si misura: quiz prima e dopo, con una domanda nuova di trasferimento. Passo alla demo.</aside>
+    </section>
+    <!-- /SLIDE -->
+
+    <!-- SLIDE: 05 demo -->
+    <section class="slide">
+      <div class="content">
+        <div class="kicker">Demo live · 2'30"</div>
+        <h2>Un anno di Salvatore in 10 secondi</h2>
+        <div class="demo-frame">
+          <iframe src="../app/index.html" title="Anteprima di Fortuna in Chiaro" tabindex="-1"></iframe>
+        </div>
+        <div class="demo-caption">Apri la demo: <a href="../app/index.html?demo=1" target="_blank">app/index.html?demo=1</a> (seme fisso, percorso guidato) · Riserva: video registrato</div>
+      </div>
+      <div class="footer">
+        <span class="wordmark">accenture<span class="chevron">&gt;</span></span>
+        <span class="page-num"></span>
+      </div>
+      <aside class="notes">1:00-3:30 (2'30") — DEMO con ?demo=1. (1) 1:00-1:15 Quiz prima: Salvatore fa 1/3. (2) 1:15-1:50 Abitudine (2 biglietti da 5 € al giorno, 3.650 € l'anno) e un anno in 10 secondi: "servirebbero 208 stadi da 60.000 posti, e vincerebbe una sola persona" (L3). (3) 1:50-2:15 "HAI VINTO!"... era solo il rimborso: guadagno 0 €; il 38,5% delle vincite del modello A è il rimborso, il 79,4% è da 5 o 10 € (L1). (4) 2:15-2:45 Dalla parte del banco: 10.000 Salvatori per un anno, quanti in attivo, quanto incassa il banco; 21,5 miliardi in Italia (L2). (5) 2:45-3:20 Quiz dopo 3/3 + trasferimento sul biglietto da 2 € inventato; cruscotto prima/dopo. (6) 3:20-3:30 CR1: la soglia scelta da Salvatore è superata, compare "Vuoi parlarne con qualcuno?" con il numero verde; il messaggio lo invia solo lui. Se BR-17 è approvato: "Pausa e Conto" al posto del passo 4 o 10" prima della chiusura. I ritardatari restano nell'app ma escono dal copione. Se l'animazione non parte: video di riserva.</aside>
+    </section>
+    <!-- /SLIDE -->
+
+    <!-- SLIDE: 06 OPZIONALE BR-17 Pausa e Conto (go/no-go al checkpoint 14:05; eliminare se no-go) -->
+    <section class="slide">
+      <div class="content">
+        <div class="kicker">Pausa e Conto <span class="badge warn">Opzionale · go/no-go 14:05</span></div>
+        <h2>"Sto per comprare un biglietto": <span class="accent">30 secondi</span> di numeri</h2>
+        <div class="columns">
+          <div class="col">
+            <h3>Cosa mostra, per quel biglietto</h3>
+            <ul class="bullets">
+              <li>Perdita media attesa: 28,8% del prezzo (modello A)</li>
+              <li>Vincite che sono solo rimborso: 38,5%</li>
+              <li>Premio massimo in scala fisica: 208 stadi, un vincitore</li>
+            </ul>
+          </div>
+          <div class="col">
+            <h3>Cosa non fa</h3>
+            <ul class="bullets">
+              <li>Non dice cosa comprare né se giocare</li>
+              <li>Non è un esercizio clinico</li>
+              <li>Si chiude con "La scelta è tua"</li>
+            </ul>
+          </div>
+        </div>
+        <p class="note-box">Decisione informata, focus del Tema 02. Attivata solo da Salvatore (BR-17, Could).</p>
+      </div>
+      <div class="footer">
+        <span class="wordmark">accenture<span class="chevron">&gt;</span></span>
+        <span class="src">Dati: tabella ADM modello A (ricerca-azzardo.md §1.1); ricalcoli in idea-selezionata.md</span>
+        <span class="page-num"></span>
+      </div>
+      <aside class="notes">OPZIONALE, 0" di default. Se BR-17 passa al checkpoint 14:05 si mostra in demo (10"), e questa slide resta come riserva se la demo si blocca. Se no-go: eliminare la slide.</aside>
+    </section>
+    <!-- /SLIDE -->
+
+    <!-- SLIDE: 07 prima/dopo, Deliverable 02 -->
+    <section class="slide">
+      <div class="content">
+        <div class="kicker">Before/After Simplicity Evidence <span class="deliv">Deliverable 02</span></div>
+        <h2>Dalla speranza ai numeri</h2>
+        <div class="before-after">
+          <div class="ba-panel ba-before">
+            <div class="ba-tag">Prima</div>
+            <p class="ba-quote">"10 € al giorno, prima o poi vinco."</p>
+            <ul class="bullets">
+              <li>Quiz: <strong>1/3</strong></li>
+              <li>"1 su 12.480.000": un numero senza significato</li>
+              <li>"Ho vinto 5 €": sembra una vincita</li>
+            </ul>
+          </div>
+          <div class="ba-panel ba-after">
+            <div class="ba-tag">Dopo</div>
+            <p class="ba-quote"><span class="num">3.650 €</span> l'anno, perdita attesa <span class="num">≈ 1.051 €</span></p>
+            <ul class="bullets">
+              <li>Quiz: <strong>3/3</strong> + domanda di trasferimento corretta</li>
+              <li>Premio massimo: in media una volta ogni <strong>~17.096 anni</strong></li>
+              <li>Il 38,5% delle vincite è solo il rimborso: guadagno 0 €</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="footer">
+        <span class="wordmark">accenture<span class="chevron">&gt;</span></span>
+        <span class="src">Modello A, payout 71,2%: 3.650 × 28,8% ≈ 1.051 €; 12.480.000 / 730 biglietti l'anno ≈ 17.096 anni; rimborsi 4.576.000 / 11.893.456 vincite = 38,5% [UFF ADM + DERIV]</span>
+        <span class="page-num"></span>
+      </div>
+      <aside class="notes">3:30-3:45 (15") — Deliverable 02. Prima: "prima o poi vinco", quiz 1/3. Dopo: 3.650 € l'anno, perdita attesa circa 1.051 € (modello A; con il modello B si arriva a 1.456 €), premio massimo in media una volta ogni 17.000 anni circa. Quiz 3/3 e risposta corretta su un biglietto mai visto: ha capito il concetto, non ha memorizzato la risposta.</aside>
+    </section>
+    <!-- /SLIDE -->
+
+    <!-- SLIDE: 07 Risk & Clarity Note, Deliverable 03 -->
+    <section class="slide">
+      <div class="content">
+        <div class="kicker">Risk &amp; Clarity Note <span class="deliv">Deliverable 03</span></div>
+        <h2>Cosa semplifichiamo, <span class="accent">cosa non tocchiamo</span></h2>
+        <table class="t">
+          <tr><th style="width:230px">Aspetto</th><th>Come lo trattiamo</th></tr>
+          <tr><td class="m">Semplificato</td><td>Linguaggio, visualizzazione (un anno in 10 secondi), arrotondamenti nei testi. Solo due biglietti da 5 € (modelli A e B), senza marchi commerciali.</td></tr>
+          <tr><td class="m">Non alterato</td><td>Probabilità e premi ufficiali ADM delle tabelle di emissione: il payout calcolato dall'app coincide con la tabella (test automatici).</td></tr>
+          <tr><td class="m">Lotto</td><td>Fonte di terzi (calcolo combinatorio standard: ambo 1 su 400,5, 250 volte la posta), dichiarata come tale. La regola "5 numeri estratti su 90" è ricavata da quel calcolo. La posta la sceglie l'utente.</td></tr>
+          <tr><td class="m">Quiz didattico</td><td>Il biglietto da 2 € al 70% della domanda di trasferimento è inventato per l'esercizio ed è dichiarato come tale nell'app.</td></tr>
+          <tr><td class="m">Nessun consiglio</td><td>L'app mostra numeri e significati, non dice se giocare o smettere (T2-V3). Nessun dato personale raccolto.</td></tr>
+          <tr><td class="m">Se serve aiuto</td><td>Telefono Verde Nazionale ISS <strong>800 55 88 22</strong>: gratuito, anonimo, lunedì-venerdì 10:00-16:00.</td></tr>
+        </table>
+      </div>
+      <div class="footer">
+        <span class="wordmark">accenture<span class="chevron">&gt;</span></span>
+        <span class="src">Fonti: ADM tabelle premi (ricerca-azzardo.md §1); Lotto [TERZI] §2; ISS TVNGA §6</span>
+        <span class="page-num"></span>
+      </div>
+      <aside class="notes">3:45-4:00 (15") — Deliverable 03. Semplifichiamo il linguaggio, non i numeri: probabilità e premi sono quelli ufficiali ADM, verificati dai test. Il Lotto viene da un calcolo combinatorio di terzi e lo diciamo; la regola 5 su 90 è ricavata. Il biglietto da 2 € del quiz è inventato e dichiarato. Nessun consiglio. Il numero verde ISS è sempre visibile.</aside>
+    </section>
+    <!-- /SLIDE -->
+
+    <!-- SLIDE: 09 struttura agentica di sviluppo -->
+    <!-- kicker distinto dalla slide Fase 2 -->
+    <section class="slide">
+      <div class="content">
+        <div class="kicker">Struttura agentica di sviluppo · come l'abbiamo costruita</div>
+        <h2>Un team di <span class="accent">5 agenti</span>, 2 verifiche umane</h2>
+        <div class="flow">
+          <div class="flow-box">Idea<br><span class="small">innovazione</span></div><div class="flow-arrow"></div>
+          <div class="flow-box human">Conferma umana</div><div class="flow-arrow"></div>
+          <div class="flow-box">BR e test<br><span class="small">business</span></div><div class="flow-arrow"></div>
+          <div class="flow-box highlight">Sviluppo ⇄ test<br><span style="font-size:13px">stanze parallele</span></div><div class="flow-arrow"></div>
+          <div class="flow-box">Review<br><span class="small">qa PASS/FAIL</span></div><div class="flow-arrow"></div>
+          <div class="flow-box human">Conferma umana → push</div>
+        </div>
+        <div class="columns">
+          <div class="col">
+            <h3>Stanze agile parallele</h3>
+            <ul class="bullets">
+              <li><strong>Motore</strong>: dati ufficiali, calcolo, test unitari</li>
+              <li><strong>Esperienza</strong>: schermate, simulazione, quiz</li>
+              <li>Contratto API comune, test per stanza</li>
+            </ul>
+          </div>
+          <div class="col">
+            <h3>Rules, skill, hook</h3>
+            <ul class="bullets">
+              <li><strong>Rules</strong>: CLAUDE.md e prompt di ruolo · <strong>Skill</strong>: presentazioni-accenture</li>
+              <li><strong>Hook</strong> guard.ps1: blocca 00_input/ e API key</li>
+              <li><strong>Hook</strong> post-edit-tests.ps1: test dopo ogni modifica ad app/</li>
+              <li><strong>L4, guardrail del Tema 02</strong>: un hook PreToolUse blocca in app/ i testi da consiglio o giudizio ("conviene", "smetti", "gioca meno"): T2-V3 diventa un controllo automatico</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="footer">
+        <span class="wordmark">accenture<span class="chevron">&gt;</span></span>
+        <span class="src">Dettaglio: agents/ e docs/governance/stato-avanzamento.md</span>
+        <span class="page-num"></span>
+      </div>
+      <aside class="notes">4:00-4:25 (25") — Questa è la struttura agentica di SVILUPPO (agents/), quella valutata. L'orchestratore coordina 5 agenti che si passano il lavoro attraverso file, ognuno scrive solo nelle sue cartelle. Due verifiche umane: scelta dell'idea e consegna. Sviluppo in due stanze parallele, Motore ed Esperienza, con un contratto API comune. Gli hook rendono le regole automatiche: niente scritture sulle fonti, niente segreti, test a ogni modifica. E il vincolo del tema, "nessun consiglio", è un hook: se un agente scrive "conviene" o "smetti" nell'app, la scrittura viene bloccata. Nessun push senza PASS di QA.</aside>
+    </section>
+    <!-- /SLIDE -->
+
+    <!-- SLIDE: 09 token -->
+    <section class="slide">
+      <div class="content">
+        <div class="kicker">Uso consapevole dei token</div>
+        <h2>Il modello giusto per ogni ruolo, <span class="accent">zero token</span> a runtime</h2>
+        <div class="columns">
+          <div class="col">
+            <table class="t">
+              <tr><th>Agente</th><th>Modello</th></tr>
+              <tr><td>innovazione (idea, pitch)</td><td class="m">Opus</td></tr>
+              <tr><td>qa (verdetto PASS/FAIL)</td><td class="m">Opus</td></tr>
+              <tr><td>business (BR, test)</td><td class="m">Sonnet</td></tr>
+              <tr><td>governance (piano, push)</td><td class="m">Sonnet</td></tr>
+              <tr><td>sviluppo</td><td class="m">eredita dalla sessione</td></tr>
+              <tr><td>compiti meccanici</td><td class="m">Haiku</td></tr>
+            </table>
+          </div>
+          <div class="col">
+            <ul class="bullets">
+              <li>Opus solo dove deve essere giusto: idea e QA</li>
+              <li>Contesto mirato: ogni agente legge solo i file che gli servono e restituisce una sintesi</li>
+              <li>Stato nei file, non nella chat</li>
+              <li>App deterministica: <strong>nessuna chiamata AI a runtime</strong>, costo per utente nullo, funziona offline</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="footer">
+        <span class="wordmark">accenture<span class="chevron">&gt;</span></span>
+        <span class="src">Fonte: CLAUDE.md, sezione "Uso consapevole dei token"</span>
+        <span class="page-num"></span>
+      </div>
+      <aside class="notes">4:25-4:35 (10") — Opus solo per idea e QA, Sonnet per business e governance, Haiku per i compiti meccanici. La soluzione è deterministica: i numeri devono essere esatti, quindi niente AI a runtime. Zero token per utente.</aside>
+    </section>
+    <!-- /SLIDE -->
+
+    <!-- SLIDE: 11 visione Fase 2 (architettura multi-agente del PRODOTTO, fuori MVP) -->
+    <section class="slide">
+      <div class="content">
+        <div class="kicker">Visione Fase 2 <span class="badge warn">Non è nel MVP</span> <span class="badge">Architettura del prodotto, non di sviluppo</span></div>
+        <h2>Da simulatore a <span class="accent">percorso di supporto</span></h2>
+        <table class="t">
+          <tr><th style="width:260px">Agente del prodotto</th><th style="width:400px">Oggi, nel MVP (deterministico)</th><th>In Fase 2</th></tr>
+          <tr><td class="m">Analista</td><td>Sì: il motore di calcolo (spesa, perdita attesa, quota del reddito)</td><td>Movimenti reali, con consenso</td></tr>
+          <tr><td class="m">Escalation verso un umano</td><td>Leggera: CR1 "Vuoi parlarne con qualcuno?", attivata da Salvatore</td><td>SerD, psicologo, Telefono Verde ISS con protocollo clinico</td></tr>
+          <tr><td class="m">Craving</td><td>Educativa: "Pausa e Conto", se approvata</td><td>Interventi nei momenti a rischio, esercizi validati clinicamente</td></tr>
+          <tr><td class="m">Coach</td><td>No</td><td>Colloquio motivazionale con supervisione clinica</td></tr>
+          <tr><td class="m">Debiti · Barriere</td><td>No: sarebbe consulenza personalizzata (T2-V3)</td><td>Sportelli competenti; autoesclusione ADM, blocchi bancari</td></tr>
+        </table>
+        <p class="small" style="margin-top:14px">Prerequisiti: backend e AI a runtime, partnership clinica (SerD, ISS), validazione dell'efficacia, consenso ai dati sanitari (GDPR art. 9), valutazione del costo in token.</p>
+      </div>
+      <div class="footer">
+        <span class="wordmark">accenture<span class="chevron">&gt;</span></span>
+        <span class="src">Fonte: docs/idea/idea-selezionata.md, "Visione Fase 2"</span>
+        <span class="page-num"></span>
+      </div>
+      <aside class="notes">4:35-4:45 (10") — Attenzione a non confonderla con la slide precedente: quella era la struttura agentica con cui abbiamo COSTRUITO l'app; questa è una VISIONE di prodotto, fuori dal MVP. Oggi due agenti esistono già in forma leggera e deterministica (Analista, Escalation con CR1). Il resto richiede partnership clinica e consenso: per questo non è nel MVP.</aside>
+    </section>
+    <!-- /SLIDE -->
+
+    <!-- SLIDE: 12 valore su scala, STIMA NOSTRA (da confermare al checkpoint) -->
+    <section class="slide bg-light-grey">
+      <div class="content">
+        <div class="kicker">Valore su scala <span class="badge warn">Stima nostra</span></div>
+        <h2>Se raggiungessimo l'1% dei giocatori</h2>
+        <div class="kpi-row">
+          <div class="kpi" style="background:#fff"><div class="value">180.000</div><div class="label">giocatori raggiunti (1% di 18 mln)</div></div>
+          <div class="kpi" style="background:#fff"><div class="value">126.000</div><div class="label">arrivano a 3/3 (ipotesi 70%)</div></div>
+          <div class="kpi" style="background:#fff"><div class="value">~150 mln €</div><div class="label">l'anno di perdite rese consapevoli</div></div>
+        </div>
+        <p class="note-box" style="background:#fff">Calcolo: 126.000 × ~1.190 € (21,5 mld ADM 2024 / 18 mln ISS). <strong>Ipotesi non misurata</strong>: anni e perimetro delle due fonti non coincidono. Non sono risparmi: lo strumento non dà consigli, mostra i numeri.</p>
+      </div>
+      <div class="footer">
+        <span class="wordmark">accenture<span class="chevron">&gt;</span></span>
+        <span class="src">Fonte: valore-checkpoint.md §2 (stima nostra su ADM Bilancio 2024 e ISS ISTISAN 19/28)</span>
+        <span class="page-num"></span>
+      </div>
+      <aside class="notes">4:45-4:52 (7") — DA CONFERMARE AL CHECKPOINT 14:05: l'utente decide se tenere questa slide. Se resta: "È una stima nostra, non misurata: 1% dei giocatori, 70% che capisce, circa 150 milioni l'anno di perdite rese visibili. Non risparmi: consapevolezza." Se viene tolta: i 7 secondi passano alla chiusura.</aside>
+    </section>
+    <!-- /SLIDE -->
+
+    <!-- SLIDE: 13 chiusura -->
+    <section class="slide closing bg-dark">
+      <div class="content closing">
+        <div class="kicker">Fortuna in Chiaro</div>
+        <h1>La fortuna non si cambia.<br>Si può vedere.</h1>
+        <p class="subtitle">Se il gioco è diventato un problema: Telefono Verde ISS <strong style="color:#fff">800 55 88 22</strong>, gratuito e anonimo.</p>
+        <div class="contacts">Repository: [URL GitHub da inserire] · app/index.html · presentation/index.html</div>
+      </div>
+      <div class="footer">
+        <span class="wordmark">accenture<span class="chevron">&gt;</span></span>
+        <span class="page-num"></span>
+      </div>
+      <aside class="notes">4:52-5:00 (8") — Chiudere su Salvatore: "Non gli diciamo cosa fare. Gli mostriamo, in 10 secondi, quanto gli costa sperare." Numero verde, repository. Grazie.</aside>
+    </section>
+    <!-- /SLIDE -->
+
+  </div>
+</div>
+
+<div class="nav-hit left" id="hit-prev"></div>
+<div class="nav-hit right" id="hit-next"></div>
+
+<div id="notes-panel"></div>
+
+<div id="nav-ui">
+  <button id="btn-prev" aria-label="Slide precedente">&#8592;</button>
+  <span id="counter">1 / 1</span>
+  <button id="btn-next" aria-label="Slide successiva">&#8594;</button>
+  <span>N = note del relatore</span>
+</div>
+
+<script>
+(function(){
+  var deck = document.getElementById('deck');
+  var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+  var total = slides.length;
+  var current = 0;
+  var notesPanel = document.getElementById('notes-panel');
+
+  slides.forEach(function(s, i){
+    var pn = s.querySelector('.page-num');
+    if (pn) pn.textContent = String(i + 1).padStart(2, '0') + ' / ' + String(total).padStart(2, '0');
+  });
+
+  function render(){
+    slides.forEach(function(s, i){ s.classList.toggle('active', i === current); });
+    var counter = document.getElementById('counter');
+    if (counter) counter.textContent = (current + 1) + ' / ' + total;
+    var n = slides[current].querySelector('.notes');
+    notesPanel.textContent = n ? n.textContent : '';
+  }
+
+  function goTo(i){
+    if (i < 0 || i >= total) return;
+    current = i;
+    render();
+  }
+  function next(){ goTo(current + 1); }
+  function prev(){ goTo(current - 1); }
+
+  function resize(){
+    var scale = Math.min(window.innerWidth / 1280, window.innerHeight / 720);
+    deck.style.position = 'absolute';
+    deck.style.top = '50%';
+    deck.style.left = '50%';
+    deck.style.transform = 'translate(-50%,-50%) scale(' + scale + ')';
+  }
+
+  window.addEventListener('resize', resize);
+  window.addEventListener('keydown', function(e){
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown' || e.key === 'ArrowDown'){
+      e.preventDefault(); next();
+    } else if (e.key === 'ArrowLeft' || e.key === 'PageUp' || e.key === 'ArrowUp'){
+      e.preventDefault(); prev();
+    } else if (e.key === 'Home'){
+      goTo(0);
+    } else if (e.key === 'End'){
+      goTo(total - 1);
+    } else if (e.key === 'n' || e.key === 'N'){
+      notesPanel.classList.toggle('on');
+    }
+  });
+
+  document.getElementById('btn-next').addEventListener('click', next);
+  document.getElementById('btn-prev').addEventListener('click', prev);
+  document.getElementById('hit-next').addEventListener('click', next);
+  document.getElementById('hit-prev').addEventListener('click', prev);
+
+  resize();
+  render();
+})();
+</script>
+
+</body>
+</html>

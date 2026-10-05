@@ -136,14 +136,17 @@
 ---
 
 ## BR-11 — Nessun consiglio né giudizio (T2-V3)
-**Descrizione**: in nessun punto dell'app compaiono frasi che consigliano di smettere, giocare meno, o che esprimono un giudizio di valore sulla scelta dell'utente; solo numeri e significati.
-**Motivazione di business**: vincolo esplicito e non negoziabile del tema e dell'idea; la violazione squalifica la soluzione.
+**Descrizione**: in nessun punto dell'app compaiono frasi che consigliano di smettere, giocare meno, o che esprimono un giudizio di valore sulla scelta dell'utente; solo numeri e significati. **Rafforzamento L4 (approvato dall'utente, 13:10)**: il vincolo non è affidato solo alla revisione umana dei testi, ma a un controllo automatico. Un hook PreToolUse (`.claude/hooks/`) blocca la scrittura/modifica di file in `app/` quando il contenuto corrisponde a una lista chiusa di formule da consiglio o giudizio (es. "conviene", "ti consiglio", "dovresti smettere", "dovresti giocare meno", "gioca meno", "smetti"). In aggiunta, un test automatico scansiona tutti i testi dell'app (file HTML/JS visibili all'utente) cercando le stesse formule.
+**Motivazione di business**: vincolo esplicito e non negoziabile del tema e dell'idea; la violazione squalifica la soluzione. Il controllo automatico rende il vincolo verificabile e dimostrabile (pattern "hooks" richiesto dalla valutazione), non solo affidato alla lettura manuale.
 **Priorità**: Must.
 **Vincolo di tema**: T2-V3 (esplicito), Tema 02 vincolo 3 ("vietato fornire raccomandazioni... o indicazioni su cosa fare").
 
 **Criteri di accettazione**
 - Dato tutti i testi dell'app (benvenuto, schede, quiz, cruscotto), quando vengono letti integralmente, allora non contengono imperativi o consigli del tipo "dovresti smettere", "gioca meno", "non conviene", "ti consiglio di...".
 - Dato il disclaimer (BR-08), quando confrontato con il resto dei testi, allora è l'unico riferimento esplicito a un comportamento esterno (il numero verde), presentato come informazione e non come raccomandazione.
+- **[L4]** Dato l'hook PreToolUse attivo, quando si tenta di scrivere in un file sotto `app/` un testo contenente una formula vietata (es. "ti consiglio di giocare meno") — **caso positivo (da bloccare)** — allora la scrittura viene rifiutata e l'agente riceve un messaggio di blocco.
+- **[L4]** Dato l'hook PreToolUse attivo, quando si scrive in un file sotto `app/` un testo neutro equivalente (es. "in media servirebbero 17.096 anni per vincere il premio massimo") — **caso negativo (da consentire)** — allora la scrittura viene eseguita senza blocchi (nessun falso positivo).
+- **[L4]** Dato il test automatico che scansiona i testi dell'app, quando eseguito su tutti i file HTML/JS visibili all'utente, allora restituisce esito verde (nessuna formula vietata trovata) prima del verdetto QA.
 
 ---
 
@@ -156,3 +159,75 @@
 **Criteri di accettazione**
 - Dato l'utente che compila quiz e abitudine, quando si ispeziona il traffico di rete del browser (devtools), allora non risultano richieste HTTP in uscita contenenti le risposte o le scelte dell'utente.
 - Dato il codice dell'app, quando ispezionato, allora non contiene chiavi API né chiamate a servizi esterni per elaborare i dati dell'utente (logica interamente deterministica/locale, coerente con la Strategia AI dell'idea).
+
+---
+
+## BR-13 — L1: le vincite che non sono vincite
+**Descrizione**: quando nella simulazione (schermata 4) o altrove un biglietto simulato "vince", l'app distingue il saldo reale: se il premio coincide con il rimborso della giocata (es. vincita di 5 € su una giocata da 5 €), il messaggio non è "HAI VINTO 5 €" ma segnala che si tratta del recupero della spesa, con guadagno netto 0 €. A fine simulazione, un riepilogo mostra quante vincite erano solo rimborso, quante erano piccole vincite reali, quante erano vincite reali superiori alla giocata.
+**Motivazione di business**: leva di innovazione L1, approvata dall'utente; rende visibile un'illusione cognitiva comune (percepire come "vincita" ciò che è solo un rimborso), rafforzando l'evidenza Before/After con un dato specifico e sorprendente.
+**Priorità**: Must.
+**Vincolo di tema**: T2-V1 (comprensione di un costo quotidiano), T2-E4 (dati ufficiali, nessuna alterazione), coerente con BR-11 (nessun giudizio: solo classificazione oggettiva del saldo).
+
+**Criteri di accettazione**
+- Dato il modello A (G1) usato nella simulazione, quando un biglietto estratto ha un premio pari esattamente alla giocata (es. premio 5 € su giocata 5 €), allora l'app mostra un messaggio che indica il recupero della spesa e un guadagno netto di 0 €, non "hai vinto".
+- Dato l'anno di simulazione completato, quando il riepilogo delle vincite viene mostrato, allora indica la quota di vincite che sono rimborso (coerente con il dato di fonte: **38,5%** delle vincite è un rimborso da 5 €, cioè 4.576.000 vincite su 11.893.456 vincite totali del modello A) e la quota di vincite da 5 € o 10 € (**79,4%** del totale).
+- Dato il riepilogo delle vincite, quando confrontato con la fonte, allora i due valori percentuali (38,5% e 79,4%) coincidono con `ricerca-azzardo.md` §1, senza arrotondamenti ulteriori non dichiarati.
+- Dato il messaggio "hai recuperato la giocata", quando letto, allora non contiene giudizi né consigli (coerente con BR-11): è una descrizione neutra del saldo.
+
+---
+
+## BR-14 — L2: dalla parte del banco, 10.000 persone
+**Descrizione**: un tasto nella simulazione passa dalla vista individuale di Salvatore alla vista aggregata di **10.000 persone** con la stessa abitudine di gioco, per un anno, usando lo stesso motore di calcolo e lo stesso seme fisso in modalità demo. L'app mostra quante persone (su 10.000) finiscono in attivo (vincite nette positive) e quanto incassa complessivamente il banco. Una seconda vista mostra la scala Italia (perdita netta nazionale 2024).
+**Motivazione di business**: leva di innovazione L2, approvata dall'utente; sposta la prospettiva dal singolo giocatore al sistema, rendendo visibile che il gioco è strutturalmente a favore del banco su grandi numeri, senza bisogno di giudicare la scelta individuale.
+**Priorità**: Must.
+**Vincolo di tema**: T2-V1 (scala del costo quotidiano), T2-E4 (dati ufficiali con fonte), coerente con BR-11 (nessun consiglio: solo numeri aggregati).
+
+**Criteri di accettazione**
+- Dato il tasto "Dalla parte del banco" nella schermata 4, quando l'utente lo attiva, allora l'app simula 10.000 persone con la stessa abitudine di gioco di Salvatore per un anno, usando lo stesso motore (stessa logica di BR-04) e, in modalità demo, lo stesso seme fisso ad ogni esecuzione.
+- Dato il risultato della simulazione aggregata, quando mostrato, allora indica quante delle 10.000 persone (in numero e percentuale) terminano l'anno con vincite nette positive (in attivo) e quante no.
+- Dato il risultato aggregato, quando mostrato, allora indica l'incasso netto complessivo del banco sulle 10.000 persone, coerente con il payout del gioco selezionato (71,2% per il modello A, 60,1% per il modello B).
+- Dato la vista "scala Italia", quando mostrata, allora riporta la perdita netta nazionale 2024 di **21,5 miliardi di euro**, etichettata con la fonte (`ricerca-azzardo.md`, dato [UFF-sec]).
+
+---
+
+## BR-15 — L3: probabilità in cose fisiche
+**Descrizione**: ogni probabilità "1 su N" mostrata nell'app (schermata 4 "Un anno in 10 secondi" e scheda "Capire i numeri" → probabilità) è tradotta in un confronto fisico tangibile: per il premio massimo del modello A, "servirebbero 208 stadi da 60.000 posti pieni, e in tutti vincerebbe una sola persona"; per la frequenza di gioco di Salvatore (2 biglietti/giorno), "in media una vincita del premio massimo ogni circa 17.096 anni".
+**Motivazione di business**: leva di innovazione L3, approvata dall'utente; rende percepibile su scala umana una probabilità altrimenti astratta (1 su 12.480.000), rafforzando la comprensione richiesta dal Tema 02 senza ricorrere a consigli o giudizi.
+**Priorità**: Must.
+**Vincolo di tema**: T2-V1 (comprensione di un concetto di rischio/probabilità di base), coerente con BR-11 (formulazione con "servirebbero…"/"in media…", mai "dovresti").
+
+**Criteri di accettazione**
+- Dato il premio massimo del modello A (probabilità 1 su 12.480.000, fonte §1.1 [UFF]), quando l'app lo traduce in scala fisica, allora mostra "208 stadi da 60.000 posti pieni, e in tutti vincerebbe una sola persona" (12.480.000 / 60.000 = 208, calcolo verificabile).
+- Dato la frequenza di gioco di Salvatore (2 biglietti/giorno = 730 biglietti/anno) e la probabilità del premio massimo del modello A, quando l'app mostra la scala temporale, allora riporta "in media, una vincita del premio massimo ogni circa 17.096 anni" (12.480.000 / 730 ≈ 17.096, etichettato come stima derivata [DERIV], coerente con BR-04/TC-08).
+- Dato i due confronti fisici (stadi e anni), quando letti, allora sono formulati senza imperativi o consigli ("servirebbero…", "in media…"), mai "dovresti", coerente con il rafforzamento BR-11/L4 (nessun falso positivo dell'hook).
+- Dato la scheda "Capire i numeri" → probabilità (BR-05), quando l'utente la apre, allora il confronto fisico "208 stadi" è presente accanto alla rappresentazione visiva "1 su 12.480.000" già prevista da BR-05.
+
+---
+
+## BR-16 — CR1: "Vuoi parlarne con qualcuno?"
+**Descrizione**: nella schermata "La mia abitudine", l'utente sceglie autonomamente una soglia di spesa mensile personale (es. 100 €, valore di default suggerito ma modificabile). Se la spesa mensile calcolata dall'abitudine inserita supera la soglia scelta dall'utente, compare un pannello con: (a) il numero verde ISS 800 55 88 22 con link `tel:` per chiamare direttamente dal dispositivo; (b) un messaggio già scritto, neutro, da inviare a una persona di fiducia tramite link WhatsApp o `mailto:` precompilato, che **l'utente sceglie se inviare e invia personalmente** (nessun invio automatico, nessun contatto salvato dall'app).
+**Motivazione di business**: change request CR1, approvata dall'utente; introduce un'escalation leggera verso un supporto umano, attivata da una soglia di budget scelta dall'utente (non da una diagnosi di rischio), compatibile con il perimetro educativo del Tema 02 e con il divieto di consigli/giudizi (BR-11).
+**Priorità**: Should.
+**Vincolo di tema**: T2-V3 (la soglia è un budget personale scelto dall'utente, non una valutazione clinica), BR-12 (nessun dato salvato o inviato dall'app), coerente con BR-11/L4 (testo del messaggio precompilato verificato dall'hook).
+
+**Criteri di accettazione**
+- Dato la schermata "La mia abitudine", quando l'utente la visualizza, allora può impostare una soglia di spesa mensile personale (campo numerico, default proposto, es. 100 €, modificabile liberamente).
+- Dato che la spesa mensile calcolata (BR-03) supera la soglia scelta dall'utente, quando il confronto viene valutato, allora compare il pannello "Vuoi parlarne con qualcuno?" con il numero verde 800 55 88 22 in forma di link `tel:800558822`.
+- Dato il pannello visibile, quando l'utente lo apre, allora trova anche un messaggio precompilato per una persona di fiducia, disponibile come link WhatsApp (`https://wa.me/?text=...`) e come link `mailto:` con oggetto e corpo precompilati; l'invio avviene solo se l'utente tocca il link e conferma nell'app esterna (nessun invio automatico da parte dell'app).
+- Dato il testo del messaggio precompilato, quando letto, allora è formulato in modo neutro (nessun giudizio, nessun riferimento a "dipendenza" o diagnosi), supera la scansione dell'hook L4 (BR-11) e non contiene formule da consiglio.
+- Dato l'attivazione del pannello o l'eventuale invio del messaggio, quando ispezionato il comportamento dell'app (DevTools → Network, storage), allora nessun dato (soglia, importo, contatto, esito dell'invio) viene salvato fuori dal browser o inviato a un server dell'app (coerente con BR-12): solo l'app esterna (client email/WhatsApp) scelta dall'utente riceve il messaggio, e solo per sua azione diretta.
+- Dato che la spesa mensile non supera la soglia scelta, quando l'utente naviga nella schermata, allora il pannello non compare.
+
+---
+
+## BR-17 — CR2: "Pausa e Conto" (go/no-go al checkpoint delle 14:05)
+**Descrizione**: un tasto "Sto per comprare un biglietto" avvia una pausa di 30 secondi durante la quale l'app mostra i numeri specifici del biglietto scelto: perdita media attesa su quella giocata, quota delle vincite di quel gioco che sono solo rimborso (BR-13), e la probabilità del premio massimo tradotta in scala fisica (BR-15). Al termine, il messaggio "La scelta è tua" chiude la pausa senza indicare una decisione.
+**Motivazione di business**: change request CR2, approvata dall'utente come versione educativa (non clinica) di un intervento nel momento della scelta; rinforza la decisione informata richiesta dal Tema 02 senza diventare un esercizio contro l'impulso o un'indicazione di cosa fare (T2-V3, BR-11).
+**Priorità**: Could — **condizionata a un go/no-go esplicito dell'utente al checkpoint delle 14:05**; se non approvata o se il tempo manca, la funzionalità resta fuori dal perimetro MVP senza impatto sui Must.
+**Vincolo di tema**: T2-V3 (nessuna indicazione su cosa fare, solo numeri), coerente con BR-11, BR-13, BR-15.
+
+**Criteri di accettazione**
+- Dato il go/no-go dell'utente al checkpoint delle 14:05, quando l'esito è "go", allora il tasto "Sto per comprare un biglietto" è presente nell'app e la funzionalità è testata; quando l'esito è "no-go" o il checkpoint non viene raggiunto in tempo, allora BR-17 resta non implementato e questo non blocca il verdetto sui Must.
+- Dato il tasto "Sto per comprare un biglietto" attivato (caso "go"), quando la pausa parte, allora dura 30 secondi e mostra: perdita media attesa per quella giocata, quota di vincite rimborso/piccole per quel gioco (coerente con BR-13), probabilità del premio massimo in scala fisica (coerente con BR-15).
+- Dato il termine della pausa di 30 secondi, quando l'app mostra il messaggio finale, allora il testo è "La scelta è tua" (o equivalente neutro), senza alcuna indicazione su cosa fare, coerente con BR-11/L4.
+- Dato il testo mostrato durante la pausa, quando scansionato dall'hook L4 e dal test automatico (BR-11), allora non contiene formule da consiglio o giudizio.

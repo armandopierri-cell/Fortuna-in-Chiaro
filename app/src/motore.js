@@ -131,6 +131,25 @@
     return c;
   }
 
+  // Campionatore veloce: u in [0,1) -> premio. Stessa mappatura di estraiPremio (stesse estrazioni
+  // a parita' di seme), ma senza ricerca del gioco a ogni giocata e con uscita immediata per i
+  // biglietti non vincenti (~76% dei casi) e ricerca binaria sulla cumulata.
+  function campionatore(g, posta) {
+    if (g.tipo === "lotto") {
+      var pL = 1 / g.probabilitaUnoSu, vL = g.moltiplicatore * costoGiocata(g, posta);
+      return function (u) { return u < pL ? vL : 0; };
+    }
+    var c = cumulata(g), n = c.length;
+    var soglie = c.map(function (x) { return x.soglia; }), premi = c.map(function (x) { return x.premio; });
+    var pTot = soglie[n - 1];
+    return function (u) {
+      if (u >= pTot) return 0;
+      var lo = 0, hi = n - 1;
+      while (lo < hi) { var mid = (lo + hi) >> 1; if (u < soglie[mid]) hi = mid; else lo = mid + 1; }
+      return premi[lo];
+    };
+  }
+
   function estraiPremio(giocoId, rnd, posta) {
     var g = trovaGioco(giocoId);
     var u = rnd();
@@ -138,6 +157,67 @@
     var c = cumulata(g);
     for (var i = 0; i < c.length; i++) if (u < c[i].soglia) return c[i].premio;
     return 0;
+  }
+
+  // ---- Le vincite che non sono vincite (BR-13, L1) -----------------------
+  // rimborso: premio = costo della giocata; piccole: costo < premio <= 2 x costo; reali: premio > 2 x costo.
+  function classeVincita(premio, costo) {
+    if (premio <= 0) return null;
+    if (premio <= costo) return "rimborso";
+    if (premio <= 2 * costo) return "piccole";
+    return "reali";
+  }
+
+  // Calcolo esatto dalla tabella premi (non simulato).
+  // quotaBigliettiVincenti = biglietti con un premio qualsiasi / emissione;
+  // quotaRimborso = vincite pari al costo / vincite totali;
+  // quotaPiccole  = vincite fino a 2 x costo (rimborso INCLUSO, cumulata) / vincite totali;
+  // quotaSoloPiccole = vincite con costo < premio <= 2 x costo / vincite totali; quotaReali = il resto.
+  function riepilogoVincite(giocoId, posta) {
+    var g = trovaGioco(giocoId);
+    if (g.tipo === "lotto") {
+      // al lotto l'unica vincita paga moltiplicatore x posta: sempre "reale" secondo la definizione
+      return { quotaBigliettiVincenti: 1 / g.probabilitaUnoSu, quotaRimborso: 0, quotaPiccole: 0,
+        quotaSoloPiccole: 0, quotaReali: 1, vincenti: null, emissione: null };
+    }
+    var costo = costoGiocata(g, posta), conta = { rimborso: 0, piccole: 0, reali: 0 }, tot = 0;
+    g.premi.forEach(function (p) { conta[classeVincita(p.premio, costo)] += p.vincenti; tot += p.vincenti; });
+    return {
+      quotaBigliettiVincenti: tot / g.emissione,
+      quotaRimborso: conta.rimborso / tot,
+      quotaPiccole: (conta.rimborso + conta.piccole) / tot,
+      quotaSoloPiccole: conta.piccole / tot,
+      quotaReali: conta.reali / tot,
+      vincenti: { rimborso: conta.rimborso, piccole: conta.piccole, reali: conta.reali, totale: tot },
+      emissione: g.emissione
+    };
+  }
+
+  // ---- Probabilita' in cose fisiche (BR-15, L3) --------------------------
+  var POSTI_STADIO = 60000;
+  function scalaFisica(unoSu) {
+    return { stadi: Math.round(unoSu / POSTI_STADIO), postiStadio: POSTI_STADIO };
+  }
+
+  // ---- Soglia scelta dall'utente (BR-16, CR1) ----------------------------
+  // sogliaMensile non numerica o negativa = nessuna soglia impostata -> supera false.
+  function superaSoglia(abitudine, sogliaMensile) {
+    var spesaMese = spesa(abitudine).mese, s = Number(sogliaMensile);
+    var valida = sogliaMensile !== null && sogliaMensile !== "" && isFinite(s) && s >= 0;
+    var supera = valida && spesaMese > s + 1e-9;
+    return { supera: supera, spesaMese: spesaMese, eccedenza: supera ? spesaMese - s : 0 };
+  }
+
+  // ---- Pausa e Conto (BR-17, CR2): i numeri di un singolo biglietto -----
+  function contoBiglietto(giocoId, posta) {
+    var va = valoreAtteso(giocoId, posta), pm = probabilitaPremioMax(giocoId, posta);
+    return {
+      costo: va.costo,
+      perditaMediaPerBiglietto: va.costo - va.ritorno,
+      quotaRimborso: riepilogoVincite(giocoId, posta).quotaRimborso,
+      unoSu: pm.unoSu,
+      stadi: scalaFisica(pm.unoSu).stadi
+    };
   }
 
   function giocateNelGiorno(voce, d) {
@@ -152,26 +232,78 @@
     var rnd = creaPRNG(seme);
     var serie = [], vincite = [];
     var spesoCum = 0, vintoCum = 0;
-    var voci = abitudine.voci || [];
+    var voci = preparaVoci(abitudine);
+    var classi = { rimborso: 0, piccole: 0, reali: 0, totale: 0 };
     for (var d = 0; d < n; d++) {
-      var speso = 0, vinto = 0;
+      var speso = 0, vinto = 0, eventi = [];
       for (var j = 0; j < voci.length; j++) {
         var voce = voci[j];
-        var g = trovaGioco(voce.gioco);
-        var costo = costoGiocata(g, voce.posta);
-        var k = giocateNelGiorno(voce, d);
+        var k = giocateNelGiorno(voce.voce, d);
         for (var i = 0; i < k; i++) {
-          speso += costo;
-          var premio = estraiPremio(voce.gioco, rnd, voce.posta);
+          speso += voce.costo;
+          var premio = voce.estrai(rnd());
+          if (premio <= 0) continue;
           vinto += premio;
-          if (premio >= SOGLIA_VINCITA_NOTEVOLE) vincite.push({ giorno: d + 1, gioco: voce.gioco, premio: premio });
+          var classe = classeVincita(premio, voce.costo);
+          classi[classe]++; classi.totale++;
+          eventi.push({ premio: premio, classe: classe, gioco: voce.id, costo: voce.costo });
+          if (premio >= SOGLIA_VINCITA_NOTEVOLE) vincite.push({ giorno: d + 1, gioco: voce.id, premio: premio });
         }
       }
       spesoCum += speso;
       vintoCum += vinto;
-      serie.push({ giorno: d + 1, speso: speso, vinto: vinto, spesoCum: spesoCum, vintoCum: vintoCum });
+      var giorno = { giorno: d + 1, speso: speso, vinto: vinto, spesoCum: spesoCum, vintoCum: vintoCum };
+      if (eventi.length) giorno.eventi = eventi;
+      serie.push(giorno);
     }
-    return { giorni: serie, totale: { speso: spesoCum, vinto: vintoCum, perso: spesoCum - vintoCum }, vincite: vincite };
+    return {
+      giorni: serie,
+      totale: { speso: spesoCum, vinto: vintoCum, perso: spesoCum - vintoCum,
+        classiVincite: classi, vinciteRimborso: classi.rimborso },
+      vincite: vincite
+    };
+  }
+
+  function preparaVoci(abitudine) {
+    return (abitudine.voci || []).map(function (voce) {
+      var g = trovaGioco(voce.gioco);
+      return { voce: voce, id: g.id, costo: costoGiocata(g, voce.posta), estrai: campionatore(g, voce.posta) };
+    });
+  }
+
+  // ---- Dalla parte del banco: n persone come te per un anno (BR-14, L2) ----
+  // Un solo PRNG con seme, persone simulate in sequenza: risultato riproducibile.
+  // inAttivo = persone con vinto > speso a fine anno.
+  function simulaFolla(abitudine, seme, n) {
+    var persone = n || 10000;
+    var rnd = creaPRNG(seme);
+    var voci = preparaVoci(abitudine);
+    var perdite = new Float64Array(persone);
+    var spesoTot = 0, vintoTot = 0, inAttivo = 0;
+    for (var p = 0; p < persone; p++) {
+      var speso = 0, vinto = 0;
+      for (var d = 0; d < GIORNI_ANNO; d++) {
+        for (var j = 0; j < voci.length; j++) {
+          var v = voci[j], k = giocateNelGiorno(v.voce, d);
+          for (var i = 0; i < k; i++) { speso += v.costo; vinto += v.estrai(rnd()); }
+        }
+      }
+      spesoTot += speso; vintoTot += vinto;
+      if (vinto > speso) inAttivo++;
+      perdite[p] = speso - vinto;
+    }
+    var ordinate = Array.prototype.slice.call(perdite).sort(function (a, b) { return a - b; });
+    var mediana = persone % 2 ? ordinate[(persone - 1) / 2] : (ordinate[persone / 2 - 1] + ordinate[persone / 2]) / 2;
+    return {
+      n: persone,
+      inAttivo: inAttivo,
+      quotaInAttivo: inAttivo / persone,
+      speso: spesoTot,
+      vinto: vintoTot,
+      incassoBanco: spesoTot - vintoTot,
+      perditaMedia: (spesoTot - vintoTot) / persone,
+      perditaMediana: mediana
+    };
   }
 
   // ---- Simulatore dei "ritardatari" --------------------------------------
@@ -267,6 +399,12 @@
     creaPRNG: creaPRNG,
     estraiPremio: estraiPremio,
     simulaAnno: simulaAnno,
+    simulaFolla: simulaFolla,
+    classeVincita: classeVincita,
+    riepilogoVincite: riepilogoVincite,
+    scalaFisica: scalaFisica,
+    superaSoglia: superaSoglia,
+    contoBiglietto: contoBiglietto,
     simulaRitardatari: simulaRitardatari,
     verificaQuiz: verificaQuiz,
     confrontaQuiz: confrontaQuiz,
