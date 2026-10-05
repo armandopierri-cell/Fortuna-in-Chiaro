@@ -45,7 +45,7 @@ agents/                            Struttura agentica consegnata (copia di .clau
 └── WORKFLOW.md                     Flusso idea → BR → sviluppo ⇄ test → presentazione → QA → push
 
 presentation/
-├── index.html                     Slide Accenture
+└── index.html                     Slide Accenture
 
 docs/
 ├── governance/stato-avanzamento.md   Decisioni, verifiche umane, rischi, piano residuo
