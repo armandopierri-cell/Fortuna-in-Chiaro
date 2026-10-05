@@ -4,24 +4,38 @@
 <meta charset="UTF-8">
 <title>Fortuna in Chiaro — Hagenthon, Tema 02</title>
 <!--
-  BOZZA v2 (13:25) — agente innovazione, da skill presentazioni-accenture.
-  Allineata a docs/idea/idea-selezionata.md (leve L1-L4, CR1, CR2, Fase 2, demo aggiornata).
-  SCALETTA (5:00, demo compresa). Note del relatore: tasto N.
-  01  0:00-0:10  Titolo
-  02  0:10-0:35  Salvatore (Deliverable 01)
-  03  0:35-0:50  Il problema
-  04  0:50-1:00  La soluzione
-  05  1:00-3:30  DEMO live (2'30"): L3 208 stadi, L1 rimborso, L2 10.000 Salvatori, quiz 3/3, CR1
-  06  (0")       OPZIONALE BR-17 "Pausa e Conto": go/no-go al checkpoint 14:05 (se approvato: passo demo da 10")
-  07  3:30-3:45  Prima/Dopo (Deliverable 02)
-  08  3:45-4:00  Risk & Clarity Note (Deliverable 03)
-  09  4:00-4:25  Struttura agentica di sviluppo + L4 hook guardrail
-  10  4:25-4:35  Token e AI
-  11  4:35-4:45  Visione Fase 2 (architettura del prodotto, fuori MVP)
-  12  4:45-4:52  Valore su scala (STIMA NOSTRA, da confermare al checkpoint 14:05)
-  13  4:52-5:00  Chiusura
-  Fonti numeri: docs/idea/valore-checkpoint.md, docs/idea/ricerca-azzardo.md
-  (38,5%, 79,4%, 208 stadi: ricalcolati sulle tabelle ADM di ricerca-azzardo.md §1, vedi idea-selezionata.md)
+  VERSIONE DEFINITIVA v3 (13:40) — agente innovazione, da skill presentazioni-accenture.
+  Allineata a docs/idea/idea-selezionata.md (leve L1-L4, CR1, CR2, Fase 2, "Demo ... aggiornata").
+  Integra presentation/sezioni/business-case.html (numeri in docs/idea/numeri-business-case.md):
+    bc-01 + bc-05 (divario SerD) -> slide 03; bc-02, bc-04 -> appendice; bc-06 -> appendice A8 (da decidere);
+    bc-03 scartata (duplica slide 02 e 05). La cartella sezioni/ non serve più a questo file.
+  Navigazione diretta: index.html#n (n = numero slide, da 1). Note del relatore: tasto N.
+
+  PARTE PARLATA (5:00, demo compresa)
+  01  0:00-0:10  (10")   Titolo
+  02  0:10-0:35  (25")   Salvatore (Deliverable 01)
+  03  0:35-0:55  (20")   Il problema su scala + divario di supporto
+  04  0:55-3:25  (2'30") DEMO live, copione idea-selezionata.md
+  05  3:25-3:45  (20")   Prima/Dopo (Deliverable 02)
+  06  3:45-4:00  (15")   Risk & Clarity Note (Deliverable 03)
+  07  4:00-4:35  (35")   Struttura agentica di sviluppo + L4 hook + token
+  08  4:35-4:50  (15")   Visione Fase 2 (breve)
+  09  4:50-5:00  (10")   Chiusura
+  Totale: 10+25+20+150+20+15+35+15+10 = 300" = 5'00"
+
+  APPENDICE (dopo la chiusura, non parlata: per le domande)
+  10  Divisore "Appendice"
+  11  A1 La soluzione: tre concetti, un percorso
+  12  A2 La verità del biglietto (tabelle ADM)
+  13  A3 Dalla parte del banco (simulazione, seme demo 20261005)
+  14  A4 Chi paga di più
+  15  A5 Token: modello per ruolo
+  16  A6 Fase 2 di dettaglio
+  17  A7 Pausa e Conto (BR-17)            DA DECIDERE AL CHECKPOINT
+  18  A8 Valore su scala ~150 mln €      DA DECIDERE AL CHECKPOINT
+  Fonti numeri: docs/idea/numeri-business-case.md, valore-checkpoint.md, ricerca-azzardo.md;
+  numeri della simulazione: app/ con seme demo 20261005 (perdita attesa 1.050,83 €; 175 vincite, 72 rimborsi;
+  174 su 10.000 in attivo; banco 10.738.155 € su 36.500.000 €).
 -->
 <style>
   :root{
@@ -51,7 +65,7 @@
     position:absolute; inset:0; width:1280px; height:720px;
     display:none; flex-direction:column;
     background:var(--white); color:var(--black);
-    padding:56px 72px 40px 72px;
+    padding:52px 72px 64px 72px;
   }
   .slide.active{ display:flex; }
 
@@ -165,6 +179,21 @@
   .badge.warn{ background:var(--black); color:var(--white); }
   .deliv{ display:inline-block; font-size:13px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; padding:4px 10px; border:2px solid var(--purple); color:var(--purple); border-radius:3px; margin-left:12px; vertical-align:middle; }
 
+  .kpi.sm .value{ font-size:42px; }
+  .kpi.xs .value{ font-size:36px; }
+  .kpi-row + .kpi-row{ margin-top:18px; }
+  .gap-band{ display:flex; align-items:center; gap:28px; margin-top:22px; padding:18px 26px; background:var(--purple-darker); color:#fff; border-radius:4px; }
+  .gap-band .big{ font-size:40px; font-weight:700; color:var(--purple-pastel); line-height:1; white-space:nowrap; }
+  .gap-band .txt{ font-size:17px; line-height:1.4; }
+  .chips{ display:flex; gap:10px; margin:0 0 12px 0; flex-wrap:wrap; }
+  .chip{ font-size:14px; font-weight:700; padding:5px 12px; border:2px solid var(--purple); color:var(--purple-darker); border-radius:3px; }
+  .cols3{ display:flex; gap:32px; flex:1; min-height:0; }
+  .cols3 .col{ flex:1; min-width:0; }
+  .cols3 li{ font-size:16px; line-height:1.4; margin-bottom:8px; }
+  .appx-tag{ display:inline-block; font-size:13px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; padding:4px 10px; border-radius:3px; background:var(--grey-light); color:#555; margin-right:10px; vertical-align:middle; }
+  .bg-light-grey .appx-tag{ background:#fff; }
+  .divider{ justify-content:center; }
+  .divider h1{ font-size:56px; }
   .note-box{ margin-top:14px; padding:12px 16px; border-left:4px solid var(--purple); background:#f6f6f1; font-size:16px; }
   .small{ font-size:15px; color:#6b6b63; }
 
@@ -222,7 +251,7 @@
         <span class="wordmark">accenture<span class="chevron">&gt;</span></span>
         <span class="page-num"></span>
       </div>
-      <aside class="notes">0:00-0:10 (10") — "Quanto costa sperare? Fortuna in Chiaro mostra in 10 secondi un anno di gioco, con le probabilità ufficiali ADM. Non giudica, non consiglia: mostra i numeri."</aside>
+      <aside class="notes">SLIDE 01 · 0:00-0:10 (10") — "Quanto costa sperare? Fortuna in Chiaro mostra in 10 secondi un anno di gioco, con le probabilità ufficiali ADM. Non giudica, non consiglia: mostra i numeri."</aside>
     </section>
     <!-- /SLIDE -->
 
@@ -253,10 +282,10 @@
       </div>
       <div class="footer">
         <span class="wordmark">accenture<span class="chevron">&gt;</span></span>
-        <span class="src">Fonte: valore-checkpoint.md §1; tabella premi ADM "Nuovo 20X" (ricerca-azzardo.md §1.1)</span>
+        <span class="src">Fonti: persona del business case (Tema 02); spesa e quota del reddito: calcolo nostro (numeri-business-case.md §3); "1 su 12.480.000": tabella premi ADM, lotteria istantanea da 5 € modello A</span>
         <span class="page-num"></span>
       </div>
-      <aside class="notes">0:10-0:35 (25") — Deliverable 01. Presentare Salvatore: 1.300 € al mese, 10 € al giorno. Lui pensa "prima o poi vinco". In un anno sono 3.650 €, il 23% del reddito. Il problema non è l'accesso ai dati (sono pubblici, ADM) ma la loro leggibilità.</aside>
+      <aside class="notes">SLIDE 02 · 0:10-0:35 (25") — Deliverable 01. Presentare Salvatore: 1.300 € al mese, 10 € al giorno. Lui pensa "prima o poi vinco". In un anno sono 3.650 €, il 23% del reddito. Il problema non è l'accesso ai dati (sono pubblici, ADM) ma la loro leggibilità.</aside>
     </section>
     <!-- /SLIDE -->
 
