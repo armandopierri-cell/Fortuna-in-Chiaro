@@ -2,11 +2,11 @@
 
 | Campo | Valore |
 |---|---|
-| **Stato** | **PRELIMINARE — basata solo sui temi della sfida** |
-| Data | 2026-10-05 |
+| **Stato** | **v2 — temi + regolamento generale** |
+| Data | 2026-10-05, aggiornata subito dopo la ricezione di `00_input/regolamento.md` (consegnato alle 11:53 circa, avvio delle 3 ore di sviluppo) |
 | Owner | Team Quality Assurance |
-| Fonte di riferimento | `00_input/hagenthon-temi-sfida-3.html` (fa fede), estratto `00_input/temi-sfida.md` (verificato allineato all'HTML il 2026-10-05) |
-| Fonti mancanti | Regolamento generale (criteri di valutazione, consegna, orari, tecnologie): vedi sezione 5 |
+| Fonte di riferimento | `00_input/hagenthon-temi-sfida-3.html` (fa fede per temi/vincoli/deliverable), estratto `00_input/temi-sfida.md` (verificato allineato il 2026-10-05); `00_input/regolamento.md` (fa fede per consegna, tempi, strumenti, valutazione) |
+| Fonti ancora mancanti | Nessuna area bloccante residua; restano solo due punti di dettaglio in sospeso — vedi sezione 8 |
 | Tema scelto | Non ancora scelto: si applicano la sezione 1 più la sezione del tema scelto |
 
 ---
@@ -35,7 +35,7 @@
 | C-04 | Esiste un **prototipo** funzionante ed eseguibile, e non solo slide, mockup statici o documentazione? | § Intro ("costruite un prototipo"), r.5 | Bloccante |
 | C-05 | È pronta una **demo finale** del prototipo che si può eseguire davanti alla giuria? | § Intro ("preparate la demo finale"), r.5 | Bloccante |
 | C-06 | Il team è composto da **esattamente 2 persone**? | § Tema 01/02/03 › La challenge ("In team da 2 persone"), r.6 | Bloccante |
-| C-07 | Tutto lo sviluppo del prototipo si è svolto nelle **3 ore di sviluppo** previste, senza codice applicativo preparato prima? (Cosa sia ammesso prima dell'inizio, come template, boilerplate o setup, va confermato con il regolamento: vedi sez. 5.) | § Tema 01/02/03 › La challenge ("avete 3 ore di sviluppo"), r.6 | Bloccante |
+| C-07 | La **logica applicativa specifica** che risolve il problema del tema scelto è stata sviluppata nelle **3 ore** previste (11:53–15:00 circa)? Codice/template/boilerplate preparati **prima** dell'avvio sono ammessi — anzi richiesti — e **non** sono una violazione. | `00_input/regolamento.md` § Tempi ("È consentito, anzi richiesto, preparare codice e template prima di iniziare lo sviluppo") | Bloccante |
 | C-08 | La soluzione è stata realizzata **usando strumenti di agentic coding**, e il team può mostrarlo (per esempio log, sessioni, commit)? | § Titolo "Hackathon Agentic Coding" e obiettivo di ogni tema ("Usare strumenti di agentic coding…"), r.1, r.12, r.54, r.92 | Bloccante |
 | C-09 | Sono presenti **tutti e 3** i deliverable specifici del tema scelto, con il **nome indicato dal tema** (per esempio "Persona & Barriera", non un titolo generico)? | § Tema scelto › Deliverable specifici | Bloccante |
 
@@ -93,7 +93,7 @@
 
 | ID | Controllo (sì/no) | Riferimento | Gravità |
 |---|---|---|---|
-| T2-V1 | È scelto **uno scenario educativo preciso** tra quelli indicati: comprensione di un concetto finanziario di base, gestione del budget personale, lettura di un estratto conto o di una bolletta, comprensione di costi e commissioni, simulazione di una scelta quotidiana di risparmio? (Se l'elenco sia tassativo va chiarito: vedi sez. 5.2.) | § Tema 02 › Vincoli specifici n.1, r.69 | Bloccante |
+| T2-V1 | È scelto **uno scenario educativo preciso** tra quelli indicati: comprensione di un concetto finanziario di base, gestione del budget personale, lettura di un estratto conto o di una bolletta, comprensione di costi e commissioni, simulazione di una scelta quotidiana di risparmio? (Se l'elenco sia tassativo o solo esemplificativo resta da chiarire: vedi sez. 8.2; interpretazione prudente adottata: sceglierne uno dall'elenco.) | § Tema 02 › Vincoli specifici n.1, r.69 | Bloccante |
 | T2-V2 | È **dimostrato** un miglioramento tangibile nella comprensione dell'utente o nella sua capacità di gestire le finanze, con un'evidenza prima/dopo e non solo dichiarato? | § Tema 02 › Vincoli specifici n.2, r.70 | Bloccante |
 | T2-V3 | La soluzione **non dà mai** raccomandazioni di investimento, consulenza finanziaria personalizzata o indicazioni su cosa comprare, vendere **o scegliere**? Va verificato anche con richieste esplicite dell'utente (per esempio "dove investo?" o "quale rata mi conviene?"): la soluzione deve rifiutare o riportare la conversazione sul piano educativo. | § Tema 02 › Vincoli specifici n.3 ("Vietato…"), r.71 | Bloccante |
 | T2-V4 | La soluzione contiene una **capability software concreta** (calcolo, simulazione, tracciamento, parsing, quiz con logica…) e non solo la riscrittura di testi? | § Tema 02 › Vincoli specifici n.4, r.72 | Bloccante |
@@ -130,7 +130,7 @@
 
 | ID | Controllo (sì/no) | Riferimento | Gravità |
 |---|---|---|---|
-| T3-V1 | È scelto **un profilo utente preciso** tra quelli indicati: persona anziana, persona con bassa alfabetizzazione digitale, con difficoltà linguistiche o con DSA, lavoratore in riqualificazione, nuovo utente di un processo digitale? (Se l'elenco sia tassativo va chiarito: vedi sez. 5.2.) | § Tema 03 › Vincoli specifici n.1, r.107 | Bloccante |
+| T3-V1 | È scelto **un profilo utente preciso** tra quelli indicati: persona anziana, persona con bassa alfabetizzazione digitale, con difficoltà linguistiche o con DSA, lavoratore in riqualificazione, nuovo utente di un processo digitale? (Se l'elenco sia tassativo o solo esemplificativo resta da chiarire: vedi sez. 8.2; interpretazione prudente adottata: sceglierne uno dall'elenco.) | § Tema 03 › Vincoli specifici n.1, r.107 | Bloccante |
 | T3-V2 | Lo **scenario di apprendimento è concreto** (uno strumento o un processo digitale identificato, un task preciso da imparare) e non astratto? | § Tema 03 › Vincoli specifici n.2, r.108 | Bloccante |
 | T3-V3 | È dimostrato un miglioramento **misurabile**, con una metrica e un valore prima/dopo, in almeno una di queste dimensioni: comprensione, autonomia, completamento del task, riduzione degli errori, capacità di ripetere un'azione? | § Tema 03 › Vincoli specifici n.3, r.109 | Bloccante |
 | T3-V4 | Gli eventuali temi sensibili (sanità clinica, fiscalità personalizzata, ambito legale) **non sono mai presentati come consigli professionali**? La soluzione deve avere disclaimer e limiti di risposta, verificati anche con domande dirette dell'utente. | § Tema 03 › Vincoli specifici n.4 ("Vietato…"), r.110 | Bloccante |
@@ -156,30 +156,69 @@
 
 ---
 
-## 5. Da completare con il regolamento generale
+## 5. Regolamento generale
 
-### 5.1 Aree mancanti (non ricavabili dai temi della sfida)
+Controlli ricavati da `00_input/regolamento.md`. Valgono per tutti i temi, in aggiunta alla sezione 1.
 
-| # | Area | Cosa serve sapere | Controlli impattati |
+| ID | Controllo (sì/no) | Riferimento | Gravità |
 |---|---|---|---|
-| R-01 | **Criteri di valutazione** | Criteri, pesi, punteggi; se le voci di "cosa evitare" penalizzano o sono solo indicazioni; quali violazioni comportano l'esclusione | Ricalibrazione di tutte le gravità |
-| R-02 | **Formato e modalità di consegna** | Cosa si consegna (repo, archivio, link, documento, slide), dove e come (piattaforma, email, form), in che formato vanno i 3 deliverable specifici (documento separato, slide, parte della demo), eventuali limiti di lunghezza | C-04, C-09, Tn-D* |
-| R-03 | **Scadenze e orari** | Inizio e fine delle 3 ore, code freeze, termine di consegna, calendario e ordine delle demo | C-07 |
-| R-04 | **Tecnologie e strumenti ammessi** | Quali strumenti di agentic coding e modelli AI sono ammessi o obbligatori, API o servizi esterni a pagamento, linguaggi e framework, licenze open source | C-08 |
-| R-05 | **Dati ammessi** | Dati reali o sintetici, dati personali e GDPR, uso di servizi o siti pubblici reali (scraping, termini d'uso), documenti reali come bollette ed estratti conto | T1-V2, T2-E5, T3-V2 |
-| R-06 | **Durata e formato della demo** | Minuti disponibili, demo live o registrata, slide ammesse, Q&A, chi presenta | C-05, T1-V5, T1-D2 |
-| R-07 | **Naming** | Nome del team e del progetto, convenzioni per file, repository e cartelle di consegna | C-09, pacchetto di rilascio |
-| R-08 | **Lavoro preparatorio** | Cosa è ammesso prima dell'inizio delle 3 ore (template, boilerplate, setup ambiente, ricerca, design) | C-07 |
-| R-09 | **Dichiarazione dell'uso dell'AI** | Se è richiesta per tutti i temi (oggi è esplicita solo nel Tema 01, T1-V6) e in quale forma | T1-V6, T1-E6, C-08 |
+| R-01 | Il repository del progetto è su **GitHub** ed è **pubblico** (non privato, non ad accesso ristretto)? | § Modalità di consegna ("Repository pubblico GitHub") | Bloccante |
+| R-02 | Il repository ha nella root le **3 cartelle `app/`, `agents/`, `presentation/`** e il file **`README.md`**, secondo la struttura minima indicata? | § Modalità di consegna (struttura repository) | Bloccante |
+| R-03 | `app/` contiene il **codice del prototipo** della soluzione ed è coerente con quanto mostrato in demo? | § Modalità di consegna + § Cosa si consegna | Bloccante |
+| R-04 | `agents/` documenta la **struttura agentica** usata per costruire/far funzionare la soluzione: agenti, istruzioni, comandi, prompt, skill **e** workflow (non solo una parte di questi elementi)? | § Modalità di consegna ("agenti, istruzioni, comandi, prompt, skills, workflow") | Bloccante |
+| R-05 | `presentation/` contiene una **presentazione in HTML**, con **brand guideline Accenture**, che illustra **sia** la soluzione **sia** la struttura agentica di `agents/`? | § Cosa si consegna + § Modalità di consegna | Bloccante |
+| R-06 | `README.md` in root è presente e descrive il progetto in modo da orientare chi lo apre per primo (persona o agente valutatore)? | § Modalità di consegna | Bloccante |
+| R-07 | La soluzione è un **prototipo end-to-end funzionante** (si avvia ed esegue il task reale dall'inizio alla fine, non solo mockup o slide)? | § Cosa si consegna (rinforza C-04) | Bloccante |
+| R-08 | È stato usato **Claude Code** come strumento di agentic coding? (Nessun altro vincolo su tecnologie, linguaggi o dati.) | § Strumenti ("Claude Code obbligatorio. Nessun altro vincolo...") (rinforza C-08) | Bloccante |
+| R-09 | I **3 deliverable specifici** del tema scelto sono presenti **dentro** la presentazione e la demo, e **non** come documenti separati a parte? | § Cosa si consegna ("non come documenti separati") — nota: corregge l'interpretazione prudenziale precedente (ex A-05) | Bloccante |
+| R-10 | L'esposizione al gruppo (presentazione **+** demo) dura in totale **5 minuti**, demo compresa? | § Cosa si consegna | Bloccante |
+| R-11 | Il **push** del progetto e della presentazione su GitHub è avvenuto **entro il freeze delle ore 15:00** del 05/10/2026? | § Tempi ("Freeze e scadenza: ore 15:00") | Bloccante |
+| R-12 | La soluzione risulta **caricata anche sul portale** indicato dall'organizzazione, oltre che su GitHub? | § Modalità di consegna ("La soluzione viene caricata su un portale") | Bloccante |
 
-### 5.2 Ambiguità nei temi della sfida (da chiarire con gli organizzatori o con il regolamento)
+---
 
-| # | Punto | Ambiguità | Interpretazione prudenziale adottata da QA |
+## 6. Criteri di valutazione
+
+Controlli di qualità ricavati da `00_input/regolamento.md` § Valutazione. La soluzione è valutata da faculty (soggettiva) **e** da **un agente** sul repository (oggettiva): per questo gli ultimi tre controlli (V-10…V-12) riguardano la leggibilità del repository per un valutatore automatico.
+
+| ID | Controllo (sì/no) | Criterio | Riferimento |
 |---|---|---|---|
-| A-01 | T2-V1, scenari educativi | L'elenco degli scenari è tassativo o indicativo? | Scegliere uno dei 5 scenari elencati |
-| A-02 | T3-V1, profili utente | L'elenco dei profili è tassativo o indicativo? | Scegliere uno dei 6 profili elencati |
-| A-03 | T3-V5, "capability agentica" | Basta una logica condizionale statica (albero di quiz) o serve un comportamento adattivo a runtime? | Mostrare un adattamento che dipende dalle risposte o dal comportamento reale dell'utente |
-| A-04 | C-01, sovrapposizioni tra temi | Alcuni casi stanno in più temi (per esempio "bolletta" in T1-V2 e T2-V1, "anziano" in T1 e T3) | Dichiarare un solo tema e soddisfare **solo** i vincoli e i deliverable di quel tema, con i suoi nomi |
-| A-05 | Deliverable vs demo | I deliverable specifici sono documenti separati o possono coincidere con parti della demo (per esempio T1-D2 "è" la demo)? | Produrre sempre un artefatto scritto per ogni deliverable, oltre alla demo |
+| V-01 | La presentazione argomenta **cosa c'è di innovativo** nell'idea rispetto a soluzioni esistenti? | Innovatività dell'idea | § Valutazione › Criteri dichiarati |
+| V-02 | La soluzione è **concreta e realizzata** (prototipo funzionante, non solo idea o slide), verificabile con R-07/C-04? | Messa a terra | § Valutazione › Criteri dichiarati |
+| V-03 | La demo nei 5 minuti mostra in modo chiaro il problema e il valore della soluzione, senza intoppi tecnici? | Efficacia della demo | § Valutazione › Criteri dichiarati |
+| V-04 | È documentato un uso **efficiente dei token** (letture mirate, contesto non ridondante, scelte consapevoli di modello/subagent)? | Efficienza nell'utilizzo dei token | § Valutazione › Criteri dichiarati |
+| V-05 | Il codice in `app/` è leggibile, organizzato e privo di errori bloccanti all'avvio? | Qualità tecnica | § Valutazione › Parametri della soluzione |
+| V-06 | È dichiarato **dove e come** è stata usata l'AI, con attenzione a ridurre i token? | Uso consapevole dell'AI | § Valutazione › Parametri della soluzione |
+| V-07 | Esiste evidenza di **revisione/validazione umana** dei contenuti e del codice generati dall'AI (chi ha verificato cosa, e dove è documentato)? | Verifica umana | § Valutazione › Parametri della soluzione |
+| V-08 | Il repository mostra l'uso di **pattern di validazione** — skill, rules (es. `CLAUDE.md`), hooks — e questo è illustrato in `agents/` e nella presentazione? | Validazione con pattern (skill, rules, hooks) | § Valutazione › Parametri della soluzione |
+| V-09 | È dichiarata esplicitamente la **strategia di applicazione dell'AI** adottata (cosa si delega all'AI, cosa resta umano, e perché)? | Strategia di applicazione dell'AI | § Valutazione › Parametri della soluzione |
+| V-10 | Il `README.md` **mappa ogni criterio** di valutazione (V-01…V-09) a un'**evidenza puntuale** nel repository, con link/percorso al file? | Leggibilità per l'agente valutatore | § Valutazione ("agente... repository... molto leggibile anche per un agente") |
+| V-11 | I nomi di file e cartelle sono **chiari e descrittivi** (non "doc1.md", "test", "final_v2"), così che un agente possa orientarsi senza aprire tutto? | Leggibilità per l'agente valutatore | idem |
+| V-12 | Il repository è privo di **file inutili** (bozze, temporanei, backup, cartelle vuote, output di debug) che possano confondere la valutazione automatica? | Leggibilità per l'agente valutatore | idem |
 
-> Quando arriva il regolamento generale: aggiornare lo stato del documento, aggiungere le sezioni relative a R-01…R-09, chiudere le ambiguità A-01…A-05 e ricalibrare le gravità secondo i criteri ufficiali.
+---
+
+## 7. Repo hygiene
+
+| ID | Controllo (sì/no) | Riferimento | Gravità |
+|---|---|---|---|
+| H-01 | `00_input/` (regolamento, temi, template Accenture — materiale interno) **non** è presente nel repository pubblico? | Materiale interno/riservato Accenture — non va esposto in un repo pubblico | Bloccante |
+| H-02 | `kb/` (knowledge base interna costruita durante la formazione) **non** è presente nel repository pubblico? | idem | Bloccante |
+| H-03 | Nessun **segreto, API key, token o credenziale** è presente nel codice, nei file di configurazione o nella history git? | Igiene repo / sicurezza | Bloccante |
+| H-04 | `agents/` nel repository pubblico è **allineata** con la configurazione reale `.claude/` usata durante lo sviluppo, tramite `agents/sync.ps1` eseguito prima del push? | Coerenza tra struttura agentica dichiarata (R-04) e quella realmente usata | Bloccante |
+| H-05 | È presente un `.gitignore` che esclude correttamente `00_input/`, `kb/` ed eventuali file di segreti, a prevenzione di push accidentali entro il freeze? | Prevenzione di H-01/H-02/H-03 | Maggiore |
+
+---
+
+## 8. Aperture residue
+
+### 8.1 Chiuse dal regolamento generale
+
+Le seguenti aree, prima aperte, sono ora coperte da `00_input/regolamento.md` e dalle sezioni 5–7: criteri di valutazione (sez. 6), formato/modalità di consegna (sez. 5), scadenze e orari (§ Tempi, C-07 riclassificato), tecnologie ammesse (§ Strumenti, R-08), durata/formato demo (R-10), lavoro preparatorio (ammesso/richiesto, C-07), dichiarazione dell'uso dell'AI (V-06/V-09). Resta chiusa anche l'ambiguità deliverable-vs-demo (ex A-05): il regolamento impone di **non** produrli come documenti separati (R-09). Restano chiuse per interpretazione QA, senza bisogno di ulteriore chiarimento, l'ambiguità ex A-03 ("capability agentica": l'interpretazione prudente — adattamento reale a runtime — resta valida) ed ex A-04 (sovrapposizioni tra temi: un solo tema dichiarato, con i soli vincoli e deliverable di quel tema).
+
+### 8.2 Ancora aperte
+
+| # | Punto | Domanda | Interpretazione prudenziale adottata da QA |
+|---|---|---|---|
+| A-01 | T2-V1 (scenari educativi), T3-V1 (profili utente) | Gli elenchi di scenari/profili sono **tassativi** (va scelto uno degli elementi indicati) o solo **esemplificativi**? Il regolamento conferma che la domanda resta aperta. | Sceglierne **uno dagli elenchi** indicati nei temi |
+| R-13 | Naming | Nessuna convenzione di naming per team/progetto è indicata nel regolamento oltre alla struttura di cartelle (sez. 5). Non bloccante: usare nomi coerenti e descrittivi (vedi V-11). | Nome di progetto e repository coerente col tema scelto; nessun blocco se manca una convenzione formale |
