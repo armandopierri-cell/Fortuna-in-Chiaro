@@ -4,11 +4,12 @@
 <meta charset="UTF-8">
 <title>Fortuna in Chiaro — Hagenthon, Tema 02</title>
 <!--
-  VERSIONE DEFINITIVA v3 (13:40) — agente innovazione, da skill presentazioni-accenture.
+  VERSIONE DEFINITIVA v4 (14:30) — agente innovazione, da skill presentazioni-accenture.
   Allineata a docs/idea/idea-selezionata.md (leve L1-L4, CR1, CR2, Fase 2, "Demo ... aggiornata").
-  Integra presentation/sezioni/business-case.html (numeri in docs/idea/numeri-business-case.md):
-    bc-01 + bc-05 (divario SerD) -> slide 03; bc-02, bc-04 -> appendice; bc-06 -> appendice A8 (da decidere);
-    bc-03 scartata (duplica slide 02 e 05). La cartella sezioni/ non serve più a questo file.
+  Riordinata secondo la scaletta v3; sezioni/business-case.html integrata e rimossa:
+    bc-01 (problema Italia) + bc-05 (divario SerD) -> slide 03;
+    bc-02 (chi paga di più) -> appendice A4; bc-04 (verità del biglietto) -> appendice A2;
+    bc-06 (valore su scala) -> appendice A8 (da decidere). bc-03 scartata (duplica 02/05).
   Navigazione diretta: index.html#n (n = numero slide, da 1). Note del relatore: tasto N.
 
   PARTE PARLATA (5:00, demo compresa)
@@ -34,8 +35,8 @@
   17  A7 Pausa e Conto (BR-17)            DA DECIDERE AL CHECKPOINT
   18  A8 Valore su scala ~150 mln €      DA DECIDERE AL CHECKPOINT
   Fonti numeri: docs/idea/numeri-business-case.md, valore-checkpoint.md, ricerca-azzardo.md;
-  numeri della simulazione: app/ con seme demo 20261005 (perdita attesa 1.050,83 €; 175 vincite, 72 rimborsi;
-  174 su 10.000 in attivo; banco 10.738.155 € su 36.500.000 €).
+  numeri della simulazione: app/ con seme demo 20261005 (perdita attesa 1.050,83 €; 175 vincite, 72 rimborsi,
+  38,5% delle vincite è rimborso; 174 su 10.000 in attivo, 1,7%; banco 10.738.155 € su 36.500.000 €).
 -->
 <style>
   :root{
@@ -114,6 +115,7 @@
   .kpi .value{ font-size:52px; font-weight:700; color:var(--purple); line-height:1; }
   .kpi .label{ font-size:16px; color:#555; margin-top:10px; }
   .kpi .tag{ font-size:14px; color:var(--grey); margin-top:6px; }
+  .kpi-row + .kpi-row{ margin-top:18px; }
 
   .before-after{ display:flex; gap:24px; flex:1; min-height:0; }
   .ba-panel{ flex:1; border-radius:4px; padding:26px; display:flex; flex-direction:column; }
@@ -181,10 +183,14 @@
 
   .kpi.sm .value{ font-size:42px; }
   .kpi.xs .value{ font-size:36px; }
-  .kpi-row + .kpi-row{ margin-top:18px; }
   .gap-band{ display:flex; align-items:center; gap:28px; margin-top:22px; padding:18px 26px; background:var(--purple-darker); color:#fff; border-radius:4px; }
   .gap-band .big{ font-size:40px; font-weight:700; color:var(--purple-pastel); line-height:1; white-space:nowrap; }
   .gap-band .txt{ font-size:17px; line-height:1.4; }
+  .gap-row{ display:flex; gap:40px; align-items:center; flex:1; }
+  .gap-col{ flex:1; text-align:center; }
+  .gap-col .big{ font-size:60px; font-weight:700; color:var(--purple); line-height:1; }
+  .gap-col .small{ font-size:15px; color:var(--grey); margin-top:10px; }
+  .gap-vs{ font-size:22px; font-weight:700; color:var(--grey); }
   .chips{ display:flex; gap:10px; margin:0 0 12px 0; flex-wrap:wrap; }
   .chip{ font-size:14px; font-weight:700; padding:5px 12px; border:2px solid var(--purple); color:var(--purple-darker); border-radius:3px; }
   .cols3{ display:flex; gap:32px; flex:1; min-height:0; }
@@ -196,6 +202,7 @@
   .divider h1{ font-size:56px; }
   .note-box{ margin-top:14px; padding:12px 16px; border-left:4px solid var(--purple); background:#f6f6f1; font-size:16px; }
   .small{ font-size:15px; color:#6b6b63; }
+  .decide-flag{ position:absolute; top:28px; right:72px; font-size:13px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; padding:6px 14px; border-radius:3px; background:#000; color:#fff; z-index:3; }
 
   /* note del relatore: nascoste, tasto N per mostrarle */
   .notes{ display:none; }
@@ -238,7 +245,7 @@
 <div id="viewport">
   <div id="deck">
 
-    <!-- SLIDE: 01 copertina -->
+    <!-- SLIDE 01: copertina -->
     <section class="slide cover bg-dark">
       <div class="content cover">
         <div class="wordmark-big">accenture<span style="color:var(--purple-light)">&gt;</span></div>
@@ -255,7 +262,7 @@
     </section>
     <!-- /SLIDE -->
 
-    <!-- SLIDE: 02 Salvatore, Deliverable 01 -->
+    <!-- SLIDE 02: Salvatore, Deliverable 01 -->
     <section class="slide">
       <div class="content">
         <div class="kicker">User Difficulty Statement <span class="deliv">Deliverable 01</span></div>
@@ -289,55 +296,31 @@
     </section>
     <!-- /SLIDE -->
 
-    <!-- SLIDE: 03 il problema -->
+    <!-- SLIDE 03: il problema su scala + divario di supporto (bc-01 + bc-05) -->
     <section class="slide">
       <div class="content">
         <div class="kicker">Il problema</div>
         <h2>Salvatore non è un caso isolato</h2>
         <div class="kpi-row" style="margin-top:10px">
           <div class="kpi"><div class="value">18 mln</div><div class="label">adulti che hanno giocato nell'ultimo anno</div><div class="tag">ISS, Rapporti ISTISAN 19/28</div></div>
-          <div class="kpi"><div class="value">1,4 mln</div><div class="label">a rischio moderato</div><div class="tag">ISS, Rapporti ISTISAN 19/28</div></div>
+          <div class="kpi"><div class="value">1,5 mln</div><div class="label">giocatori "problematici" (~3% adulti)</div><div class="tag">ISS, Rapporti ISTISAN 19/28</div></div>
           <div class="kpi"><div class="value">21,5 mld €</div><div class="label">persi netti dagli italiani nel 2024</div><div class="tag">ADM, Bilancio di esercizio 2024</div></div>
         </div>
-        <p class="note-box" style="margin-top:28px">Un biglietto da 5 € (modello A, ADM) restituisce in media <strong>71,2 centesimi per euro</strong>: il 28,8% resta perso per costruzione [UFF + DERIV].</p>
+        <div class="gap-band">
+          <div class="big">1,5 mln ↔ ~15.000</div>
+          <div class="txt">Giocatori problematici contro persone in carico ai SerD per il gioco: meno dell'1,1%. Un divario che Fortuna in Chiaro non colma, ma rende visibile (CR1, "Vuoi parlarne con qualcuno?").</div>
+        </div>
       </div>
       <div class="footer">
         <span class="wordmark">accenture<span class="chevron">&gt;</span></span>
-        <span class="src">Fonti: ricerca-azzardo.md §0, §1.1, §4, §5 (ISS; ADM via agipronews.it e gioconews.it)</span>
+        <span class="src">Fonti: ricerca-azzardo.md §0, §4-5; numeri-business-case.md Slide 1 e 5 (ISS ISTISAN 19/28; ADM Bilancio 2024; Dipartimento Politiche Antidroga 2015; ISS TVNGA)</span>
         <span class="page-num"></span>
       </div>
-      <aside class="notes">0:35-0:50 (15") — 18 milioni di giocatori, 1,4 milioni a rischio moderato: è il nostro pubblico. I 1,5 milioni problematici vanno al numero verde, non a un simulatore. 21,5 miliardi persi nel 2024. Il gioco non è "sfortuna": è costruito per restituire meno di quanto si gioca.</aside>
+      <aside class="notes">SLIDE 03 · 0:35-0:55 (20") — 18 milioni di giocatori, 1,5 milioni problematici: è il contesto, non il nostro pubblico diretto (loro vanno al numero verde, non a un simulatore). 21,5 miliardi persi nel 2024. E tra chi ha un problema e chi riceve aiuto c'è un divario enorme: meno dell'1,1% è in carico ai SerD. Da qui nasce CR1.</aside>
     </section>
     <!-- /SLIDE -->
 
-    <!-- SLIDE: 04 la soluzione -->
-    <section class="slide">
-      <div class="content">
-        <div class="kicker">La soluzione</div>
-        <h2>Fortuna in Chiaro: <span class="accent">tre concetti</span>, un percorso</h2>
-        <div class="flow">
-          <div class="flow-box">Quiz prima</div><div class="flow-arrow"></div>
-          <div class="flow-box">La tua abitudine</div><div class="flow-arrow"></div>
-          <div class="flow-box highlight">Un anno in 10 secondi</div><div class="flow-arrow"></div>
-          <div class="flow-box">Dalla parte del banco</div><div class="flow-arrow"></div>
-          <div class="flow-box">Quiz dopo + trasferimento</div>
-        </div>
-        <div class="columns">
-          <div class="col"><h3>Probabilità in cose fisiche</h3><p>"1 su 12.480.000" diventa 208 stadi pieni con un solo vincitore.</p></div>
-          <div class="col"><h3>Vincite che non sono vincite</h3><p>"Hai vinto 5 €" diventa "hai recuperato la giocata: guadagno 0 €".</p></div>
-          <div class="col"><h3>Dalla parte del banco</h3><p>10.000 persone come Salvatore per un anno: chi incassa davvero.</p></div>
-        </div>
-        <p class="small">Statico, offline, nessun dato personale raccolto. Nessun consiglio: solo numeri e significati (vincolo T2-V3).</p>
-      </div>
-      <div class="footer">
-        <span class="wordmark">accenture<span class="chevron">&gt;</span></span>
-        <span class="page-num"></span>
-      </div>
-      <aside class="notes">0:50-1:00 (10") — Tre leve: le probabilità diventano cose fisiche, le vincite finte si smascherano, si guarda dalla parte del banco. Il percorso si misura: quiz prima e dopo, con una domanda nuova di trasferimento. Passo alla demo.</aside>
-    </section>
-    <!-- /SLIDE -->
-
-    <!-- SLIDE: 05 demo -->
+    <!-- SLIDE 04: demo -->
     <section class="slide">
       <div class="content">
         <div class="kicker">Demo live · 2'30"</div>
@@ -351,45 +334,11 @@
         <span class="wordmark">accenture<span class="chevron">&gt;</span></span>
         <span class="page-num"></span>
       </div>
-      <aside class="notes">1:00-3:30 (2'30") — DEMO con ?demo=1. (1) 1:00-1:15 Quiz prima: Salvatore fa 1/3. (2) 1:15-1:50 Abitudine (2 biglietti da 5 € al giorno, 3.650 € l'anno) e un anno in 10 secondi: "servirebbero 208 stadi da 60.000 posti, e vincerebbe una sola persona" (L3). (3) 1:50-2:15 "HAI VINTO!"... era solo il rimborso: guadagno 0 €; il 38,5% delle vincite del modello A è il rimborso, il 79,4% è da 5 o 10 € (L1). (4) 2:15-2:45 Dalla parte del banco: 10.000 Salvatori per un anno, quanti in attivo, quanto incassa il banco; 21,5 miliardi in Italia (L2). (5) 2:45-3:20 Quiz dopo 3/3 + trasferimento sul biglietto da 2 € inventato; cruscotto prima/dopo. (6) 3:20-3:30 CR1: la soglia scelta da Salvatore è superata, compare "Vuoi parlarne con qualcuno?" con il numero verde; il messaggio lo invia solo lui. Se BR-17 è approvato: "Pausa e Conto" al posto del passo 4 o 10" prima della chiusura. I ritardatari restano nell'app ma escono dal copione. Se l'animazione non parte: video di riserva.</aside>
+      <aside class="notes">SLIDE 04 · 0:55-3:25 (2'30") — DEMO con ?demo=1. (1) 0:55-1:10 Quiz prima: Salvatore fa 1/3. (2) 1:10-1:45 Abitudine (2 biglietti da 5 € al giorno, 3.650 € l'anno) e un anno in 10 secondi: "servirebbero 208 stadi da 60.000 posti, e vincerebbe una sola persona" (L3). (3) 1:45-2:10 "HAI VINTO!"... era solo il rimborso: guadagno 0 €; il 38,5% delle vincite del modello A è il rimborso, il 79,4% è da 5 o 10 € (L1). (4) 2:10-2:40 Dalla parte del banco: 10.000 Salvatori per un anno, quanti in attivo, quanto incassa il banco; 21,5 miliardi in Italia (L2). (5) 2:40-3:15 Quiz dopo 3/3 + trasferimento sul biglietto da 2 € inventato; cruscotto prima/dopo. (6) 3:15-3:25 CR1: la soglia scelta da Salvatore è superata, compare "Vuoi parlarne con qualcuno?" con il numero verde; il messaggio lo invia solo lui. Se BR-17 è approvato: "Pausa e Conto" al posto del passo 4 o 10" prima della chiusura (vedi appendice A7). I ritardatari restano nell'app ma escono dal copione. Se l'animazione non parte: video di riserva.</aside>
     </section>
     <!-- /SLIDE -->
 
-    <!-- SLIDE: 06 OPZIONALE BR-17 Pausa e Conto (go/no-go al checkpoint 14:05; eliminare se no-go) -->
-    <section class="slide">
-      <div class="content">
-        <div class="kicker">Pausa e Conto <span class="badge warn">Opzionale · go/no-go 14:05</span></div>
-        <h2>"Sto per comprare un biglietto": <span class="accent">30 secondi</span> di numeri</h2>
-        <div class="columns">
-          <div class="col">
-            <h3>Cosa mostra, per quel biglietto</h3>
-            <ul class="bullets">
-              <li>Perdita media attesa: 28,8% del prezzo (modello A)</li>
-              <li>Vincite che sono solo rimborso: 38,5%</li>
-              <li>Premio massimo in scala fisica: 208 stadi, un vincitore</li>
-            </ul>
-          </div>
-          <div class="col">
-            <h3>Cosa non fa</h3>
-            <ul class="bullets">
-              <li>Non dice cosa comprare né se giocare</li>
-              <li>Non è un esercizio clinico</li>
-              <li>Si chiude con "La scelta è tua"</li>
-            </ul>
-          </div>
-        </div>
-        <p class="note-box">Decisione informata, focus del Tema 02. Attivata solo da Salvatore (BR-17, Could).</p>
-      </div>
-      <div class="footer">
-        <span class="wordmark">accenture<span class="chevron">&gt;</span></span>
-        <span class="src">Dati: tabella ADM modello A (ricerca-azzardo.md §1.1); ricalcoli in idea-selezionata.md</span>
-        <span class="page-num"></span>
-      </div>
-      <aside class="notes">OPZIONALE, 0" di default. Se BR-17 passa al checkpoint 14:05 si mostra in demo (10"), e questa slide resta come riserva se la demo si blocca. Se no-go: eliminare la slide.</aside>
-    </section>
-    <!-- /SLIDE -->
-
-    <!-- SLIDE: 07 prima/dopo, Deliverable 02 -->
+    <!-- SLIDE 05: prima/dopo, Deliverable 02 -->
     <section class="slide">
       <div class="content">
         <div class="kicker">Before/After Simplicity Evidence <span class="deliv">Deliverable 02</span></div>
@@ -420,11 +369,11 @@
         <span class="src">Modello A, payout 71,2%: 3.650 × 28,8% ≈ 1.051 €; 12.480.000 / 730 biglietti l'anno ≈ 17.096 anni; rimborsi 4.576.000 / 11.893.456 vincite = 38,5% [UFF ADM + DERIV]</span>
         <span class="page-num"></span>
       </div>
-      <aside class="notes">3:30-3:45 (15") — Deliverable 02. Prima: "prima o poi vinco", quiz 1/3. Dopo: 3.650 € l'anno, perdita attesa circa 1.051 € (modello A; con il modello B si arriva a 1.456 €), premio massimo in media una volta ogni 17.000 anni circa. Quiz 3/3 e risposta corretta su un biglietto mai visto: ha capito il concetto, non ha memorizzato la risposta.</aside>
+      <aside class="notes">SLIDE 05 · 3:25-3:45 (20") — Deliverable 02. Prima: "prima o poi vinco", quiz 1/3. Dopo: 3.650 € l'anno, perdita attesa circa 1.051 € (modello A; con il modello B si arriva a 1.456 €), premio massimo in media una volta ogni 17.000 anni circa. Quiz 3/3 e risposta corretta su un biglietto mai visto: ha capito il concetto, non ha memorizzato la risposta.</aside>
     </section>
     <!-- /SLIDE -->
 
-    <!-- SLIDE: 07 Risk & Clarity Note, Deliverable 03 -->
+    <!-- SLIDE 06: Risk & Clarity Note, Deliverable 03 -->
     <section class="slide">
       <div class="content">
         <div class="kicker">Risk &amp; Clarity Note <span class="deliv">Deliverable 03</span></div>
@@ -444,12 +393,11 @@
         <span class="src">Fonti: ADM tabelle premi (ricerca-azzardo.md §1); Lotto [TERZI] §2; ISS TVNGA §6</span>
         <span class="page-num"></span>
       </div>
-      <aside class="notes">3:45-4:00 (15") — Deliverable 03. Semplifichiamo il linguaggio, non i numeri: probabilità e premi sono quelli ufficiali ADM, verificati dai test. Il Lotto viene da un calcolo combinatorio di terzi e lo diciamo; la regola 5 su 90 è ricavata. Il biglietto da 2 € del quiz è inventato e dichiarato. Nessun consiglio. Il numero verde ISS è sempre visibile.</aside>
+      <aside class="notes">SLIDE 06 · 3:45-4:00 (15") — Deliverable 03. Semplifichiamo il linguaggio, non i numeri: probabilità e premi sono quelli ufficiali ADM, verificati dai test. Il Lotto viene da un calcolo combinatorio di terzi e lo diciamo; la regola 5 su 90 è ricavata. Il biglietto da 2 € del quiz è inventato e dichiarato. Nessun consiglio. Il numero verde ISS è sempre visibile.</aside>
     </section>
     <!-- /SLIDE -->
 
-    <!-- SLIDE: 09 struttura agentica di sviluppo -->
-    <!-- kicker distinto dalla slide Fase 2 -->
+    <!-- SLIDE 07: struttura agentica di sviluppo -->
     <section class="slide">
       <div class="content">
         <div class="kicker">Struttura agentica di sviluppo · come l'abbiamo costruita</div>
@@ -487,13 +435,180 @@
         <span class="src">Dettaglio: agents/ e docs/governance/stato-avanzamento.md</span>
         <span class="page-num"></span>
       </div>
-      <aside class="notes">4:00-4:25 (25") — Questa è la struttura agentica di SVILUPPO (agents/), quella valutata. L'orchestratore coordina 5 agenti che si passano il lavoro attraverso file, ognuno scrive solo nelle sue cartelle. Due verifiche umane: scelta dell'idea e consegna. Sviluppo in due stanze parallele, Motore ed Esperienza, con un contratto API comune. Gli hook rendono le regole automatiche: niente scritture sulle fonti, niente segreti, test a ogni modifica. E il vincolo del tema, "nessun consiglio", è un hook: se un agente scrive "conviene" o "smetti" nell'app, la scrittura viene bloccata. Nessun push senza PASS di QA.</aside>
+      <aside class="notes">SLIDE 07 · 4:00-4:35 (35") — Questa è la struttura agentica di SVILUPPO (agents/), quella valutata. L'orchestratore coordina 5 agenti che si passano il lavoro attraverso file, ognuno scrive solo nelle sue cartelle. Due verifiche umane: scelta dell'idea e consegna. Sviluppo in due stanze parallele, Motore ed Esperienza, con un contratto API comune e test per stanza. Gli hook rendono le regole automatiche: niente scritture sulle fonti, niente segreti, test a ogni modifica. E il vincolo del tema, "nessun consiglio", è un hook: se un agente scrive "conviene" o "smetti" nell'app, la scrittura viene bloccata prima ancora che qualcuno la riveda. Nessun push senza PASS di QA.</aside>
     </section>
     <!-- /SLIDE -->
 
-    <!-- SLIDE: 09 token -->
+    <!-- SLIDE 08: visione Fase 2, breve -->
+    <section class="slide bg-light-grey">
+      <div class="content">
+        <div class="kicker">Visione Fase 2 <span class="badge warn">Non è nel MVP</span></div>
+        <h2>Da simulatore a <span class="accent">percorso di supporto</span></h2>
+        <div class="columns">
+          <div class="col">
+            <h3>Oggi nel MVP</h3>
+            <ul class="bullets">
+              <li>Analista deterministico: spesa, perdita attesa, quota del reddito</li>
+              <li>Escalation leggera CR1: "Vuoi parlarne con qualcuno?", attivata solo da Salvatore</li>
+            </ul>
+          </div>
+          <div class="col">
+            <h3>In Fase 2, con partnership clinica</h3>
+            <ul class="bullets">
+              <li>Movimenti reali con consenso; coach con supervisione clinica</li>
+              <li>Escalation con protocollo SerD/ISS; sportelli debiti e autoesclusione ADM</li>
+            </ul>
+          </div>
+        </div>
+        <p class="small" style="margin-top:10px">Dettaglio completo in appendice (A6). Prerequisiti: backend, partnership cliniche, consenso GDPR art. 9.</p>
+      </div>
+      <div class="footer">
+        <span class="wordmark">accenture<span class="chevron">&gt;</span></span>
+        <span class="src">Fonte: docs/idea/idea-selezionata.md, "Visione Fase 2"</span>
+        <span class="page-num"></span>
+      </div>
+      <aside class="notes">SLIDE 08 · 4:35-4:50 (15") — Oggi esistono già due agenti in forma leggera e deterministica: l'Analista (il motore di calcolo) e un'escalation leggera, CR1. Il resto, dal coach al supporto sui debiti, richiede partnership cliniche e consenso ai dati sanitari: per questo resta fuori dall'MVP. Il dettaglio è in appendice, per chi vuole approfondire.</aside>
+    </section>
+    <!-- /SLIDE -->
+
+    <!-- SLIDE 09: chiusura -->
+    <section class="slide closing bg-dark">
+      <div class="content closing">
+        <div class="kicker">Fortuna in Chiaro</div>
+        <h1>La fortuna non si cambia.<br>Si può vedere.</h1>
+        <p class="subtitle">Se il gioco è diventato un problema: Telefono Verde ISS <strong style="color:#fff">800 55 88 22</strong>, gratuito e anonimo.</p>
+        <div class="contacts">Repository: [URL repository] · app/index.html · presentation/index.html</div>
+      </div>
+      <div class="footer">
+        <span class="wordmark">accenture<span class="chevron">&gt;</span></span>
+        <span class="page-num"></span>
+      </div>
+      <aside class="notes">SLIDE 09 · 4:50-5:00 (10") — Chiudere su Salvatore: "Non gli diciamo cosa fare. Gli mostriamo, in 10 secondi, quanto gli costa sperare." Numero verde, repository. Grazie.</aside>
+    </section>
+    <!-- /SLIDE -->
+
+    <!-- SLIDE 10: divisore Appendice -->
+    <section class="slide bg-purple divider">
+      <div class="content divider" style="align-items:center;">
+        <div class="kicker">Fine della parte parlata</div>
+        <h1>Appendice</h1>
+        <p class="subtitle">Materiale di supporto per le domande: non è parlata, non conta nei 5 minuti.</p>
+      </div>
+      <div class="footer">
+        <span class="wordmark">accenture<span class="chevron">&gt;</span></span>
+        <span class="page-num"></span>
+      </div>
+      <aside class="notes">(non parlata) Divisore: da qui in poi, materiale di riserva per le domande.</aside>
+    </section>
+    <!-- /SLIDE -->
+
+    <!-- SLIDE 11: A1 la soluzione, tre concetti -->
     <section class="slide">
       <div class="content">
+        <div class="appx-tag">A1</div>
+        <div class="kicker">La soluzione</div>
+        <h2>Fortuna in Chiaro: <span class="accent">tre concetti</span>, un percorso</h2>
+        <div class="flow">
+          <div class="flow-box">Quiz prima</div><div class="flow-arrow"></div>
+          <div class="flow-box">La tua abitudine</div><div class="flow-arrow"></div>
+          <div class="flow-box highlight">Un anno in 10 secondi</div><div class="flow-arrow"></div>
+          <div class="flow-box">Dalla parte del banco</div><div class="flow-arrow"></div>
+          <div class="flow-box">Quiz dopo + trasferimento</div>
+        </div>
+        <div class="columns">
+          <div class="col"><h3>Probabilità in cose fisiche</h3><p>"1 su 12.480.000" diventa 208 stadi pieni con un solo vincitore.</p></div>
+          <div class="col"><h3>Vincite che non sono vincite</h3><p>"Hai vinto 5 €" diventa "hai recuperato la giocata: guadagno 0 €".</p></div>
+          <div class="col"><h3>Dalla parte del banco</h3><p>10.000 persone come Salvatore per un anno: chi incassa davvero.</p></div>
+        </div>
+        <p class="small">Statico, offline, nessun dato personale raccolto. Nessun consiglio: solo numeri e significati (vincolo T2-V3).</p>
+      </div>
+      <div class="footer">
+        <span class="wordmark">accenture<span class="chevron">&gt;</span></span>
+        <span class="page-num"></span>
+      </div>
+      <aside class="notes">(non parlata) Le tre leve della soluzione, per chi chiede "come funziona davvero".</aside>
+    </section>
+    <!-- /SLIDE -->
+
+    <!-- SLIDE 12: A2 la verità del biglietto (bc-04) -->
+    <section class="slide">
+      <div class="content">
+        <div class="appx-tag">A2</div>
+        <div class="kicker">I numeri · La verità del biglietto</div>
+        <h2>Non tutte le "vincite" sono un guadagno</h2>
+        <p class="subtitle">Lotteria istantanea da 5 €, modello A/B (ADM): quando si vince, spesso si recupera solo la giocata.</p>
+        <div class="kpi-row">
+          <div class="kpi"><div class="value">38,5%</div><div class="label">Delle vincite è solo il rimborso dei 5 € giocati</div></div>
+          <div class="kpi"><div class="value">79,4%</div><div class="label">Delle vincite vale 5 o 10 €</div></div>
+        </div>
+        <div class="kpi-row">
+          <div class="kpi"><div class="value">71,2% / 60,1%</div><div class="label">Payout reale: quanto torna ogni € giocato (modello A / B)</div></div>
+          <div class="kpi"><div class="value">208 stadi</div><div class="label">Da 60.000 posti pieni per vincere una sola volta il premio massimo</div></div>
+        </div>
+      </div>
+      <div class="footer">
+        <span class="wordmark">accenture<span class="chevron">&gt;</span></span>
+        <span class="src">Fonte: ADM, tabelle premi lotteria istantanea da 5 € (modelli A/B), calcolo nostro sui dati ufficiali (numeri-business-case.md Slide 4). Nessun marchio commerciale citato.</span>
+        <span class="page-num"></span>
+      </div>
+      <aside class="notes">(non parlata) Dettaglio numerico della leva L1, se richiesto in dibattito.</aside>
+    </section>
+    <!-- /SLIDE -->
+
+    <!-- SLIDE 13: A3 dalla parte del banco (simulazione, seme 20261005) -->
+    <section class="slide">
+      <div class="content">
+        <div class="appx-tag">A3</div>
+        <div class="kicker">I numeri · Dalla parte del banco</div>
+        <h2>10.000 Salvatori, un anno: chi incassa davvero</h2>
+        <p class="subtitle">Simulazione dell'app con seme demo fisso 20261005, per riprodurre esattamente questi numeri.</p>
+        <div class="kpi-row">
+          <div class="kpi"><div class="value">≈ 1.051 €</div><div class="label">perdita attesa l'anno a persona (modello A)</div></div>
+          <div class="kpi"><div class="value">175</div><div class="label">vincite su 10.000 persone, di cui 72 solo rimborso</div></div>
+        </div>
+        <div class="kpi-row">
+          <div class="kpi"><div class="value">174 / 10.000</div><div class="label">persone in attivo a fine anno (1,7%)</div></div>
+          <div class="kpi"><div class="value">10.738.155 €</div><div class="label">incassati dal banco su 36.500.000 € giocati</div></div>
+        </div>
+      </div>
+      <div class="footer">
+        <span class="wordmark">accenture<span class="chevron">&gt;</span></span>
+        <span class="src">Fonte: app/ (motore di simulazione), seme demo 20261005, riproducibile; 38,5% delle vincite è rimborso coerente con la tabella ADM modello A (numeri-business-case.md Slide 4)</span>
+        <span class="page-num"></span>
+      </div>
+      <aside class="notes">(non parlata) Numeri esatti della simulazione a 10.000 persone, per chi vuole verificare i conti dietro la demo.</aside>
+    </section>
+    <!-- /SLIDE -->
+
+    <!-- SLIDE 14: A4 chi paga di più (bc-02) -->
+    <section class="slide">
+      <div class="content">
+        <div class="appx-tag">A4</div>
+        <div class="kicker">I numeri · Fragilità</div>
+        <h2>Il peso non è uguale per tutti</h2>
+        <p class="subtitle">Pesa di più dove il reddito è più basso, e cresce tra i più giovani.</p>
+        <div class="kpi-row">
+          <div class="kpi"><div class="value">3.319 €</div><div class="label">Spesa pro capite/anno in Abruzzo (2024)</div></div>
+          <div class="kpi"><div class="value">845 €</div><div class="label">Spesa pro capite/anno in Trentino-Alto Adige, canale fisico (2024)</div></div>
+        </div>
+        <div class="kpi-row">
+          <div class="kpi"><div class="value">68.000 → 90.000</div><div class="label">Studenti 14-17 anni problematici, 2018 → 2024</div></div>
+          <div class="kpi"><div class="value">80.000 → 136.000+</div><div class="label">Studenti 14-17 anni a rischio, 2018 → 2024</div></div>
+        </div>
+      </div>
+      <div class="footer">
+        <span class="wordmark">accenture<span class="chevron">&gt;</span></span>
+        <span class="src">Fonte: Il Centro / PressGiochi su dati ADM territoriali · ISS, usciredalgioco.iss.it, monitoraggio popolazione scolastica 2024. Nesso individuale reddito/istruzione non quantificato da uno studio ISS: solo correlazione territoriale (numeri-business-case.md Slide 2).</span>
+        <span class="page-num"></span>
+      </div>
+      <aside class="notes">(non parlata) Se si chiede "chi gioca di più": disparità territoriale e crescita tra i minori.</aside>
+    </section>
+    <!-- /SLIDE -->
+
+    <!-- SLIDE 15: A5 token -->
+    <section class="slide">
+      <div class="content">
+        <div class="appx-tag">A5</div>
         <div class="kicker">Uso consapevole dei token</div>
         <h2>Il modello giusto per ogni ruolo, <span class="accent">zero token</span> a runtime</h2>
         <div class="columns">
@@ -523,14 +638,15 @@
         <span class="src">Fonte: CLAUDE.md, sezione "Uso consapevole dei token"</span>
         <span class="page-num"></span>
       </div>
-      <aside class="notes">4:25-4:35 (10") — Opus solo per idea e QA, Sonnet per business e governance, Haiku per i compiti meccanici. La soluzione è deterministica: i numeri devono essere esatti, quindi niente AI a runtime. Zero token per utente.</aside>
+      <aside class="notes">(non parlata) Dettaglio dei modelli per ruolo, se richiesto.</aside>
     </section>
     <!-- /SLIDE -->
 
-    <!-- SLIDE: 11 visione Fase 2 (architettura multi-agente del PRODOTTO, fuori MVP) -->
+    <!-- SLIDE 16: A6 fase 2 di dettaglio -->
     <section class="slide">
       <div class="content">
-        <div class="kicker">Visione Fase 2 <span class="badge warn">Non è nel MVP</span> <span class="badge">Architettura del prodotto, non di sviluppo</span></div>
+        <div class="appx-tag">A6</div>
+        <div class="kicker">Visione Fase 2, di dettaglio <span class="badge warn">Non è nel MVP</span> <span class="badge">Architettura del prodotto, non di sviluppo</span></div>
         <h2>Da simulatore a <span class="accent">percorso di supporto</span></h2>
         <table class="t">
           <tr><th style="width:260px">Agente del prodotto</th><th style="width:400px">Oggi, nel MVP (deterministico)</th><th>In Fase 2</th></tr>
@@ -547,13 +663,51 @@
         <span class="src">Fonte: docs/idea/idea-selezionata.md, "Visione Fase 2"</span>
         <span class="page-num"></span>
       </div>
-      <aside class="notes">4:35-4:45 (10") — Attenzione a non confonderla con la slide precedente: quella era la struttura agentica con cui abbiamo COSTRUITO l'app; questa è una VISIONE di prodotto, fuori dal MVP. Oggi due agenti esistono già in forma leggera e deterministica (Analista, Escalation con CR1). Il resto richiede partnership clinica e consenso: per questo non è nel MVP.</aside>
+      <aside class="notes">(non parlata) Versione completa della slide 08: tabella dei 5 agenti del prodotto, oggi e in Fase 2. Attenzione a non confonderla con la struttura agentica di sviluppo (slide 07): questa è una visione di prodotto, fuori dal MVP.</aside>
     </section>
     <!-- /SLIDE -->
 
-    <!-- SLIDE: 12 valore su scala, STIMA NOSTRA (da confermare al checkpoint) -->
-    <section class="slide bg-light-grey">
+    <!-- SLIDE 17: A7 Pausa e Conto, BR-17 — DA DECIDERE AL CHECKPOINT -->
+    <section class="slide">
+      <div class="decide-flag">Da decidere al checkpoint</div>
       <div class="content">
+        <div class="appx-tag">A7</div>
+        <div class="kicker">Pausa e Conto <span class="badge warn">Opzionale · BR-17</span></div>
+        <h2>"Sto per comprare un biglietto": <span class="accent">30 secondi</span> di numeri</h2>
+        <div class="columns">
+          <div class="col">
+            <h3>Cosa mostra, per quel biglietto</h3>
+            <ul class="bullets">
+              <li>Perdita media attesa: 28,8% del prezzo (modello A)</li>
+              <li>Vincite che sono solo rimborso: 38,5%</li>
+              <li>Premio massimo in scala fisica: 208 stadi, un vincitore</li>
+            </ul>
+          </div>
+          <div class="col">
+            <h3>Cosa non fa</h3>
+            <ul class="bullets">
+              <li>Non dice cosa comprare né se giocare</li>
+              <li>Non è un esercizio clinico</li>
+              <li>Si chiude con "La scelta è tua"</li>
+            </ul>
+          </div>
+        </div>
+        <p class="note-box">Decisione informata, focus del Tema 02. Attivata solo da Salvatore (BR-17, Could). Se approvata al checkpoint, sostituisce 10" nel copione demo (slide 04); se no, resta solo qui come riserva.</p>
+      </div>
+      <div class="footer">
+        <span class="wordmark">accenture<span class="chevron">&gt;</span></span>
+        <span class="src">Dati: tabella ADM modello A (ricerca-azzardo.md §1.1); ricalcoli in idea-selezionata.md</span>
+        <span class="page-num"></span>
+      </div>
+      <aside class="notes">(non parlata, riserva) Se BR-17 è approvata, se ne parla già in demo (slide 04). Questa slide resta come riserva se la demo si blocca sul quel passo, o per rispondere a domande su "Pausa e Conto".</aside>
+    </section>
+    <!-- /SLIDE -->
+
+    <!-- SLIDE 18: A8 valore su scala (bc-06) — DA DECIDERE AL CHECKPOINT -->
+    <section class="slide bg-light-grey">
+      <div class="decide-flag">Da decidere al checkpoint</div>
+      <div class="content">
+        <div class="appx-tag" style="background:#fff">A8</div>
         <div class="kicker">Valore su scala <span class="badge warn">Stima nostra</span></div>
         <h2>Se raggiungessimo l'1% dei giocatori</h2>
         <div class="kpi-row">
@@ -565,26 +719,10 @@
       </div>
       <div class="footer">
         <span class="wordmark">accenture<span class="chevron">&gt;</span></span>
-        <span class="src">Fonte: valore-checkpoint.md §2 (stima nostra su ADM Bilancio 2024 e ISS ISTISAN 19/28)</span>
+        <span class="src">Fonte: valore-checkpoint.md §2; numeri-business-case.md Slide 6 (stima nostra su ADM Bilancio 2024 e ISS ISTISAN 19/28)</span>
         <span class="page-num"></span>
       </div>
-      <aside class="notes">4:45-4:52 (7") — DA CONFERMARE AL CHECKPOINT 14:05: l'utente decide se tenere questa slide. Se resta: "È una stima nostra, non misurata: 1% dei giocatori, 70% che capisce, circa 150 milioni l'anno di perdite rese visibili. Non risparmi: consapevolezza." Se viene tolta: i 7 secondi passano alla chiusura.</aside>
-    </section>
-    <!-- /SLIDE -->
-
-    <!-- SLIDE: 13 chiusura -->
-    <section class="slide closing bg-dark">
-      <div class="content closing">
-        <div class="kicker">Fortuna in Chiaro</div>
-        <h1>La fortuna non si cambia.<br>Si può vedere.</h1>
-        <p class="subtitle">Se il gioco è diventato un problema: Telefono Verde ISS <strong style="color:#fff">800 55 88 22</strong>, gratuito e anonimo.</p>
-        <div class="contacts">Repository: [URL GitHub da inserire] · app/index.html · presentation/index.html</div>
-      </div>
-      <div class="footer">
-        <span class="wordmark">accenture<span class="chevron">&gt;</span></span>
-        <span class="page-num"></span>
-      </div>
-      <aside class="notes">4:52-5:00 (8") — Chiudere su Salvatore: "Non gli diciamo cosa fare. Gli mostriamo, in 10 secondi, quanto gli costa sperare." Numero verde, repository. Grazie.</aside>
+      <aside class="notes">(non parlata, riserva) DA CONFERMARE AL CHECKPOINT: se si vuole citare il valore su scala in chiusura o in dibattito, i numeri sono qui, già dichiarati come stima non misurata.</aside>
     </section>
     <!-- /SLIDE -->
 
@@ -640,7 +778,14 @@
     deck.style.transform = 'translate(-50%,-50%) scale(' + scale + ')';
   }
 
+  function applyHash(){
+    var h = window.location.hash.replace('#', '');
+    var n = parseInt(h, 10);
+    if (!isNaN(n) && n >= 1 && n <= total){ goTo(n - 1); }
+  }
+
   window.addEventListener('resize', resize);
+  window.addEventListener('hashchange', applyHash);
   window.addEventListener('keydown', function(e){
     if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown' || e.key === 'ArrowDown'){
       e.preventDefault(); next();
@@ -661,6 +806,7 @@
   document.getElementById('hit-prev').addEventListener('click', prev);
 
   resize();
+  applyHash();
   render();
 })();
 </script>
