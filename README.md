@@ -100,10 +100,9 @@ Flusso e stanze (Motore, Esperienza) dettagliati in `agents/WORKFLOW.md`.
 
 ## 9. Stato della consegna (onesto, a questo istante)
 
-- Ultimo verdetto QA: **PASS con riserva** (`docs/qa/verdetto-qa.md`, riesame finale 14:41 su `ae31895`):
-  UAT 24/24, DEF-001 e DEF-002 chiusi, 40 test automatici verdi, `agents/` allineata a `.claude/`.
+- Ultimo verdetto QA: **PASS** (`docs/qa/verdetto-qa.md`, riesame 15:11 su `786ad9a`; review approfondita 15:18 senza rilievi bloccanti in `docs/qa/review-approfondita.md`): UAT 24/24, 40 test automatici verdi, `agents/` allineata a `.claude/`.
 - Checkpoint idea e valore: **svolto con l'utente alle 14:30** (decisioni in `docs/governance/stato-avanzamento.md`).
-- Restano prima del push: remote GitHub (URL dall'utente), taratura della demo a 5'00" e
+- Restano prima del push: remote GitHub (URL dall'utente) e
   **conferma umana di consegna**.
 - **Push non ancora eseguito.**
 
