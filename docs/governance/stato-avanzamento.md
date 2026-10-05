@@ -21,6 +21,7 @@ Ora corrente 14:23. Tempo residuo al freeze: **1 h 07 min**. `git status`: solo 
 | ~13:10 | **CR approvate dall'utente**: CR1 "Vuoi parlarne con qualcuno?" (soglia di spesa scelta dall'utente → numero verde e messaggio a persona di fiducia, inviato solo dall'utente) come **BR-16 Should**; CR2 "Pausa e Conto" (versione educativa del craving) come **BR-17 Could**, go/no-go al checkpoint delle 14:05. L'architettura multi-agente runtime proposta (Analista, Coach, Craving, Debiti, Barriere, Escalation) va **solo come slide di visione "Fase 2"**, separata dalla struttura agentica di sviluppo. Dettaglio in docs/idea/idea-selezionata.md | utente |
 | ~13:10 | **Deroga sul freeze: push entro le 15:30** (comunicata dall'utente) | utente |
 | 14:30 | BR-17 Pausa e Conto attivo di default; Lotto (ambo/terno) rimosso dall'app; stima valore ~150 mln € confermata; demo taratura a prodotto finito entro 5'00" | utente |
+| 14:50-15:10 | **Richieste dell'utente sulla demo**: scelta dell'importo (al posto di "quante volte"), differenza A/B spiegata esplicitamente, linguaggio semplice (via "payout/valore atteso/seme"), box "Quest'anno simulato" vs "In media" con pulsante "Simula un altro anno", schedina con importo per giocata × frequenza. Applicate nei commit `c69aa32` e `786ad9a`, riesaminate e PASS da QA alle 15:00 e 15:11 (`docs/qa/verdetto-qa.md` §7 e riesame 15:11) | utente |
 
 ## Verifiche umane
 | Ora | Punto | Esito |
