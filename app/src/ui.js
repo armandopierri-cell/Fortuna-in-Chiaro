@@ -1,0 +1,595 @@
+// Interfaccia di "Fortuna in Chiaro": eventi, rendering, animazione.
+// Usa solo window.Motore (calcoli) e legge window.GIOCHI / window.QUIZ (dati). Nessuna rete, nessuno storage.
+(function () {
+  "use strict";
+
+  var M = window.Motore;
+  var G = window.GIOCHI;
+  var Q = window.QUIZ;
+  var N_SCHERMATE = 7;
+  var SEME_NORMALE = 42;            // seme fisso dichiarato a schermo (analisi funzionale §3.4)
+  var DURATA_NORMALE = 10000;       // ms
+  var DURATA_DEMO = 3000;           // ms (BR-10)
+  var PUNTI_GRIGLIA = 10000;        // scheda A: 100 x 100 puntini
+  var ESTRAZIONI_RITARDATARI = 500000;
+  var LETTERE = ["A", "B", "C", "D", "E", "F"];
+
+  var params = new URLSearchParams(window.location.search);
+  var demoDaUrl = params.get("demo") === "1";
+
+  var state;
+  var anim = null; // animazione in corso: { raf, watch, ultimo }
+  function fermaAnimazione() {
+    if (!anim) return;
+    cancelAnimationFrame(anim.raf);
+    clearInterval(anim.watch);
+    anim = null;
+  }
+
+  // ---------------------------------------------------------------- utilita'
+  function $(id) { return document.getElementById(id); }
+  function el(tag, attrs, html) {
+    var e = document.createElement(tag);
+    if (attrs) Object.keys(attrs).forEach(function (k) {
+      if (k === "class") e.className = attrs[k];
+      else if (k === "text") e.textContent = attrs[k];
+      else e.setAttribute(k, attrs[k]);
+    });
+    if (html !== undefined) e.innerHTML = html;
+    return e;
+  }
+  function num(n, d) { return M.formattaNumero(n, d || 0); }
+  // Euro: senza decimali se l'importo e' intero al centesimo, altrimenti 2 decimali.
+  function eur(n) {
+    var c = Math.round(n * 100) / 100;
+    return M.formattaEuro(c, c % 1 === 0 ? 0 : 2);
+  }
+  function eur2(n) { return M.formattaEuro(n, 2); }
+  function perc(f, d) { return num(f * 100, d === undefined ? 1 : d) + "%"; }
+  function unoSu(n) { return "1 su " + num(n, n % 1 === 0 ? 0 : 1); }
+  function seme() { return state.demo ? G.seme.demo : SEME_NORMALE; }
+
+  function payoutDichiarato(g) {
+    return g.dichiarati && typeof g.dichiarati.payout === "number" ? g.dichiarati.payout : M.payout(g.id);
+  }
+  // Gioco di riferimento per le schede: modello A se presente, altrimenti la prima lotteria, altrimenti il primo gioco.
+  function giocoRiferimento() {
+    var gs = G.giochi;
+    return gs.filter(function (g) { return g.id === "istantanea-5-a"; })[0] ||
+      gs.filter(function (g) { return g.tipo === "istantanea"; })[0] || gs[0];
+  }
+  function citaFonte(f) {
+    if (!f) return "Fonte non indicata.";
+    if (f.affidabilita === "TERZI" || f.verificatoSuAdm === false) {
+      return "Fonte: calcolo combinatorio, terzi (" + f.sezione + "). Non ancora riscontrato riga per riga sulla pagina ADM.";
+    }
+    var s = "Fonte: " + f.ente + (f.descrizione ? " — " + f.descrizione : "") + " (" + f.sezione + ").";
+    if (f.affidabilita === "STIMA") s += " Stima, non tabella ufficiale completa.";
+    return s;
+  }
+
+  // ------------------------------------------------------------------ stato
+  function statoIniziale() {
+    var sel = {};
+    G.giochi.forEach(function (g) { sel[g.id] = { on: false, volte: 0, periodo: "giorno", posta: 1 }; });
+    var voci = (G.abitudineDemo && G.abitudineDemo.voci) || [];
+    var applicate = 0;
+    voci.forEach(function (v) {
+      if (!sel[v.gioco]) return;
+      sel[v.gioco] = { on: true, volte: v.volte, periodo: v.periodo || "giorno", posta: v.posta || 1 };
+      applicate++;
+    });
+    if (!applicate && G.giochi.length) sel[G.giochi[0].id] = { on: true, volte: 1, periodo: "giorno", posta: 1 };
+    return {
+      schermata: 1,
+      demo: demoDaUrl || ($("demo-toggle") && $("demo-toggle").checked) || false,
+      sel: sel,
+      rispostePrima: {},
+      risposteDopo: {},
+      ordineDopo: null,
+      risultati: null
+    };
+  }
+
+  function abitudine() {
+    var voci = [];
+    G.giochi.forEach(function (g) {
+      var s = state.sel[g.id];
+      if (!s || !s.on || !(s.volte > 0)) return;
+      var v = { gioco: g.id, volte: s.volte, periodo: s.periodo };
+      if (g.tipo === "lotto") v.posta = s.posta;
+      voci.push(v);
+    });
+    return { voci: voci };
+  }
+
+  // ------------------------------------------------------------- navigazione
+  function vai(n) {
+    if (n < 1 || n > N_SCHERMATE) return;
+    fermaAnimazione();
+    state.schermata = n;
+    document.querySelectorAll(".screen").forEach(function (s) {
+      s.hidden = Number(s.getAttribute("data-screen")) !== n;
+    });
+    $("btn-ricomincia-top").hidden = n < 4;
+    renderSteps();
+    if (n === 2) aggiornaQuizPrima();
+    if (n === 4) avviaSimulazione();
+    if (n === 5) initSchede();
+    if (n === 6) renderQuizDopo();
+    if (n === 7) renderCruscotto();
+    window.scrollTo(0, 0);
+    var h = document.querySelector('.screen[data-screen="' + n + '"] h1');
+    if (h) { h.setAttribute("tabindex", "-1"); h.focus({ preventScroll: true }); }
+  }
+
+  function renderSteps() {
+    var ol = $("steps");
+    ol.innerHTML = "";
+    for (var i = 1; i <= N_SCHERMATE; i++) {
+      var li = el("li", { text: String(i) });
+      if (i < state.schermata) li.className = "done";
+      if (i === state.schermata) { li.className = "current"; li.setAttribute("aria-current", "step"); }
+      ol.appendChild(li);
+    }
+  }
+
+  function ricomincia() {
+    state = statoIniziale();
+    $("demo-toggle").checked = state.demo;
+    aggiornaDemo();
+    renderQuiz($("quiz-prima"), domandePrima(), state.rispostePrima, null, aggiornaQuizPrima);
+    $("quiz-dopo").innerHTML = "";
+    renderAbitudine();
+    schedeInit = false;
+    vai(1);
+  }
+
+  // --------------------------------------------------------- 1. Benvenuto
+  function aggiornaDemo() {
+    state.demo = $("demo-toggle").checked;
+    $("demo-badge").hidden = !state.demo;
+    $("demo-info").textContent = state.demo
+      ? "Modalità demo attiva: seme fisso " + G.seme.demo + ", animazione di circa 3 secondi, risultato identico a ogni esecuzione."
+      : "";
+  }
+
+  // ------------------------------------------------------------- quiz
+  function domandePrima() {
+    return Q.domande.filter(function (q) { return q.fase !== "dopo"; });
+  }
+  function domandeTrasferimento() {
+    return Q.domande.filter(function (q) { return q.fase === "dopo"; });
+  }
+
+  // Mescola le opzioni in modo deterministico (seme) per il quiz dopo.
+  function mescola(arr, rnd) {
+    var a = arr.slice();
+    for (var i = a.length - 1; i > 0; i--) {
+      var j = Math.floor(rnd() * (i + 1));
+      var t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+  }
+
+  function renderQuiz(form, domande, risposte, ordini, onChange) {
+    form.innerHTML = "";
+    domande.forEach(function (q, idx) {
+      var fs = el("fieldset", { class: "domanda" });
+      var etichetta = (idx + 1) + ". " + q.testo;
+      fs.appendChild(el("legend", { text: etichetta }));
+      if (q.fase === "dopo") fs.appendChild(el("p", { class: "tag", text: "Biglietto inventato per l'esercizio, non è un gioco reale" }));
+      var opzioni = ordini && ordini[q.id] ? ordini[q.id] : q.opzioni;
+      opzioni.forEach(function (o, i) {
+        var lab = el("label", { class: "opzione" });
+        var inp = el("input", { type: "radio", name: form.id + "-" + q.id, value: o.chiave });
+        if (risposte[q.id] === o.chiave) inp.checked = true;
+        inp.addEventListener("change", function () {
+          risposte[q.id] = o.chiave;
+          mostraSpiegazione(fs, q, risposte[q.id]);
+          onChange();
+        });
+        lab.appendChild(inp);
+        lab.appendChild(el("span", { text: LETTERE[i] + ") " + o.testo }));
+        fs.appendChild(lab);
+      });
+      if (risposte[q.id]) mostraSpiegazione(fs, q, risposte[q.id]);
+      form.appendChild(fs);
+    });
+  }
+
+  function mostraSpiegazione(fs, q, risposta) {
+    var p = fs.querySelector(".spiegazione");
+    if (!p) { p = el("p", { "aria-live": "polite" }); fs.appendChild(p); }
+    var ok = risposta === q.corretta;
+    var giusta = q.opzioni.filter(function (o) { return o.chiave === q.corretta; })[0];
+    p.className = "spiegazione " + (ok ? "ok" : "ko");
+    p.textContent = (ok ? "Risposta corretta. " : "La risposta corretta è: " + giusta.testo + ". ") + q.spiegazione;
+  }
+
+  function completo(domande, risposte) {
+    return domande.every(function (q) { return !!risposte[q.id]; });
+  }
+
+  function aggiornaQuizPrima() {
+    $("avanti-2").disabled = !completo(domandePrima(), state.rispostePrima);
+  }
+
+  function renderQuizDopo() {
+    var domande = domandePrima().concat(domandeTrasferimento());
+    if (!state.ordineDopo) {
+      var rnd = M.creaPRNG(seme() + 7);
+      state.ordineDopo = {};
+      domandePrima().forEach(function (q) {
+        var o = mescola(q.opzioni, rnd);
+        // garantisce un ordine diverso da quello del quiz prima
+        if (o.every(function (x, i) { return x.chiave === q.opzioni[i].chiave; })) o.push(o.shift());
+        state.ordineDopo[q.id] = o;
+      });
+    }
+    var form = $("quiz-dopo");
+    if (!form.children.length) renderQuiz(form, domande, state.risposteDopo, state.ordineDopo, aggiornaQuizDopo);
+    aggiornaQuizDopo();
+  }
+  function aggiornaQuizDopo() {
+    $("avanti-6").disabled = !completo(domandePrima().concat(domandeTrasferimento()), state.risposteDopo);
+  }
+
+  // ------------------------------------------------------- 3. Abitudine
+  function renderAbitudine() {
+    var box = $("lista-giochi");
+    box.innerHTML = "";
+    G.giochi.forEach(function (g) {
+      var s = state.sel[g.id];
+      var card = el("div", { class: "gioco" + (s.on ? " sel" : "") });
+      var head = el("label", { class: "gioco-head" });
+      var chk = el("input", { type: "checkbox" });
+      chk.checked = s.on;
+      head.appendChild(chk);
+      head.appendChild(el("span", { text: g.nome }));
+      card.appendChild(head);
+
+      var pm = M.probabilitaPremioMax(g.id, 1);
+      var dati = el("ul", { class: "gioco-dati" });
+      var costo = g.tipo === "lotto" ? "posta scelta da te (1 € a puntata se non la cambi)" : eur(g.prezzo);
+      var premio = g.tipo === "lotto" ? eur(pm.premio) + " (" + num(g.moltiplicatore) + "× la posta)" : eur(pm.premio);
+      [["Costo", costo], ["Payout", perc(payoutDichiarato(g))], ["Premio massimo", premio], ["Probabilità premio massimo", unoSu(pm.unoSu)]]
+        .forEach(function (r) { dati.appendChild(el("li", null, r[0] + ": <strong>" + r[1] + "</strong>")); });
+      card.appendChild(dati);
+
+      var inp = el("div", { class: "gioco-input" });
+      var lv = el("label", null, "Quante volte ");
+      var volte = el("input", { type: "number", min: "0", max: "20", step: "1", inputmode: "numeric", value: String(s.volte) });
+      lv.appendChild(volte);
+      var per = el("select", { "aria-label": "Periodo" });
+      [["giorno", "al giorno"], ["settimana", "a settimana"]].forEach(function (p) {
+        var o = el("option", { value: p[0], text: p[1] });
+        if (s.periodo === p[0]) o.selected = true;
+        per.appendChild(o);
+      });
+      inp.appendChild(lv);
+      inp.appendChild(per);
+      var posta = null;
+      if (g.tipo === "lotto") {
+        var lp = el("label", null, "Posta per giocata (€) ");
+        posta = el("input", { type: "number", min: "1", max: "100", step: "1", inputmode: "numeric", value: String(s.posta) });
+        lp.appendChild(posta);
+        inp.appendChild(lp);
+      }
+      inp.hidden = !s.on;
+      card.appendChild(inp);
+      card.appendChild(el("p", { class: "fonte", text: citaFonte(g.fonte) }));
+
+      function intero(input, min, max) {
+        var v = Math.floor(Number(input.value));
+        if (!isFinite(v) || v < min) v = min;
+        if (v > max) v = max;
+        return v;
+      }
+      chk.addEventListener("change", function () {
+        s.on = chk.checked;
+        if (s.on && !(s.volte > 0)) { s.volte = 1; volte.value = "1"; }
+        card.className = "gioco" + (s.on ? " sel" : "");
+        inp.hidden = !s.on;
+        aggiornaSpesa();
+      });
+      volte.addEventListener("input", function () { s.volte = intero(volte, 0, 20); aggiornaSpesa(); });
+      volte.addEventListener("change", function () { volte.value = String(s.volte); });
+      per.addEventListener("change", function () { s.periodo = per.value; aggiornaSpesa(); });
+      if (posta) {
+        posta.addEventListener("input", function () { s.posta = intero(posta, 1, 100); aggiornaSpesa(); });
+        posta.addEventListener("change", function () { posta.value = String(s.posta); });
+      }
+      box.appendChild(card);
+    });
+    aggiornaSpesa();
+  }
+
+  function aggiornaSpesa() {
+    var ab = abitudine();
+    var sp = M.spesa(ab);
+    var box = $("riepilogo-spesa");
+    var vuoto = !ab.voci.length || !(sp.giorno > 0);
+    $("avanti-3").disabled = vuoto;
+    state.risultati = null; // l'abitudine e' cambiata: la simulazione va rifatta
+    if (vuoto) {
+      box.innerHTML = '<p class="avviso">Seleziona almeno un gioco per vedere la tua spesa</p>';
+      return;
+    }
+    box.innerHTML =
+      "<dl>" +
+      "<dt>Al giorno</dt><dd class=\"big\">" + eur(sp.giorno) + "</dd>" +
+      "<dt>Al mese</dt><dd class=\"big\">" + eur2(sp.mese) + "</dd>" +
+      "<dt>All'anno</dt><dd class=\"big\">" + eur(sp.anno) + "</dd>" +
+      "</dl>" +
+      '<p class="note">Anno = giorno × 365; mese = anno ÷ 12, arrotondato al centesimo.</p>';
+  }
+
+  // ------------------------------------------------ 4. Un anno in 10 secondi
+  function calcolaRisultati() {
+    var ab = abitudine();
+    var pa = M.perditaAttesa(ab);
+    var anni = M.anniAttesiPremioMax(ab);
+    var top = anni.reduce(function (a, b) { return !a || b.premio > a.premio ? b : a; }, null);
+    var sim = M.simulaAnno(ab, seme());
+    return {
+      seme: seme(),
+      spesaAnno: pa.spesaAnno,
+      ritornoAnno: pa.ritornoAnno,
+      perditaAnno: pa.anno,
+      payoutMedio: pa.spesaAnno > 0 ? 1 - pa.perEuro : 0,
+      premioMax: top ? top.premio : null,
+      anniPremioMax: top && isFinite(top.anni) ? top.anni : null,
+      giocoPremioMax: top ? M.trovaGioco(top.gioco).nome : null,
+      sim: sim
+    };
+  }
+
+  function avviaSimulazione() {
+    if (!state.risultati || state.risultati.seme !== seme()) state.risultati = calcolaRisultati();
+    var r = state.risultati;
+    $("seme-info").textContent = "Simulazione con seme fisso (" + r.seme + "), riproducibile: rivedendola, i numeri restano gli stessi." +
+      (state.demo ? " Modalità demo: animazione accelerata." : "");
+
+    $("atteso-dl").innerHTML =
+      "<dt>Speso in un anno</dt><dd>" + eur(r.spesaAnno) + "</dd>" +
+      "<dt>Torna in media</dt><dd>" + eur2(r.ritornoAnno) + "</dd>" +
+      "<dt>Perso in media</dt><dd class=\"big\" style=\"color:var(--perso)\">" + eur2(r.perditaAnno) + "</dd>";
+    $("atteso-media").textContent = "In media, su 100 € giocati, te ne tornano " + num(r.payoutMedio * 100, 2) + " €.";
+
+    // calendario
+    var cal = $("calendario");
+    cal.innerHTML = "";
+    var giorniVincita = {};
+    r.sim.vincite.forEach(function (v) { giorniVincita[v.giorno] = true; });
+    var celle = [];
+    for (var i = 0; i < r.sim.giorni.length; i++) { var c = document.createElement("span"); cal.appendChild(c); celle.push(c); }
+    $("vincite").innerHTML = "";
+    $("sim-finale").innerHTML = "";
+    $("btn-rivedi").disabled = true;
+
+    var durata = state.demo ? DURATA_DEMO : DURATA_NORMALE;
+    var tot = r.sim.giorni.length;
+    var inizio = null, mostrati = 0, vinciteMostrate = 0;
+    fermaAnimazione();
+    var a = anim = { raf: null, watch: null, ultimo: 0 };
+
+    function frame() {
+      if (anim !== a) return;
+      var ts = performance.now();
+      a.ultimo = ts;
+      cancelAnimationFrame(a.raf);
+      if (inizio === null) inizio = ts;
+      var t = Math.min(1, (ts - inizio) / durata);
+      var fino = Math.round(t * tot);
+      for (; mostrati < fino; mostrati++) {
+        var g = r.sim.giorni[mostrati];
+        celle[mostrati].className = giorniVincita[g.giorno] ? "w" : (g.speso > 0 ? "g" : "");
+      }
+      while (vinciteMostrate < r.sim.vincite.length && r.sim.vincite[vinciteMostrate].giorno <= fino) {
+        var v = r.sim.vincite[vinciteMostrate++];
+        $("vincite").insertBefore(el("li", { text: "Giorno " + v.giorno + ": vinti " + eur(v.premio) }), $("vincite").firstChild);
+      }
+      mostraContatori(fino ? r.sim.giorni[fino - 1] : null, fino, tot);
+      if (t < 1) a.raf = requestAnimationFrame(frame);
+      else { fermaAnimazione(); fineSimulazione(r); }
+    }
+    mostraContatori(null, 0, tot);
+    a.raf = requestAnimationFrame(frame);
+    // ripiego se requestAnimationFrame e' sospeso (scheda in background, browser headless)
+    a.watch = setInterval(function () { if (performance.now() - a.ultimo > 150) frame(); }, 200);
+  }
+
+  function mostraContatori(g, fino, tot) {
+    var speso = g ? g.spesoCum : 0, vinto = g ? g.vintoCum : 0;
+    $("c-speso").textContent = eur(speso);
+    $("c-vinto").textContent = eur(vinto);
+    $("c-perso").textContent = eur(speso - vinto);
+    $("sim-giorno").textContent = "Giorno " + fino + " di " + tot;
+    $("sim-progress").style.width = (tot ? 100 * fino / tot : 0) + "%";
+  }
+
+  function fineSimulazione(r) {
+    var t = r.sim.totale;
+    var html =
+      "<p>In questo anno simulato: speso <strong>" + eur(t.speso) + "</strong>, vinto <strong>" + eur(t.vinto) +
+      "</strong>, perso <strong>" + eur(t.perso) + "</strong>.</p>" +
+      "<p>In media, su 100 € giocati, te ne tornano <strong>" + num(r.payoutMedio * 100, 2) + " €</strong>.</p>";
+    if (r.anniPremioMax !== null) {
+      html += "<p>Con questa abitudine, il premio massimo esce in media una volta ogni <strong>" +
+        num(Math.round(r.anniPremioMax)) + " anni</strong> di gioco.</p>" +
+        '<p class="note">Premio massimo considerato: ' + eur(r.premioMax) + " (" + r.giocoPremioMax +
+        "). Stima derivata (calcolo nostro): 1 ÷ (probabilità del premio massimo × giocate all'anno).</p>";
+    } else {
+      html += "<p>Il premio massimo di questo gioco non è raggiungibile nella simulazione.</p>";
+    }
+    $("sim-finale").innerHTML = html;
+    $("btn-rivedi").disabled = false;
+  }
+
+  // -------------------------------------------------- 5. Capire i numeri
+  var schedeInit = false;
+  function initSchede() {
+    if (schedeInit) return;
+    schedeInit = true;
+    var g = giocoRiferimento();
+    var pm = M.probabilitaPremioMax(g.id, 1);
+    var pay = payoutDichiarato(g);
+
+    // Scheda A
+    $("sa-testo").textContent = "Immagina " + num(pm.unoSu) + " biglietti allineati: in media uno solo vince il premio massimo (" +
+      eur(pm.premio) + ")." + (g.emissione ? " Nella serie completa da " + num(g.emissione) + " biglietti i vincenti sono " +
+      num(Math.round(g.emissione / pm.unoSu)) + "." : "") +
+      " È come scegliere a caso una sola persona tra tutti gli abitanti di una grande città europea.";
+    var griglie = Math.max(1, Math.ceil(pm.unoSu / PUNTI_GRIGLIA));
+    var range = $("sa-range");
+    range.max = String(griglie);
+    range.value = "1";
+    function aggA() {
+      var k = Number(range.value);
+      $("sa-k").textContent = num(k);
+      $("sa-u").textContent = k === 1 ? "griglia" : "griglie";
+      disegnaGriglia(k >= griglie);
+      $("sa-esito").textContent = k >= griglie
+        ? num(k) + (k === 1 ? " griglia × " : " griglie × ") + num(PUNTI_GRIGLIA) + " puntini = " + num(k * PUNTI_GRIGLIA) + " biglietti: ora, in media, c'è un puntino vincente (in rosso)."
+        : num(k) + (k === 1 ? " griglia × " : " griglie × ") + num(PUNTI_GRIGLIA) + " puntini = " + num(k * PUNTI_GRIGLIA) + " biglietti. Per trovare, in media, un puntino vincente servono " + num(griglie) + " griglie come questa.";
+    }
+    range.addEventListener("input", aggA);
+    aggA();
+    $("sa-fonte").textContent = citaFonte(g.fonte);
+
+    // Scheda B
+    $("sb-testo").textContent = "Il valore atteso è la media di ciò che torna indietro se giochi tante volte. Su un biglietto con payout " +
+      perc(pay) + ": ogni 100 € giocati, in media " + eur2(100 * pay) + " tornano indietro, " + eur2(100 * (1 - pay)) + " restano al banco.";
+    var box = $("sb-scelte");
+    [10, 100, 1000, 10000].forEach(function (n, i) {
+      var lab = el("label");
+      var r = el("input", { type: "radio", name: "sb-n", value: String(n) });
+      if (i === 1) r.checked = true;
+      r.addEventListener("change", function () { aggB(n); });
+      lab.appendChild(r);
+      lab.appendChild(document.createTextNode(num(n)));
+      box.appendChild(lab);
+    });
+    var va = M.valoreAtteso(g.id, 1);
+    function aggB(n) {
+      var rnd = M.creaPRNG(seme());
+      var vinto = 0;
+      for (var i = 0; i < n; i++) vinto += M.estraiPremio(g.id, rnd, 1);
+      var spesaTot = n * va.costo;
+      $("sb-dl").innerHTML =
+        "<dt>Spesa totale</dt><dd>" + eur(spesaTot) + "</dd>" +
+        "<dt>Vincita attesa (esatta)</dt><dd>" + eur2(spesaTot - M.perditaAttesaSu(va.costo, va.perEuro, n)) + " (" + perc(va.perEuro) + ")</dd>" +
+        "<dt>Perdita attesa (esatta)</dt><dd>" + eur2(M.perditaAttesaSu(va.costo, va.perEuro, n)) + "</dd>" +
+        "<dt>Vincita in una prova simulata</dt><dd>" + eur(vinto) + " (" + perc(vinto / spesaTot) + ")</dd>";
+    }
+    aggB(100);
+    $("sb-fonte").textContent = citaFonte(g.fonte) + " Prova simulata con seme fisso " + seme() + ": con più giocate la percentuale tende al valore atteso.";
+
+    // Scheda C
+    $("sc-testo").textContent = "Ogni estrazione del Lotto è indipendente dalle precedenti: un numero fermo da 100 estrazioni ha la stessa probabilità di uscire di uno uscito ieri.";
+    $("sc-lancia").textContent = "Lancia " + num(ESTRAZIONI_RITARDATARI) + " estrazioni";
+    $("sc-lancia").addEventListener("click", function () {
+      var b = $("sc-lancia");
+      b.disabled = true;
+      b.textContent = "Estrazioni in corso…";
+      setTimeout(function () {
+        var r = M.simulaRitardatari(seme(), ESTRAZIONI_RITARDATARI);
+        $("sc-dl").innerHTML =
+          "<dt>Probabilità teorica di uscita del numero " + r.numero + "</dt><dd>" + perc(r.probabilitaTeorica, 2) + "</dd>" +
+          "<dt>Frequenza su tutte le estrazioni</dt><dd>" + perc(r.frequenza, 2) + "</dd>" +
+          "<dt>Frequenza quando era fermo da " + r.ritardoMinimo + "+ estrazioni (" + num(r.casiInRitardo) + " casi)</dt><dd>" +
+          (r.frequenzaDopoRitardo === null ? "nessun caso" : perc(r.frequenzaDopoRitardo, 2)) + "</dd>" +
+          "<dt>Ritardo più lungo osservato</dt><dd>" + num(r.ritardoMassimo) + " estrazioni</dd>";
+        b.disabled = false;
+        b.textContent = "Lancia di nuovo (stesso seme)";
+      }, 30);
+    });
+    var L = G.lotto || {};
+    $("sc-fonte").textContent = "Fonte: principio matematico standard di indipendenza delle estrazioni; " +
+      (L.estratti || 5) + " numeri su " + (L.numeri || 90) + " per ruota (" + (L.sezione || "ricerca-azzardo.md §2") + "). Simulazione con seme fisso " + seme() + ".";
+  }
+
+  function disegnaGriglia(vincente) {
+    var c = $("griglia"), ctx = c.getContext("2d");
+    var lato = Math.round(Math.sqrt(PUNTI_GRIGLIA)), passo = c.width / lato;
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, c.width, c.height);
+    ctx.fillStyle = "#8a93a1";
+    for (var y = 0; y < lato; y++) for (var x = 0; x < lato; x++) ctx.fillRect(x * passo + 0.5, y * passo + 0.5, passo - 1, passo - 1);
+    if (vincente) {
+      ctx.fillStyle = "#a3141c";
+      var px = 61 * passo, py = 37 * passo;
+      ctx.fillRect(px - passo * 1.5, py - passo * 1.5, passo * 4, passo * 4);
+    }
+  }
+
+  // ------------------------------------------------------ 7. Cruscotto
+  function renderCruscotto() {
+    var box = $("cruscotto");
+    var dp = domandePrima(), dt = domandeTrasferimento();
+    var html = "";
+    if (!completo(dp.concat(dt), state.risposteDopo) || !completo(dp, state.rispostePrima)) {
+      html += '<p class="cr-delta">Completa il quiz dopo per vedere il confronto</p>';
+    } else {
+      var prima = M.verificaQuiz(dp, state.rispostePrima);
+      var dopo = M.verificaQuiz(dp, state.risposteDopo);
+      var cf = M.confrontaQuiz(prima, dopo);
+      var trasf = M.verificaQuiz(dt, state.risposteDopo);
+      html += '<div class="cr-quiz">' +
+        '<div class="cr-box"><span class="cr-l">Prima</span><span class="cr-v">' + cf.prima + "/" + cf.totalePrima + "</span></div>" +
+        '<div class="cr-box cr-dopo"><span class="cr-l">Dopo</span><span class="cr-v">' + cf.dopo + "/" + cf.totaleDopo + "</span></div></div>";
+      var delta;
+      if (cf.delta > 0) delta = "+" + cf.delta + (cf.delta === 1 ? " risposta corretta in più" : " risposte corrette in più");
+      else if (cf.delta === 0) delta = "Il tuo punteggio prima e dopo è " + cf.prima + "/" + cf.totalePrima + " in entrambi i casi.";
+      else delta = "Prima: " + cf.prima + "/" + cf.totalePrima + ", dopo: " + cf.dopo + "/" + cf.totaleDopo + ".";
+      html += '<p class="cr-delta">' + delta + "</p>";
+      if (dt.length) {
+        html += '<p class="cr-trasf">Hai calcolato da solo la perdita attesa di un biglietto nuovo: <strong>' +
+          (trasf.punteggio === trasf.totale ? "Sì" : "No") + "</strong></p>";
+      }
+    }
+    var r = state.risultati;
+    if (r) {
+      html += '<div class="cr-num">' +
+        '<div class="cr-box"><span class="cr-l">Spesa annua</span><span class="cr-v">' + eur(r.spesaAnno) + "</span></div>" +
+        '<div class="cr-box cr-perso"><span class="cr-l">Valore atteso perso</span><span class="cr-v">' + eur2(r.perditaAnno) + "</span></div>" +
+        '<div class="cr-box"><span class="cr-l">Anni attesi per il premio massimo</span><span class="cr-v">' +
+        (r.anniPremioMax !== null ? num(Math.round(r.anniPremioMax)) : "—") + "</span></div></div>";
+    }
+    box.innerHTML = html;
+  }
+
+  // ------------------------------------------------------------- avvio
+  function init() {
+    if (!M || !G || !Q) {
+      $("main").innerHTML = '<p class="avviso">Impossibile caricare i dati o il motore di calcolo (data/*.js, src/motore.js).</p>';
+      return;
+    }
+    if (demoDaUrl) $("demo-toggle").checked = true;
+    state = statoIniziale();
+    aggiornaDemo();
+    $("demo-toggle").addEventListener("change", function () { aggiornaDemo(); state.risultati = null; });
+
+    var nv = G.numeroVerde;
+    if (nv) $("numero-verde").innerHTML = "Hai domande o preoccupazioni sul gioco? Telefono Verde Nazionale ISS: <strong>" +
+      nv.numero + "</strong> — gratuito, anonimo, lun-ven 10:00-16:00.";
+
+    renderQuiz($("quiz-prima"), domandePrima(), state.rispostePrima, null, aggiornaQuizPrima);
+    renderAbitudine();
+
+    $("btn-inizia").addEventListener("click", function () { vai(2); });
+    $("avanti-2").addEventListener("click", function () { if (completo(domandePrima(), state.rispostePrima)) vai(3); });
+    $("avanti-3").addEventListener("click", function () { if (!$("avanti-3").disabled) vai(4); });
+    $("avanti-6").addEventListener("click", function () { if (!$("avanti-6").disabled) vai(7); });
+    $("btn-rivedi").addEventListener("click", avviaSimulazione);
+    $("btn-ricomincia").addEventListener("click", ricomincia);
+    $("btn-ricomincia-top").addEventListener("click", ricomincia);
+    document.querySelectorAll("[data-nav]").forEach(function (b) {
+      b.addEventListener("click", function () { vai(state.schermata + (b.getAttribute("data-nav") === "next" ? 1 : -1)); });
+    });
+    vai(1);
+  }
+
+  init();
+})();

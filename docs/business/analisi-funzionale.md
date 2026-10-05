@@ -86,10 +86,11 @@ Ogni scheda gioco in app mostra costo, payout, probabilità del premio massimo e
 
 ### 6. Quiz dopo + trasferimento
 - **Elementi**: stesse 3 domande della schermata 2 (ordine delle opzioni mescolato) + 1 domanda di trasferimento su un biglietto mai visto; pulsanti "Avanti"/"Indietro".
-- **Domanda 4 (trasferimento)**: "Un biglietto nuovo, mai visto prima, costa 2 € e ha un payout dichiarato del 65%. Giocandolo 100 volte, quanto perdi in media?"
-  A) 200 €  B) 130 €  **C) 70 €**  D) Non si può sapere
-  Spiegazione: "Spesa = 100 × 2 € = 200 €; perdita attesa = 200 € × (1 − 65%) = 70 €."
-- **Formula generale trasferimento**: `perditaAttesa = (nGiocate × costoBiglietto) × (1 − payoutDichiarato)`.
+- **Fonte testi quiz**: `app/data/quiz.js` (oggetto `window.QUIZ`, domande q1-q4; q1-q3 fase "entrambi", q4 fase "dopo").
+- **Domanda 4 (trasferimento, da `app/data/quiz.js` id `q4`)**: "Un biglietto ipotetico da 2 € restituisce in media il 70% di quanto si gioca. Quanto perdi in media su 100 giocate?"
+  A) Niente, prima o poi si vince  B) 20 €  **C) 60 €**  D) 140 €
+  Spiegazione: "Giochi 2 € × 100 = 200 €; in media ne tornano il 70% (140 €): perdi 60 €. Biglietto inventato per l'esercizio, non è un gioco reale."
+- **Formula generale trasferimento**: `perditaAttesa = (nGiocate × costoBiglietto) × (1 − payoutDichiarato)` → con prezzo 2€, payout 70%, 100 giocate: 60 €.
 - **Output**: `punteggioDopo` (0-3 sulle prime 3 domande, confrontabile con `punteggioPrima`); `trasferimentoCorretto` (booleano, risposta D4).
 - **Stati vuoti/errori**: "Avanti" disabilitato finché non sono state risposte tutte e 4 le domande.
 

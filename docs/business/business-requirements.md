@@ -52,7 +52,7 @@
 **Vincolo di tema**: T2-V1, T2-V2, T2-E2; rischio "simulazione percepita come truccata" mitigato dal valore atteso esatto accanto (vedi Risk & Clarity Note, T2-E3).
 
 **Criteri di accettazione**
-- Dato il default Salvatore — "lotteria istantanea modello A" (payout 71,2%, fonte `ricerca-azzardo.md` §1.1), 2 biglietti al giorno = 10 €/giorno, 365 giorni — quando la simulazione gira con seme fisso, allora il valore atteso esatto mostrato è **perdita attesa ≈ 1.051,20 €/anno** (3.650 € × 28,8%), calcolato analiticamente e non dal campionamento casuale.
+- Dato il default Salvatore — "lotteria istantanea modello A" (payout 71,2% arrotondato, fonte `ricerca-azzardo.md` §1.1), 2 biglietti al giorno = 10 €/giorno, 365 giorni — quando la simulazione gira con seme fisso, allora il valore atteso esatto mostrato, calcolato sulla tabella premi completa del modello A (non sul payout arrotondato), è **perdita attesa ≈ 1.051 € (tolleranza ±1 €, arrotondamento dichiarato)** — valore esatto 1.050,83 €/anno; 1.051,20 € (3.650 € × 28,8%) è solo l'approssimazione ottenuta dal payout arrotondato al decimale — calcolato analiticamente e non dal campionamento casuale.
 - Dato lo stesso default (2 biglietti/giorno = 730 biglietti/anno), quando viene mostrato "N anni per il premio massimo", allora il numero è calcolato come 1 / (probabilità vincita premio massimo × biglietti giocati all'anno); con probabilità 1/12.480.000 (fonte §1.1 [UFF]) e 730 biglietti/anno, il risultato è **N ≈ 17.096 anni** [DERIV, calcolo nostro, coerente con `docs/business/analisi-funzionale.md` §4 — da segnalare come stima derivata, non dato di fonte diretta].
 - Dato che la modalità demo è attiva (BR-10), quando si lancia la simulazione, allora il seme è fisso e il risultato (contatori finali) è identico ad ogni esecuzione in demo.
 - Dato la simulazione in corso, quando l'utente la osserva, allora i contatori "speso/vinto/perso" si aggiornano progressivamente senza bloccare l'interfaccia per più di ~10-15 secondi totali.
@@ -80,7 +80,7 @@
 
 **Criteri di accettazione**
 - Dato l'utente ha completato le schermate precedenti, quando arriva al quiz finale, allora rivede le stesse 3 domande iniziali (stesso testo, ordine eventualmente mescolato) più 1 domanda di trasferimento su un biglietto con parametri diversi da quelli mostrati prima.
-- Dato un biglietto da 2€ con payout dichiarato (valore "da fonte" se non presente in `ricerca-azzardo.md`: **segnalato**, nessun biglietto da 2€ è documentato nella ricerca — da usare un payout plausibile dichiarato esplicitamente come esempio didattico, non dato ufficiale), quando l'utente risponde "quanto perdi in media su 100 giocate", allora l'app verifica il calcolo (100 × 2€ × (1 − payout%)) e segna corretto/errato.
+- Dato il biglietto didattico da 2€ con payout 70% (fonte: `app/data/quiz.js`, domanda q4 — esempio inventato per l'esercizio, dichiarato come tale, non un gioco reale, nessun dato da `ricerca-azzardo.md`), quando l'utente risponde "quanto perdi in media su 100 giocate", allora l'app verifica il calcolo (100 × 2€ × (1 − 70%) = **60 €**) e segna corretto/errato.
 - Dato il quiz dopo completato, quando il punteggio viene calcolato, allora è confrontabile 1:1 con il punteggio "prima" (stessa scala 0-3 sulle prime 3 domande).
 
 ---

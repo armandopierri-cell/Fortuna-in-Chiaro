@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fortuna in Chiaro — Quanto ti costa sperare?</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<a class="skip" href="#main">Vai al contenuto</a>
+
+<header class="bar bar-top" role="banner">
+  <div class="brand">Fortuna in Chiaro</div>
+  <ol class="steps" id="steps" aria-label="Avanzamento"></ol>
+  <div class="bar-actions">
+    <span class="demo-badge" id="demo-badge" hidden>Modalità demo</span>
+    <button type="button" class="btn btn-ghost" id="btn-ricomincia-top" hidden>Ricomincia</button>
+  </div>
+  <p class="disclaimer">Strumento educativo: mostra numeri e significati, non dà consigli.</p>
+</header>
+
+<main id="main" tabindex="-1">
+
+  <!-- 1. Benvenuto -->
+  <section class="screen" data-screen="1" aria-labelledby="t1">
+    <h1 id="t1">Quanto ti costa sperare?</h1>
+    <p class="lead">Un simulatore per capire, in 10 secondi, cosa succede in un anno di gioco quotidiano.</p>
+    <label class="toggle">
+      <input type="checkbox" id="demo-toggle">
+      <span>Modalità demo</span>
+    </label>
+    <p class="note" id="demo-info"></p>
+    <p class="privacy">I tuoi dati restano nel tuo browser: nessuna informazione viene salvata o inviata altrove.</p>
+    <div class="nav">
+      <button type="button" class="btn btn-primary" id="btn-inizia">Inizia</button>
+    </div>
+  </section>
+
+  <!-- 2. Quiz prima -->
+  <section class="screen" data-screen="2" aria-labelledby="t2" hidden>
+    <h1 id="t2">Prima di cominciare: tre domande</h1>
+    <form id="quiz-prima" class="quiz" novalidate></form>
+    <div class="nav">
+      <button type="button" class="btn" data-nav="back">Indietro</button>
+      <button type="button" class="btn btn-primary" id="avanti-2" disabled>Avanti</button>
+    </div>
+  </section>
+
+  <!-- 3. La mia abitudine -->
+  <section class="screen" data-screen="3" aria-labelledby="t3" hidden>
+    <h1 id="t3">La mia abitudine</h1>
+    <div class="layout-2">
+      <div id="lista-giochi" class="giochi"></div>
+      <aside class="riepilogo" aria-live="polite">
+        <h2>La tua spesa</h2>
+        <div id="riepilogo-spesa"></div>
+      </aside>
+    </div>
+    <div class="nav">
+      <button type="button" class="btn" data-nav="back">Indietro</button>
+      <button type="button" class="btn btn-primary" id="avanti-3">Avanti</button>
+    </div>
+  </section>
+
+  <!-- 4. Un anno in 10 secondi -->
+  <section class="screen" data-screen="4" aria-labelledby="t4" hidden>
+    <h1 id="t4">Un anno in 10 secondi</h1>
+    <p class="note" id="seme-info"></p>
+    <div class="layout-2 sim">
+      <div class="sim-anim">
+        <div class="progress" aria-hidden="true"><div class="progress-fill" id="sim-progress"></div></div>
+        <p class="giorno" id="sim-giorno">Giorno 0 di 365</p>
+        <div class="contatori" aria-live="off">
+          <div class="cont"><span class="cont-l">Speso</span><span class="cont-v" id="c-speso">0 €</span></div>
+          <div class="cont"><span class="cont-l">Vinto</span><span class="cont-v" id="c-vinto">0 €</span></div>
+          <div class="cont cont-perso"><span class="cont-l">Perso</span><span class="cont-v" id="c-perso">0 €</span></div>
+        </div>
+        <div class="calendario" id="calendario" aria-hidden="true"></div>
+        <p class="legenda"><span class="sw sw-spesa"></span> giorno di gioco <span class="sw sw-vinto"></span> vincita da 100 € in su</p>
+        <ul class="vincite" id="vincite" aria-label="Vincite da 100 euro in su"></ul>
+      </div>
+      <aside class="atteso" aria-labelledby="t4b">
+        <h2 id="t4b">Valore atteso esatto</h2>
+        <p class="note">Calcolato dalla tabella premi, non dal caso.</p>
+        <dl id="atteso-dl"></dl>
+        <p id="atteso-media"></p>
+      </aside>
+    </div>
+    <div class="finale" id="sim-finale" aria-live="polite"></div>
+    <div class="nav">
+      <button type="button" class="btn" data-nav="back">Indietro</button>
+      <button type="button" class="btn" id="btn-rivedi">Rivedi</button>
+      <button type="button" class="btn btn-primary" data-nav="next">Avanti</button>
+    </div>
+  </section>
+
+  <!-- 5. Capire i numeri -->
+  <section class="screen" data-screen="5" aria-labelledby="t5" hidden>
+    <h1 id="t5">Capire i numeri</h1>
+    <div class="schede">
+      <article class="scheda" aria-labelledby="sa">
+        <h2 id="sa">La probabilità, vista</h2>
+        <p id="sa-testo"></p>
+        <canvas id="griglia" width="300" height="300" aria-label="Griglia di 10.000 puntini"></canvas>
+        <label class="slider">Ingrandisci: <strong id="sa-k">1</strong> <span id="sa-u">griglia</span>
+          <input type="range" id="sa-range" min="1" value="1">
+        </label>
+        <p id="sa-esito" aria-live="polite"></p>
+        <p class="fonte" id="sa-fonte"></p>
+      </article>
+      <article class="scheda" aria-labelledby="sb">
+        <h2 id="sb">Perché 'in media' si perde</h2>
+        <p id="sb-testo"></p>
+        <fieldset class="scelte" id="sb-scelte"><legend>Numero di giocate</legend></fieldset>
+        <dl id="sb-dl" aria-live="polite"></dl>
+        <p class="fonte" id="sb-fonte"></p>
+      </article>
+      <article class="scheda" aria-labelledby="sc">
+        <h2 id="sc">I ritardatari non esistono</h2>
+        <p id="sc-testo"></p>
+        <button type="button" class="btn" id="sc-lancia">Lancia 10.000 estrazioni</button>
+        <dl id="sc-dl" aria-live="polite"></dl>
+        <p class="fonte" id="sc-fonte"></p>
+      </article>
+    </div>
+    <div class="nav">
+      <button type="button" class="btn" data-nav="back">Indietro</button>
+      <button type="button" class="btn btn-primary" data-nav="next">Avanti</button>
+    </div>
+  </section>
+
+  <!-- 6. Quiz dopo + trasferimento -->
+  <section class="screen" data-screen="6" aria-labelledby="t6" hidden>
+    <h1 id="t6">Di nuovo le tre domande, più una</h1>
+    <form id="quiz-dopo" class="quiz" novalidate></form>
+    <div class="nav">
+      <button type="button" class="btn" data-nav="back">Indietro</button>
+      <button type="button" class="btn btn-primary" id="avanti-6" disabled>Avanti</button>
+    </div>
+  </section>
+
+  <!-- 7. Cruscotto -->
+  <section class="screen" data-screen="7" aria-labelledby="t7" hidden>
+    <h1 id="t7">Il tuo cruscotto</h1>
+    <div id="cruscotto"></div>
+    <p class="privacy">I tuoi dati restano nel tuo browser: nessuna informazione viene salvata o inviata altrove.</p>
+    <div class="nav">
+      <button type="button" class="btn" data-nav="back">Indietro</button>
+      <button type="button" class="btn btn-primary" id="btn-ricomincia">Ricomincia</button>
+    </div>
+  </section>
+
+</main>
+
+<footer class="bar bar-bottom" role="contentinfo">
+  <p id="numero-verde">Hai domande o preoccupazioni sul gioco? Telefono Verde Nazionale ISS: <strong>800 55 88 22</strong> — gratuito, anonimo, lun-ven 10:00-16:00.</p>
+</footer>
+
+<script src="data/giochi.js"></script>
+<script src="data/quiz.js"></script>
+<script src="src/motore.js"></script>
+<script src="src/ui.js"></script>
+</body>
+</html>
